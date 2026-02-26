@@ -1,0 +1,10 @@
+.worktrees/
+bin/
+vendor/
+*.exe
+*.test
+*.out
+.idea/
+.vscode/
+.DS_Store
+results/
