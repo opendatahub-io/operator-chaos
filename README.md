@@ -103,14 +103,51 @@ spec:
     allowedNamespaces: [opendatahub]
 ```
 
+### Suite
+
+```bash
+odh-chaos suite experiments/ [flags]
+```
+
+Run all experiments in a directory:
+- `--parallel N` --- Run up to N experiments concurrently
+- `--report-dir` --- Generate JUnit XML report for CI
+- `--dry-run` --- Validate all experiments without running
+- `--timeout` --- Per-experiment timeout (default 10m)
+
 ### Injection Types
 
-| Type | Description |
-|------|-------------|
-| PodKill | Delete pods matching selector |
-| NetworkPartition | Block traffic via NetworkPolicy |
-| CRDMutation | Mutate managed CR spec fields |
-| ConfigDrift | Modify managed ConfigMap/Secret data |
+#### Phase 1 --- Zero-Code (CLI-driven, requires cluster access)
+
+| Type | Description | Danger |
+|------|-------------|--------|
+| PodKill | Delete pods matching selector | low |
+| NetworkPartition | Block traffic via NetworkPolicy | medium |
+| CRDMutation | Mutate managed CR spec fields | medium |
+| ConfigDrift | Modify managed ConfigMap/Secret data | low |
+| WebhookDisrupt | Set webhook failurePolicy to Fail | high |
+| RBACRevoke | Remove subjects from role bindings | high |
+
+#### Phase 2 --- SDK Middleware (one-line integration, no cluster needed)
+
+| Type | Description | Danger |
+|------|-------------|--------|
+| ClientThrottle | Slow down API client responses | low |
+| APIServerError | Return errors from API calls | medium |
+| WatchDisconnect | Disconnect watch streams | medium |
+| LeaderElectionLoss | Simulate leader election loss | high |
+| WebhookTimeout | Delay webhook responses | medium |
+| WebhookReject | Reject webhook requests | medium |
+
+#### Phase 3 --- Advanced Fault Categories (SDK fault specs)
+
+| Category | Types | Description |
+|----------|-------|-------------|
+| Memory | MemoryLeak, MemoryPressure, AllocSpike | Memory exhaustion and allocation faults |
+| CPU | GoroutineBomb, BusySpin, GCPressure | CPU and goroutine exhaustion |
+| I/O | FDExhaustion, DiskWriteFailure, SlowReader | File descriptor and disk faults |
+| Concurrency | DeadlockInject, ChannelBlock, MutexStarvation | Concurrency and synchronization faults |
+| Network | ConnectionPoolExhaust, DNSFailure, SocketTimeout | Advanced network faults |
 
 ### Verdicts
 
@@ -123,16 +160,60 @@ spec:
 
 ## Architecture
 
+```mermaid
+graph TD
+    CLI["CLI Layer<br/>run | validate | init | clean | analyze | suite | report"]
+    ORCH["Orchestrator<br/>Experiment Lifecycle State Machine"]
+    INJ["Injection Engine"]
+    OBS["Observer"]
+    EVAL["Evaluator"]
+    REP["Reporter"]
+    SAFE["Safety"]
+    SDK["SDK Middleware<br/>ChaosClient wrapper"]
+    KNOW["Knowledge Models<br/>Operator YAML specs"]
+    EXP["Experiment Specs<br/>ChaosExperiment YAML"]
+
+    CLI --> ORCH
+    ORCH --> INJ
+    ORCH --> OBS
+    ORCH --> EVAL
+    ORCH --> REP
+    ORCH --> SAFE
+    SDK -.-> INJ
+    KNOW --> ORCH
+    EXP --> CLI
 ```
-+--------------+
-|  CLI Layer   |  odh-chaos run/validate/init/clean/analyze/suite/report
-+--------------+
-| Orchestrator |  Lifecycle: Validate -> PreCheck -> Inject -> Observe -> PostCheck -> Evaluate
-+--------------+
-|   Engines    |  Injection | Observer | Evaluator | Reporter | Safety
-+--------------+
-|  Knowledge   |  Operator models (YAML) + Experiment specs (YAML)
-+--------------+
+
+### Experiment Lifecycle
+
+Each experiment follows a strict state machine through these phases:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending: Load & Validate
+    Pending --> SteadyStatePre: Acquire Lock
+    SteadyStatePre --> Injecting: Baseline OK
+    SteadyStatePre --> Aborted: Baseline Failed
+    Injecting --> Observing: Fault Applied
+    Injecting --> Aborted: Injection Error
+    Observing --> SteadyStatePost: Wait for Recovery
+    SteadyStatePost --> Evaluating: Post-check Done
+    Evaluating --> Complete: Verdict Rendered
+    Complete --> [*]: Cleanup
+    Aborted --> [*]: Cleanup
+```
+
+### SDK Integration
+
+For operators built with controller-runtime, integrate chaos testing with a single line change:
+
+```mermaid
+flowchart LR
+    OP["Operator Code"] -->|"wraps client"| CC["ChaosClient"]
+    CC -->|"checks faults"| FC["FaultConfig"]
+    FC -->|"if active"| ERR["Return Error / Delay"]
+    FC -->|"if inactive"| REAL["Real K8s Client"]
+    ADMIN["/chaos/health<br/>/chaos/status<br/>/chaos/faultpoints"] --> FC
 ```
 
 ## Contributing
