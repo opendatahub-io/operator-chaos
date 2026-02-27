@@ -14,7 +14,7 @@ func TestNewForTest(t *testing.T) {
 
 	err := ch.Config().MaybeInject(OpGet)
 	assert.Error(t, err)
-	assert.Equal(t, "test error", err.Error())
+	assert.Equal(t, "chaos(get): test error", err.Error())
 }
 
 func TestNewForTestAutoCleanup(t *testing.T) {

@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -24,6 +23,7 @@ func TestRBACRevokeValidate(t *testing.T) {
 		name    string
 		spec    v1alpha1.InjectionSpec
 		wantErr bool
+		errMsg  string
 	}{
 		{
 			name: "valid ClusterRoleBinding",
@@ -54,6 +54,7 @@ func TestRBACRevokeValidate(t *testing.T) {
 				Parameters: map[string]string{"bindingType": "ClusterRoleBinding"},
 			},
 			wantErr: true,
+			errMsg:  "bindingName",
 		},
 		{
 			name: "invalid bindingType",
@@ -65,6 +66,7 @@ func TestRBACRevokeValidate(t *testing.T) {
 				},
 			},
 			wantErr: true,
+			errMsg:  "bindingType",
 		},
 		{
 			name: "missing bindingType defaults valid",
@@ -75,6 +77,7 @@ func TestRBACRevokeValidate(t *testing.T) {
 				},
 			},
 			wantErr: true,
+			errMsg:  "bindingType",
 		},
 		{
 			name: "nil parameters",
@@ -82,6 +85,19 @@ func TestRBACRevokeValidate(t *testing.T) {
 				Type: v1alpha1.RBACRevoke,
 			},
 			wantErr: true,
+			errMsg:  "bindingName",
+		},
+		{
+			name: "invalid binding name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.RBACRevoke,
+				Parameters: map[string]string{
+					"bindingName": "INVALID NAME!",
+					"bindingType": "ClusterRoleBinding",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid Kubernetes name",
 		},
 	}
 
@@ -90,6 +106,9 @@ func TestRBACRevokeValidate(t *testing.T) {
 			err := injector.Validate(tt.spec, blast)
 			if tt.wantErr {
 				assert.Error(t, err)
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
 			} else {
 				assert.NoError(t, err)
 			}
@@ -262,7 +281,7 @@ func TestRBACRevokeInjectStoresRollbackAnnotation(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present")
 
 	var storedSubjects []rbacv1.Subject
-	require.NoError(t, json.Unmarshal([]byte(rollbackData), &storedSubjects))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackData, &storedSubjects))
 	assert.Len(t, storedSubjects, 2)
 	assert.Equal(t, "operator-sa", storedSubjects[0].Name)
 	assert.Equal(t, "admin-user", storedSubjects[1].Name)

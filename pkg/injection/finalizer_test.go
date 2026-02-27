@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -24,6 +23,7 @@ func TestFinalizerBlockValidate(t *testing.T) {
 		name    string
 		spec    v1alpha1.InjectionSpec
 		wantErr bool
+		errMsg  string
 	}{
 		{
 			name: "valid spec",
@@ -60,6 +60,7 @@ func TestFinalizerBlockValidate(t *testing.T) {
 				},
 			},
 			wantErr: true,
+			errMsg:  "name",
 		},
 		{
 			name: "missing kind",
@@ -71,6 +72,20 @@ func TestFinalizerBlockValidate(t *testing.T) {
 				},
 			},
 			wantErr: true,
+			errMsg:  "kind",
+		},
+		{
+			name: "invalid resource name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.FinalizerBlock,
+				Parameters: map[string]string{
+					"apiVersion": "v1",
+					"kind":       "ConfigMap",
+					"name":       "INVALID NAME!",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid Kubernetes name",
 		},
 	}
 
@@ -79,6 +94,9 @@ func TestFinalizerBlockValidate(t *testing.T) {
 			err := injector.Validate(tt.spec, blast)
 			if tt.wantErr {
 				assert.Error(t, err)
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
 			} else {
 				assert.NoError(t, err)
 			}
@@ -265,7 +283,7 @@ func TestFinalizerBlockInjectStoresRollbackAnnotation(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present after injection")
 
 	var rollbackData map[string]string
-	require.NoError(t, json.Unmarshal([]byte(rollbackJSON), &rollbackData))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
 	assert.Equal(t, "chaos.opendatahub.io/block", rollbackData["finalizer"],
 		"rollback data should contain the finalizer name")
 

@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -26,6 +27,7 @@ type FaultSpec struct {
 	ErrorRate float64       `json:"errorRate" yaml:"errorRate"`
 	Error     string        `json:"error" yaml:"error"`
 	Delay     time.Duration `json:"delay,omitempty" yaml:"delay,omitempty"`
+	MaxDelay  time.Duration `json:"maxDelay,omitempty" yaml:"maxDelay,omitempty"`
 }
 
 // FaultConfig holds the activation state and fault specifications.
@@ -54,7 +56,7 @@ type ChaosError struct {
 }
 
 func (e *ChaosError) Error() string {
-	return e.Message
+	return fmt.Sprintf("chaos(%s): %s", e.Operation, e.Message)
 }
 
 // MaybeInject checks if a fault should be injected for the given operation.
@@ -72,7 +74,9 @@ func (f *FaultConfig) MaybeInject(operation Operation) error {
 		return nil
 	}
 
-	if spec.Delay > 0 {
+	if spec.MaxDelay > 0 {
+		time.Sleep(time.Duration(rand.Int63n(int64(spec.MaxDelay))))
+	} else if spec.Delay > 0 {
 		time.Sleep(spec.Delay)
 	}
 	if spec.ErrorRate > 0 && rand.Float64() < spec.ErrorRate {

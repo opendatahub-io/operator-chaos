@@ -30,8 +30,14 @@ func (m *CRDMutationInjector) Validate(spec v1alpha1.InjectionSpec, blast v1alph
 	if _, ok := spec.Parameters["name"]; !ok {
 		return fmt.Errorf("CRDMutation requires 'name' parameter")
 	}
+	if err := validateK8sName("name", spec.Parameters["name"]); err != nil {
+		return err
+	}
 	if _, ok := spec.Parameters["field"]; !ok {
 		return fmt.Errorf("CRDMutation requires 'field' parameter (JSON path to mutate)")
+	}
+	if err := validateFieldName("field", spec.Parameters["field"]); err != nil {
+		return err
 	}
 	if _, ok := spec.Parameters["value"]; !ok {
 		return fmt.Errorf("CRDMutation requires 'value' parameter (JSON value to set)")
@@ -68,14 +74,14 @@ func (m *CRDMutationInjector) Inject(ctx context.Context, spec v1alpha1.Injectio
 		"field":         fieldName,
 		"originalValue": originalValue,
 	}
-	rollbackJSON, err := json.Marshal(rollbackInfo)
+	rollbackStr, err := safety.WrapRollbackData(rollbackInfo)
 	if err != nil {
 		return nil, nil, fmt.Errorf("serializing rollback data for %s/%s: %w", spec.Parameters["kind"], spec.Parameters["name"], err)
 	}
 
 	// Build annotations map with rollback data
 	annotationsMap := map[string]interface{}{
-		safety.RollbackAnnotationKey: string(rollbackJSON),
+		safety.RollbackAnnotationKey: rollbackStr,
 	}
 
 	// Build labels map with chaos labels

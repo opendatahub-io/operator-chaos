@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,7 +49,7 @@ func TestFaultConfigActive(t *testing.T) {
 	assert.True(t, cfg.IsActive())
 	err := cfg.MaybeInject(OpGet)
 	assert.Error(t, err)
-	assert.Equal(t, "simulated error", err.Error())
+	assert.Equal(t, "chaos(get): simulated error", err.Error())
 }
 
 func TestFaultConfigInactiveNoInjection(t *testing.T) {
@@ -119,6 +120,28 @@ func TestFaultConfigConcurrentAccess(t *testing.T) {
 	}
 
 	wg.Wait()
+}
+
+func TestChaosErrorIncludesOperation(t *testing.T) {
+	err := &ChaosError{
+		Operation: OpCreate,
+		Message:   "something went wrong",
+	}
+	assert.Equal(t, "chaos(create): something went wrong", err.Error())
+	assert.Contains(t, err.Error(), "create")
+	assert.Contains(t, err.Error(), "something went wrong")
+}
+
+func TestMaybeInject_RandomDelay(t *testing.T) {
+	cfg := &FaultConfig{
+		Active: true,
+		Faults: map[Operation]FaultSpec{
+			OpGet: {MaxDelay: 1 * time.Millisecond},
+		},
+	}
+	// With MaxDelay only (no ErrorRate), MaybeInject should not return an error
+	err := cfg.MaybeInject(OpGet)
+	assert.Nil(t, err, "MaxDelay-only config should not return an error")
 }
 
 func TestMaybeInjectReturnsChaosError(t *testing.T) {

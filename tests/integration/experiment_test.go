@@ -268,7 +268,7 @@ func TestTestChaosHelperIntegration(t *testing.T) {
 
 	err := ch.Config().MaybeInject(sdk.OpGet)
 	assert.Error(t, err)
-	assert.Equal(t, "test error", err.Error())
+	assert.Equal(t, "chaos(get): test error", err.Error())
 
 	ch.Deactivate(sdk.OpGet)
 	err = ch.Config().MaybeInject(sdk.OpGet)

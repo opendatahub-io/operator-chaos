@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -39,6 +38,9 @@ func (f *FinalizerBlockInjector) Validate(spec v1alpha1.InjectionSpec, blast v1a
 
 	if _, ok := spec.Parameters["name"]; !ok {
 		return fmt.Errorf("FinalizerBlock requires 'name' parameter")
+	}
+	if err := validateK8sName("name", spec.Parameters["name"]); err != nil {
+		return err
 	}
 
 	return nil
@@ -84,7 +86,7 @@ func (f *FinalizerBlockInjector) Inject(ctx context.Context, spec v1alpha1.Injec
 		rollbackData := map[string]string{
 			"finalizer": finalizerName,
 		}
-		rollbackJSON, err := json.Marshal(rollbackData)
+		rollbackStr, err := safety.WrapRollbackData(rollbackData)
 		if err != nil {
 			return nil, nil, fmt.Errorf("serializing rollback data for %s/%s: %w", kind, name, err)
 		}
@@ -93,7 +95,7 @@ func (f *FinalizerBlockInjector) Inject(ctx context.Context, spec v1alpha1.Injec
 		if annotations == nil {
 			annotations = make(map[string]string)
 		}
-		annotations[safety.RollbackAnnotationKey] = string(rollbackJSON)
+		annotations[safety.RollbackAnnotationKey] = rollbackStr
 		obj.SetAnnotations(annotations)
 
 		// Add chaos labels

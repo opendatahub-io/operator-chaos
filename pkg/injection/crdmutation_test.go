@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -120,6 +119,36 @@ func TestCRDMutationValidate(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "apiVersion",
+		},
+		{
+			name: "invalid resource name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.CRDMutation,
+				Parameters: map[string]string{
+					"apiVersion": "v1",
+					"kind":       "DataScienceCluster",
+					"name":       "INVALID NAME!",
+					"field":      "replicas",
+					"value":      "0",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid Kubernetes name",
+		},
+		{
+			name: "invalid field name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.CRDMutation,
+				Parameters: map[string]string{
+					"apiVersion": "v1",
+					"kind":       "DataScienceCluster",
+					"name":       "default-dsc",
+					"field":      "123invalid",
+					"value":      "0",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid field name",
 		},
 	}
 
@@ -269,7 +298,7 @@ func TestCRDMutationInjectStoresRollbackAnnotation(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present after injection")
 
 	var rollbackData map[string]interface{}
-	require.NoError(t, json.Unmarshal([]byte(rollbackJSON), &rollbackData))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
 	assert.Equal(t, "test.example.com/v1", rollbackData["apiVersion"])
 	assert.Equal(t, "TestResource", rollbackData["kind"])
 	assert.Equal(t, "replicas", rollbackData["field"])

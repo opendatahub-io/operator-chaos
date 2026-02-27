@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -86,6 +85,18 @@ func TestWebhookDisruptValidate(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "unsupported action",
+		},
+		{
+			name: "invalid webhook name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.WebhookDisrupt,
+				Parameters: map[string]string{
+					"webhookName": "INVALID NAME!",
+					"action":      "setFailurePolicy",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid Kubernetes name",
 		},
 	}
 
@@ -262,7 +273,7 @@ func TestWebhookDisruptInjectStoresRollbackAnnotation(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present after injection")
 
 	var rollbackData map[string]string
-	require.NoError(t, json.Unmarshal([]byte(rollbackJSON), &rollbackData))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
 	assert.Equal(t, "Ignore", rollbackData["test.webhook.io"], "rollback data should contain original Ignore policy")
 
 	// Verify chaos labels are present

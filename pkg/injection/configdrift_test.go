@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -97,6 +96,40 @@ func TestConfigDriftValidate(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "name",
+		},
+		{
+			name: "invalid resource name",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.ConfigDrift,
+				Parameters: map[string]string{
+					"name":  "INVALID NAME!",
+					"key":   "config.yaml",
+					"value": "corrupted",
+				},
+			},
+			wantErr: true,
+			errMsg:  "not a valid Kubernetes name",
+		},
+		{
+			name: "Secret rollback name exceeds K8s limit",
+			spec: func() v1alpha1.InjectionSpec {
+				// "chaos-rollback-" (16) + name (230) + "-" (1) + key (10) = 257 > 253
+				longName := make([]byte, 230)
+				for i := range longName {
+					longName[i] = 'a'
+				}
+				return v1alpha1.InjectionSpec{
+					Type: v1alpha1.ConfigDrift,
+					Parameters: map[string]string{
+						"name":         string(longName),
+						"key":          "my-key-val",
+						"value":        "corrupted",
+						"resourceType": "Secret",
+					},
+				}
+			}(),
+			wantErr: true,
+			errMsg:  "exceeds",
 		},
 	}
 
@@ -212,7 +245,7 @@ func TestConfigDriftInjectStoresRollbackAnnotation(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present after injection")
 
 	var rollbackData map[string]string
-	require.NoError(t, json.Unmarshal([]byte(rollbackJSON), &rollbackData))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
 	assert.Equal(t, "ConfigMap", rollbackData["resourceType"])
 	assert.Equal(t, "app.conf", rollbackData["key"])
 	assert.Equal(t, "original-config", rollbackData["originalValue"])
@@ -289,14 +322,22 @@ func TestConfigDriftInjectSecretAndCleanup(t *testing.T) {
 	require.True(t, ok, "rollback annotation should be present after injection")
 
 	var rollbackData map[string]string
-	require.NoError(t, json.Unmarshal([]byte(rollbackJSON), &rollbackData))
+	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
 	assert.Equal(t, "Secret", rollbackData["resourceType"])
 	assert.Equal(t, "password", rollbackData["key"])
-	assert.Equal(t, "original-password", rollbackData["originalValue"])
+	assert.Equal(t, "chaos-rollback-my-secret-password", rollbackData["rollbackSecretRef"])
+	assert.Empty(t, rollbackData["originalValue"], "originalValue should not be stored for Secrets")
 
 	// Verify chaos labels
 	assert.Equal(t, safety.ManagedByValue, modified.Labels[safety.ManagedByLabel])
 	assert.Equal(t, string(v1alpha1.ConfigDrift), modified.Labels[safety.ChaosTypeLabel])
+
+	// Verify rollback Secret was created
+	rbSecret := &corev1.Secret{}
+	require.NoError(t, fakeClient.Get(ctx, client.ObjectKey{Name: "chaos-rollback-my-secret-password", Namespace: "test-ns"}, rbSecret),
+		"rollback Secret should exist after injection")
+	assert.Equal(t, []byte("original-password"), rbSecret.Data["password"],
+		"rollback Secret should contain the original value")
 
 	// Cleanup should restore value and remove metadata
 	require.NoError(t, cleanup(ctx))
@@ -311,4 +352,8 @@ func TestConfigDriftInjectSecretAndCleanup(t *testing.T) {
 
 	_, hasManagedBy := restored.Labels[safety.ManagedByLabel]
 	assert.False(t, hasManagedBy, "managed-by label should be removed after cleanup")
+
+	// Verify rollback Secret was deleted
+	err = fakeClient.Get(ctx, client.ObjectKey{Name: "chaos-rollback-my-secret-password", Namespace: "test-ns"}, rbSecret)
+	assert.Error(t, err, "rollback Secret should be deleted after cleanup")
 }

@@ -2,12 +2,12 @@ package cli
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	admissionregv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	coordinationv1 "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -261,7 +261,7 @@ func cleanWebhookConfigurations(ctx context.Context, k8sClient client.Client) in
 
 		// Parse the original failure policies map
 		var originalPolicies map[string]string
-		if err := json.Unmarshal([]byte(rollbackJSON), &originalPolicies); err != nil {
+		if err := safety.UnwrapRollbackData(rollbackJSON, &originalPolicies); err != nil {
 			fmt.Printf("Warning: parsing rollback data for ValidatingWebhookConfiguration %q: %v\n", wc.Name, err)
 			continue
 		}
@@ -319,7 +319,7 @@ func cleanRBACBindings(ctx context.Context, k8sClient client.Client, namespace s
 			}
 
 			var originalSubjects []rbacv1.Subject
-			if err := json.Unmarshal([]byte(rollbackJSON), &originalSubjects); err != nil {
+			if err := safety.UnwrapRollbackData(rollbackJSON, &originalSubjects); err != nil {
 				fmt.Printf("Warning: parsing rollback data for ClusterRoleBinding %q: %v\n", crb.Name, err)
 				continue
 			}
@@ -364,7 +364,7 @@ func cleanRBACBindings(ctx context.Context, k8sClient client.Client, namespace s
 			}
 
 			var originalSubjects []rbacv1.Subject
-			if err := json.Unmarshal([]byte(rollbackJSON), &originalSubjects); err != nil {
+			if err := safety.UnwrapRollbackData(rollbackJSON, &originalSubjects); err != nil {
 				fmt.Printf("Warning: parsing rollback data for RoleBinding %s/%s: %v\n", rb.Namespace, rb.Name, err)
 				continue
 			}
@@ -391,9 +391,10 @@ func cleanRBACBindings(ctx context.Context, k8sClient client.Client, namespace s
 	return restored
 }
 
-// cleanOrphanedFinalizers scans Deployments, ConfigMaps, Secrets, and Services
-// for the rollback annotation left by the FinalizerBlock injector. For each
-// found, it removes the chaos finalizer, rollback annotation, and chaos labels.
+// cleanOrphanedFinalizers scans Deployments, ConfigMaps, Secrets, Services,
+// StatefulSets, DaemonSets, and Jobs for the rollback annotation left by the
+// FinalizerBlock injector. For each found, it removes the chaos finalizer,
+// rollback annotation, and chaos labels.
 func cleanOrphanedFinalizers(ctx context.Context, k8sClient client.Client, namespace string) int {
 	cleaned := 0
 
@@ -449,6 +450,45 @@ func cleanOrphanedFinalizers(ctx context.Context, k8sClient client.Client, names
 		}
 	}
 
+	// Scan StatefulSets
+	statefulSets := &appsv1.StatefulSetList{}
+	if err := k8sClient.List(ctx, statefulSets, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing StatefulSets for finalizer scan: %v\n", err)
+	} else {
+		for i := range statefulSets.Items {
+			ss := &statefulSets.Items[i]
+			if cleanFinalizerFromResource(ctx, k8sClient, ss, ss.Name, ss.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan DaemonSets
+	daemonSets := &appsv1.DaemonSetList{}
+	if err := k8sClient.List(ctx, daemonSets, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing DaemonSets for finalizer scan: %v\n", err)
+	} else {
+		for i := range daemonSets.Items {
+			ds := &daemonSets.Items[i]
+			if cleanFinalizerFromResource(ctx, k8sClient, ds, ds.Name, ds.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan Jobs
+	jobs := &batchv1.JobList{}
+	if err := k8sClient.List(ctx, jobs, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing Jobs for finalizer scan: %v\n", err)
+	} else {
+		for i := range jobs.Items {
+			job := &jobs.Items[i]
+			if cleanFinalizerFromResource(ctx, k8sClient, job, job.Name, job.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
 	return cleaned
 }
 
@@ -466,7 +506,7 @@ func cleanFinalizerFromResource(ctx context.Context, k8sClient client.Client, ob
 
 	// Check if this is a finalizer rollback (has "finalizer" key)
 	var rollbackData map[string]string
-	if err := json.Unmarshal([]byte(rollbackJSON), &rollbackData); err != nil {
+	if err := safety.UnwrapRollbackData(rollbackJSON, &rollbackData); err != nil {
 		return false
 	}
 	finalizerName, ok := rollbackData["finalizer"]
@@ -521,7 +561,7 @@ func cleanConfigDrift(ctx context.Context, k8sClient client.Client, namespace st
 			}
 
 			var rollbackData map[string]string
-			if err := json.Unmarshal([]byte(rollbackJSON), &rollbackData); err != nil {
+			if err := safety.UnwrapRollbackData(rollbackJSON, &rollbackData); err != nil {
 				continue
 			}
 			if rollbackData["resourceType"] != "ConfigMap" {
@@ -567,7 +607,7 @@ func cleanConfigDrift(ctx context.Context, k8sClient client.Client, namespace st
 			}
 
 			var rollbackData map[string]string
-			if err := json.Unmarshal([]byte(rollbackJSON), &rollbackData); err != nil {
+			if err := safety.UnwrapRollbackData(rollbackJSON, &rollbackData); err != nil {
 				continue
 			}
 			if rollbackData["resourceType"] != "Secret" {
@@ -575,23 +615,56 @@ func cleanConfigDrift(ctx context.Context, k8sClient client.Client, namespace st
 			}
 
 			dataKey := rollbackData["key"]
-			originalValue := rollbackData["originalValue"]
 
 			if s.Data == nil {
 				s.Data = make(map[string][]byte)
 			}
-			s.Data[dataKey] = []byte(originalValue)
 
-			delete(s.Annotations, safety.RollbackAnnotationKey)
-			for k := range safety.ChaosLabels(string(v1alpha1.ConfigDrift)) {
-				delete(s.Labels, k)
-			}
+			// Check for rollbackSecretRef (new format) vs originalValue (legacy)
+			if rollbackSecretRef, hasRef := rollbackData["rollbackSecretRef"]; hasRef {
+				// Read original value from dedicated rollback Secret
+				rbSecret := &corev1.Secret{}
+				rbKey := client.ObjectKey{Name: rollbackSecretRef, Namespace: s.Namespace}
+				if err := k8sClient.Get(ctx, rbKey, rbSecret); err != nil {
+					fmt.Printf("Warning: reading rollback Secret %q for Secret %s/%s: %v\n",
+						rollbackSecretRef, s.Namespace, s.Name, err)
+					continue
+				}
+				s.Data[dataKey] = rbSecret.Data[dataKey]
 
-			fmt.Printf("Restoring Secret %s/%s key %q\n", s.Namespace, s.Name, dataKey)
-			if err := k8sClient.Update(ctx, s); err != nil {
-				fmt.Printf("  Warning: %v\n", err)
-			} else {
+				delete(s.Annotations, safety.RollbackAnnotationKey)
+				for k := range safety.ChaosLabels(string(v1alpha1.ConfigDrift)) {
+					delete(s.Labels, k)
+				}
+
+				fmt.Printf("Restoring Secret %s/%s key %q from rollback Secret %q\n",
+					s.Namespace, s.Name, dataKey, rollbackSecretRef)
+				if err := k8sClient.Update(ctx, s); err != nil {
+					fmt.Printf("  Warning: %v\n", err)
+					continue
+				}
+
+				// Delete the rollback Secret
+				if err := k8sClient.Delete(ctx, rbSecret); err != nil {
+					fmt.Printf("  Warning: deleting rollback Secret %q: %v\n", rollbackSecretRef, err)
+				}
 				restored++
+			} else {
+				// Legacy format: originalValue stored directly
+				originalValue := rollbackData["originalValue"]
+				s.Data[dataKey] = []byte(originalValue)
+
+				delete(s.Annotations, safety.RollbackAnnotationKey)
+				for k := range safety.ChaosLabels(string(v1alpha1.ConfigDrift)) {
+					delete(s.Labels, k)
+				}
+
+				fmt.Printf("Restoring Secret %s/%s key %q\n", s.Namespace, s.Name, dataKey)
+				if err := k8sClient.Update(ctx, s); err != nil {
+					fmt.Printf("  Warning: %v\n", err)
+				} else {
+					restored++
+				}
 			}
 		}
 	}
@@ -599,25 +672,133 @@ func cleanConfigDrift(ctx context.Context, k8sClient client.Client, namespace st
 	return restored
 }
 
-// cleanCRDMutations scans ConfigMaps and Secrets for rollback annotations from
-// the CRDMutation injector. Because CRD types are arbitrary and not known at
-// compile time, the clean command cannot generically scan all possible CRD types.
-// Instead, it logs information about any detected CRDMutation rollback annotations
-// on known resource types (ConfigMaps, Secrets, Deployments) for manual recovery.
-// The rollback annotations on the actual CRD resources contain all information
-// needed to restore the original values.
+// cleanCRDMutations scans core resource types (Deployments, ConfigMaps, Secrets,
+// Services, StatefulSets) for rollback annotations that contain both "apiVersion"
+// and "kind" keys -- the signature of CRDMutation rollback data. For each found,
+// it removes the rollback annotation and chaos labels, and logs the rollback data
+// for manual field restoration. It does NOT attempt to restore the field value,
+// as that requires unstructured patch knowledge.
 func cleanCRDMutations(ctx context.Context, k8sClient client.Client, namespace string) int {
-	// CRDMutation targets arbitrary unstructured resources. We cannot easily
-	// list all possible CRD types. However, we can document that the rollback
-	// annotation on the resource itself contains complete recovery info:
-	//   {"apiVersion":"...", "kind":"...", "field":"...", "originalValue":...}
-	//
-	// For now, this is a no-op scan -- the annotation-based recovery is available
-	// for manual or operator-specific cleanup tooling.
-	_ = ctx
-	_ = k8sClient
-	_ = namespace
-	return 0
+	cleaned := 0
+
+	// Scan Deployments
+	deployments := &appsv1.DeploymentList{}
+	if err := k8sClient.List(ctx, deployments, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing Deployments for CRD mutation scan: %v\n", err)
+	} else {
+		for i := range deployments.Items {
+			dep := &deployments.Items[i]
+			if cleanCRDMutationFromResource(ctx, k8sClient, dep, dep.Name, dep.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan ConfigMaps
+	configMaps := &corev1.ConfigMapList{}
+	if err := k8sClient.List(ctx, configMaps, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing ConfigMaps for CRD mutation scan: %v\n", err)
+	} else {
+		for i := range configMaps.Items {
+			cm := &configMaps.Items[i]
+			if cleanCRDMutationFromResource(ctx, k8sClient, cm, cm.Name, cm.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan Secrets
+	secrets := &corev1.SecretList{}
+	if err := k8sClient.List(ctx, secrets, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing Secrets for CRD mutation scan: %v\n", err)
+	} else {
+		for i := range secrets.Items {
+			s := &secrets.Items[i]
+			if cleanCRDMutationFromResource(ctx, k8sClient, s, s.Name, s.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan Services
+	services := &corev1.ServiceList{}
+	if err := k8sClient.List(ctx, services, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing Services for CRD mutation scan: %v\n", err)
+	} else {
+		for i := range services.Items {
+			svc := &services.Items[i]
+			if cleanCRDMutationFromResource(ctx, k8sClient, svc, svc.Name, svc.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	// Scan StatefulSets
+	statefulSets := &appsv1.StatefulSetList{}
+	if err := k8sClient.List(ctx, statefulSets, client.InNamespace(namespace)); err != nil {
+		fmt.Printf("Warning: listing StatefulSets for CRD mutation scan: %v\n", err)
+	} else {
+		for i := range statefulSets.Items {
+			ss := &statefulSets.Items[i]
+			if cleanCRDMutationFromResource(ctx, k8sClient, ss, ss.Name, ss.Namespace) {
+				cleaned++
+			}
+		}
+	}
+
+	return cleaned
+}
+
+// cleanCRDMutationFromResource checks a resource for the CRDMutation rollback
+// signature (rollback JSON containing both "apiVersion" and "kind" keys).
+// If found, it removes the rollback annotation and chaos labels, and logs the
+// rollback data for manual field restoration.
+func cleanCRDMutationFromResource(ctx context.Context, k8sClient client.Client, obj client.Object, name, namespace string) bool {
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		return false
+	}
+	rollbackJSON, ok := annotations[safety.RollbackAnnotationKey]
+	if !ok {
+		return false
+	}
+
+	// Parse the rollback data as a generic map to check for CRDMutation signature
+	var rollbackData map[string]interface{}
+	if err := safety.UnwrapRollbackData(rollbackJSON, &rollbackData); err != nil {
+		return false
+	}
+
+	// CRDMutation signature: must have both "apiVersion" and "kind" keys
+	_, hasAPIVersion := rollbackData["apiVersion"]
+	_, hasKind := rollbackData["kind"]
+	if !hasAPIVersion || !hasKind {
+		return false
+	}
+
+	// Log the rollback data for manual field restoration
+	fmt.Printf("Found CRD mutation on %s/%s — rollback data: %s\n", namespace, name, rollbackJSON)
+	fmt.Printf("  Manual restoration needed: field=%v, originalValue=%v\n",
+		rollbackData["field"], rollbackData["originalValue"])
+
+	// Remove rollback annotation
+	delete(annotations, safety.RollbackAnnotationKey)
+	obj.SetAnnotations(annotations)
+
+	// Remove chaos labels
+	labels := obj.GetLabels()
+	if labels != nil {
+		for k := range safety.ChaosLabels(string(v1alpha1.CRDMutation)) {
+			delete(labels, k)
+		}
+		obj.SetLabels(labels)
+	}
+
+	if err := k8sClient.Update(ctx, obj); err != nil {
+		fmt.Printf("  Warning: %v\n", err)
+		return false
+	}
+	return true
 }
 
 // cleanTTLExpired scans all NetworkPolicies in the namespace for those with

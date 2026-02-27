@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -29,6 +28,9 @@ func NewRBACRevokeInjector(c client.Client) *RBACRevokeInjector {
 func (r *RBACRevokeInjector) Validate(spec v1alpha1.InjectionSpec, blast v1alpha1.BlastRadiusSpec) error {
 	if _, ok := spec.Parameters["bindingName"]; !ok {
 		return fmt.Errorf("RBACRevoke requires 'bindingName' parameter")
+	}
+	if err := validateK8sName("bindingName", spec.Parameters["bindingName"]); err != nil {
+		return err
 	}
 
 	bindingType, ok := spec.Parameters["bindingType"]
@@ -75,8 +77,8 @@ func (r *RBACRevokeInjector) injectClusterRoleBinding(ctx context.Context, bindi
 	originalSubjects := make([]rbacv1.Subject, len(crb.Subjects))
 	copy(originalSubjects, crb.Subjects)
 
-	// Serialize original subjects to JSON for crash-safe rollback
-	rollbackData, err := json.Marshal(originalSubjects)
+	// Serialize original subjects with integrity checksum for crash-safe rollback
+	rollbackStr, err := safety.WrapRollbackData(originalSubjects)
 	if err != nil {
 		return nil, nil, fmt.Errorf("serializing original subjects for ClusterRoleBinding %q: %w", bindingName, err)
 	}
@@ -85,7 +87,7 @@ func (r *RBACRevokeInjector) injectClusterRoleBinding(ctx context.Context, bindi
 	if crb.Annotations == nil {
 		crb.Annotations = make(map[string]string)
 	}
-	crb.Annotations[safety.RollbackAnnotationKey] = string(rollbackData)
+	crb.Annotations[safety.RollbackAnnotationKey] = rollbackStr
 
 	if crb.Labels == nil {
 		crb.Labels = make(map[string]string)
@@ -146,8 +148,8 @@ func (r *RBACRevokeInjector) injectRoleBinding(ctx context.Context, bindingName,
 	originalSubjects := make([]rbacv1.Subject, len(rb.Subjects))
 	copy(originalSubjects, rb.Subjects)
 
-	// Serialize original subjects to JSON for crash-safe rollback
-	rollbackData, err := json.Marshal(originalSubjects)
+	// Serialize original subjects with integrity checksum for crash-safe rollback
+	rollbackStr, err := safety.WrapRollbackData(originalSubjects)
 	if err != nil {
 		return nil, nil, fmt.Errorf("serializing original subjects for RoleBinding %q: %w", bindingName, err)
 	}
@@ -156,7 +158,7 @@ func (r *RBACRevokeInjector) injectRoleBinding(ctx context.Context, bindingName,
 	if rb.Annotations == nil {
 		rb.Annotations = make(map[string]string)
 	}
-	rb.Annotations[safety.RollbackAnnotationKey] = string(rollbackData)
+	rb.Annotations[safety.RollbackAnnotationKey] = rollbackStr
 
 	if rb.Labels == nil {
 		rb.Labels = make(map[string]string)

@@ -2,7 +2,6 @@ package injection
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -30,6 +29,9 @@ func NewWebhookDisruptInjector(c client.Client) *WebhookDisruptInjector {
 func (w *WebhookDisruptInjector) Validate(spec v1alpha1.InjectionSpec, blast v1alpha1.BlastRadiusSpec) error {
 	if _, ok := spec.Parameters["webhookName"]; !ok {
 		return fmt.Errorf("WebhookDisrupt requires 'webhookName' parameter")
+	}
+	if err := validateK8sName("webhookName", spec.Parameters["webhookName"]); err != nil {
+		return err
 	}
 
 	action, ok := spec.Parameters["action"]
@@ -78,8 +80,8 @@ func (w *WebhookDisruptInjector) Inject(ctx context.Context, spec v1alpha1.Injec
 		}
 	}
 
-	// Serialize original policies to JSON for crash-safe rollback
-	rollbackData, err := json.Marshal(originalPolicies)
+	// Serialize original policies with integrity checksum for crash-safe rollback
+	rollbackStr, err := safety.WrapRollbackData(originalPolicies)
 	if err != nil {
 		return nil, nil, fmt.Errorf("serializing original policies for ValidatingWebhookConfiguration %q: %w", webhookName, err)
 	}
@@ -88,7 +90,7 @@ func (w *WebhookDisruptInjector) Inject(ctx context.Context, spec v1alpha1.Injec
 	if webhookConfig.Annotations == nil {
 		webhookConfig.Annotations = make(map[string]string)
 	}
-	webhookConfig.Annotations[safety.RollbackAnnotationKey] = string(rollbackData)
+	webhookConfig.Annotations[safety.RollbackAnnotationKey] = rollbackStr
 
 	if webhookConfig.Labels == nil {
 		webhookConfig.Labels = make(map[string]string)
