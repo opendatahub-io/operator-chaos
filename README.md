@@ -210,7 +210,3 @@ flowchart LR
 2. Create a feature branch
 3. Write tests first (TDD)
 4. Submit a pull request
-
-## License
-
-Apache License 2.0
