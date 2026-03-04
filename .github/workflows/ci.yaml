@@ -47,7 +47,12 @@ jobs:
       - name: Build CLI
         run: go build -o bin/odh-chaos ./cmd/odh-chaos
       - name: Validate experiment files
+        shell: bash
         run: |
+          if [ ! -d experiments ]; then
+            echo "ERROR: experiments/ directory not found"
+            exit 1
+          fi
           status=0
           while IFS= read -r -d '' file; do
             if ! bin/odh-chaos validate "$file"; then
