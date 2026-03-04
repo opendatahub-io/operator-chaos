@@ -2,6 +2,7 @@ apiVersion: chaos.opendatahub.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-isvc-validator-disrupt
+  namespace: kserve
 spec:
   target:
     operator: kserve

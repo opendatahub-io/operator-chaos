@@ -2,6 +2,7 @@ apiVersion: chaos.opendatahub.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-main-controller-kill
+  namespace: kserve
 spec:
   target:
     operator: kserve
