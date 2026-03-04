@@ -55,6 +55,8 @@ odh-chaos run experiment.yaml --knowledge knowledge/odh-model-controller.yaml
 | `analyze` | Scan Go source for fault injection candidates |
 | `suite` | Run all experiments in a directory |
 | `report` | Generate summary reports from results |
+| `types` | List available injection types |
+| `version` | Print the CLI version |
 
 ### Run
 
@@ -150,7 +152,7 @@ Run all experiments in a directory:
 
 ```mermaid
 graph TD
-    CLI["CLI Layer<br/>run | validate | init | clean | analyze | suite | report"]
+    CLI["CLI Layer<br/>run | validate | init | clean | analyze | suite | report | types | version"]
     ORCH["Orchestrator<br/>Experiment Lifecycle State Machine"]
     INJ["Injection Engine"]
     OBS["Observer"]
