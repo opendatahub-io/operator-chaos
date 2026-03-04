@@ -18,7 +18,7 @@ func newTypesCommand() *cobra.Command {
 			}{
 				{"PodKill", "Delete pods matching a label selector", "low"},
 				{"NetworkPartition", "Create deny-all NetworkPolicy", "medium"},
-				{"ConfigDrift", "Modify ConfigMap or Secret data", "low"},
+				{"ConfigDrift", "Modify ConfigMap or Secret data", "medium"},
 				{"CRDMutation", "Mutate a field on any Kubernetes resource", "medium"},
 				{"FinalizerBlock", "Add a blocking finalizer to a resource", "medium"},
 				{"WebhookDisrupt", "Change webhook failure policy", "high"},

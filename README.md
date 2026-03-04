@@ -128,12 +128,12 @@ Run all experiments in a directory:
 | Type | Description | Danger |
 |------|-------------|--------|
 | PodKill | Delete pods matching selector | low |
-| ConfigDrift | Modify managed ConfigMap/Secret data | low |
+| ConfigDrift | Modify ConfigMap or Secret data | medium |
 | NetworkPartition | Block traffic via NetworkPolicy | medium |
-| CRDMutation | Mutate managed CR spec fields | medium |
-| FinalizerBlock | Add a stuck finalizer to block resource deletion | medium |
-| WebhookDisrupt | Set webhook failurePolicy to Fail | high |
-| RBACRevoke | Remove subjects from role bindings | high |
+| CRDMutation | Mutate a field on any Kubernetes resource | medium |
+| FinalizerBlock | Add a blocking finalizer to a resource | medium |
+| WebhookDisrupt | Change webhook failure policy | high |
+| RBACRevoke | Revoke RBAC binding subjects | high |
 
 #### SDK Middleware Faults (ChaosClient wrapper, no cluster needed)
 
