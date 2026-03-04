@@ -26,7 +26,7 @@ func LoadKnowledge(path string) (*OperatorKnowledge, error) {
 	}
 
 	var k OperatorKnowledge
-	if err := yaml.Unmarshal(data, &k); err != nil {
+	if err := yaml.UnmarshalStrict(data, &k); err != nil {
 		return nil, fmt.Errorf("parsing knowledge file %s: %w", path, err)
 	}
 
