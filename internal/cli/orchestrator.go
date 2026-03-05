@@ -11,7 +11,6 @@ import (
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/orchestrator"
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
-	"github.com/spf13/cobra"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
@@ -23,10 +22,10 @@ type orchestratorDeps struct {
 	K8sClient    client.Client
 }
 
-// buildOrchestrator creates an Orchestrator and all its dependencies from CLI flags.
+// buildOrchestrator creates an Orchestrator and all its dependencies.
 // It handles knowledge loading, K8s client creation, injection registry setup,
 // observer, evaluator, and lock initialization.
-func buildOrchestrator(cmd *cobra.Command, knowledgePath string, dryRun bool, reportDir string) (*orchestratorDeps, error) {
+func buildOrchestrator(knowledgePath string, dryRun bool, reportDir string, distributedLock bool, lockNamespace string, verbose bool) (*orchestratorDeps, error) {
 	// Load knowledge (optional)
 	var knowledge *model.OperatorKnowledge
 	if knowledgePath != "" {
@@ -72,16 +71,12 @@ func buildOrchestrator(cmd *cobra.Command, knowledgePath string, dryRun bool, re
 	}
 
 	// Build orchestrator config
-	verbose, _ := cmd.Flags().GetBool("verbose")
 	maxCycles := 10
 	if knowledge != nil {
 		maxCycles = knowledge.Recovery.MaxReconcileCycles
 	}
 
 	// Build experiment lock
-	distributedLock, _ := cmd.Flags().GetBool("distributed-lock")
-	lockNamespace, _ := cmd.Flags().GetString("lock-namespace")
-
 	var lock safety.ExperimentLock
 	if distributedLock && k8sClient != nil {
 		lock = safety.NewLeaseExperimentLock(k8sClient, lockNamespace)

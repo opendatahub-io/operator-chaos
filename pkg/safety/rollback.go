@@ -99,13 +99,15 @@ func ApplyChaosMetadata(obj client.Object, rollbackData string, injectionType st
 
 // RemoveChaosMetadata removes the rollback annotation and chaos labels from a resource.
 func RemoveChaosMetadata(obj client.Object, injectionType string) {
-	annotations := obj.GetAnnotations()
-	delete(annotations, RollbackAnnotationKey)
-	obj.SetAnnotations(annotations)
-
-	labels := obj.GetLabels()
-	for k := range ChaosLabels(injectionType) {
-		delete(labels, k)
+	if annotations := obj.GetAnnotations(); annotations != nil {
+		delete(annotations, RollbackAnnotationKey)
+		obj.SetAnnotations(annotations)
 	}
-	obj.SetLabels(labels)
+
+	if labels := obj.GetLabels(); labels != nil {
+		for k := range ChaosLabels(injectionType) {
+			delete(labels, k)
+		}
+		obj.SetLabels(labels)
+	}
 }

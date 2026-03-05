@@ -29,11 +29,13 @@ type suiteResult struct {
 
 func newSuiteCommand() *cobra.Command {
 	var (
-		knowledgePath string
-		reportDir     string
-		dryRun        bool
-		timeout       time.Duration
-		parallel      int
+		knowledgePath   string
+		reportDir       string
+		dryRun          bool
+		timeout         time.Duration
+		parallel        int
+		distributedLock bool
+		lockNamespace   string
 	)
 
 	cmd := &cobra.Command{
@@ -68,9 +70,10 @@ func newSuiteCommand() *cobra.Command {
 			fmt.Fprintf(os.Stderr, "Found %d experiments in %s\n\n", len(experimentFiles), dir)
 
 			// Build orchestrator once for all experiments (when not dry-run)
+			verbose, _ := cmd.Flags().GetBool("verbose")
 			var deps *orchestratorDeps
 			if !dryRun {
-				deps, err = buildOrchestrator(cmd, knowledgePath, dryRun, reportDir)
+				deps, err = buildOrchestrator(knowledgePath, dryRun, reportDir, distributedLock, lockNamespace, verbose)
 				if err != nil {
 					return fmt.Errorf("building orchestrator: %w", err)
 				}
@@ -124,6 +127,8 @@ func newSuiteCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "validate without running")
 	cmd.Flags().DurationVar(&timeout, "timeout", 10*time.Minute, "timeout per experiment")
 	cmd.Flags().IntVar(&parallel, "parallel", 1, "max concurrent experiments")
+	cmd.Flags().BoolVar(&distributedLock, "distributed-lock", false, "use Kubernetes Lease-based distributed locking")
+	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
 
 	return cmd
 }

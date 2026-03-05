@@ -49,8 +49,11 @@ func newRunCommand() *cobra.Command {
 				exp.Spec.BlastRadius.DryRun = true
 			}
 
+			// Read verbose from persistent flags
+			verbose, _ := cmd.Flags().GetBool("verbose")
+
 			// Build orchestrator and all dependencies
-			deps, err := buildOrchestrator(cmd, knowledgePath, dryRun, reportDir)
+			deps, err := buildOrchestrator(knowledgePath, dryRun, reportDir, distributedLock, lockNamespace, verbose)
 			if err != nil {
 				return err
 			}
