@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/reporter"
 	"github.com/spf13/cobra"
@@ -73,11 +74,19 @@ func newReportCommand() *cobra.Command {
 
 			// Default: summary
 			fmt.Printf("Chaos Engineering Report (%d experiments)\n", len(reports))
-			fmt.Println(strings.Repeat("=", 50))
+			fmt.Println(strings.Repeat("=", 80))
+			fmt.Printf("  %-30s  %-14s  %-12s  %s\n", "EXPERIMENT", "VERDICT", "RECOVERY", "DEVIATIONS")
+			fmt.Println(strings.Repeat("-", 80))
 			for _, r := range reports {
-				fmt.Printf("  %-30s  %s\n", r.Experiment, r.Evaluation.Verdict)
+				recoveryStr := r.Evaluation.RecoveryTime.Round(time.Second).String()
+				deviationCount := len(r.Evaluation.Deviations)
+				fmt.Printf("  %-30s  %s  %-12s  %d\n",
+					r.Experiment,
+					paddedColorVerdict(string(r.Evaluation.Verdict), 14),
+					recoveryStr,
+					deviationCount)
 			}
-			fmt.Println(strings.Repeat("=", 50))
+			fmt.Println(strings.Repeat("=", 80))
 
 			return nil
 		},

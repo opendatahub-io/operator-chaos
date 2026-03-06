@@ -38,12 +38,14 @@ type cleanSummary struct {
 	FinalizersRemoved int
 	ConfigDriftsFixed int
 	CRDMutationsFixed int
+	ResultConfigMaps  int
 }
 
 func (s cleanSummary) total() int {
 	return s.NetworkPolicies + s.Leases + s.ClusterRoles + s.RoleBindings +
 		s.TTLExpired + s.WebhooksRestored + s.RBACBindingsFixed +
-		s.FinalizersRemoved + s.ConfigDriftsFixed + s.CRDMutationsFixed
+		s.FinalizersRemoved + s.ConfigDriftsFixed + s.CRDMutationsFixed +
+		s.ResultConfigMaps
 }
 
 func (s cleanSummary) print() {
@@ -81,6 +83,9 @@ func (s cleanSummary) print() {
 	}
 	if s.CRDMutationsFixed > 0 {
 		fmt.Printf("  CRD mutations restored:     %d\n", s.CRDMutationsFixed)
+	}
+	if s.ResultConfigMaps > 0 {
+		fmt.Printf("  Result ConfigMaps removed:  %d\n", s.ResultConfigMaps)
 	}
 	fmt.Printf("  Total cleaned:              %d\n", s.total())
 }
@@ -154,6 +159,9 @@ func runClean(ctx context.Context, k8sClient client.Client, namespace string) cl
 	// 10. Restore CRD mutations (resources with rollback annotations from CRDMutation)
 	summary.CRDMutationsFixed = cleanCRDMutations(ctx, k8sClient, namespace)
 
+	// 11. Clean chaos-result ConfigMaps
+	summary.ResultConfigMaps = cleanResultConfigMaps(ctx, k8sClient, namespace)
+
 	return summary
 }
 
@@ -184,6 +192,18 @@ func deleteMatchingResources(
 		}
 	}
 	return cleaned
+}
+
+func cleanResultConfigMaps(ctx context.Context, k8sClient client.Client, namespace string) int {
+	list := &corev1.ConfigMapList{}
+	chaosResultLabels := client.MatchingLabels{"app.kubernetes.io/managed-by": "odh-chaos"}
+	return deleteMatchingResources(ctx, k8sClient, list, func() []client.Object {
+		items := make([]client.Object, len(list.Items))
+		for i := range list.Items {
+			items[i] = &list.Items[i]
+		}
+		return items
+	}, "ConfigMap", client.InNamespace(namespace), chaosResultLabels)
 }
 
 func cleanNetworkPolicies(ctx context.Context, k8sClient client.Client, namespace string, labels client.MatchingLabels) int {

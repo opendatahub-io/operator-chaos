@@ -8,17 +8,19 @@ import (
 	"time"
 
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
 )
 
 // ExperimentReport is the top-level report for a single chaos experiment.
 type ExperimentReport struct {
-	Experiment   string                     `json:"experiment"`
-	Timestamp    time.Time                  `json:"timestamp"`
-	Target       TargetReport               `json:"target"`
-	Injection    InjectionReport            `json:"injection"`
-	Evaluation   evaluator.EvaluationResult `json:"evaluation"`
-	SteadyState  SteadyStateReport          `json:"steadyState,omitempty"`
-	CleanupError string                     `json:"cleanupError,omitempty"`
+	Experiment     string                        `json:"experiment"`
+	Timestamp      time.Time                     `json:"timestamp"`
+	Target         TargetReport                  `json:"target"`
+	Injection      InjectionReport               `json:"injection"`
+	Evaluation     evaluator.EvaluationResult    `json:"evaluation"`
+	SteadyState    SteadyStateReport             `json:"steadyState,omitempty"`
+	Reconciliation *observer.ReconciliationResult `json:"reconciliation,omitempty"`
+	CleanupError   string                        `json:"cleanupError,omitempty"`
 }
 
 // TargetReport describes the target of a chaos experiment.

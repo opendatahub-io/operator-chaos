@@ -212,18 +212,31 @@ func runSingleExperiment(parentCtx context.Context, file string, deps *orchestra
 		fmt.Fprintf(os.Stderr, "WARNING: cleanup error in %s: %s\n", exp.Metadata.Name, result.CleanupError)
 	}
 
+	// Build enriched verdict string with recovery time and deviation count
+	verdictStr := colorVerdict(string(result.Verdict))
+	recoveryStr := "0s"
+	deviationCount := 0
+	if result.Evaluation != nil {
+		recoveryStr = result.Evaluation.RecoveryTime.Round(time.Second).String()
+		deviationCount = len(result.Evaluation.Deviations)
+	}
+
 	switch result.Verdict {
 	case v1alpha1.Resilient:
-		r.verdict = fmt.Sprintf("PASS  %s (%s)", exp.Metadata.Name, result.Verdict)
+		r.verdict = fmt.Sprintf("PASS  %s (%s, %s recovery, %d deviations)",
+			exp.Metadata.Name, verdictStr, recoveryStr, deviationCount)
 		r.status = "pass"
 	case v1alpha1.Degraded, v1alpha1.Failed:
-		r.verdict = fmt.Sprintf("FAIL  %s (%s)", exp.Metadata.Name, result.Verdict)
+		r.verdict = fmt.Sprintf("FAIL  %s (%s, %s recovery, %d deviations)",
+			exp.Metadata.Name, verdictStr, recoveryStr, deviationCount)
 		r.status = "fail"
 	case v1alpha1.Inconclusive:
-		r.verdict = fmt.Sprintf("SKIP  %s (%s)", exp.Metadata.Name, result.Verdict)
+		r.verdict = fmt.Sprintf("SKIP  %s (%s, %s recovery, %d deviations)",
+			exp.Metadata.Name, verdictStr, recoveryStr, deviationCount)
 		r.status = "skip"
 	default:
-		r.verdict = fmt.Sprintf("FAIL  %s (%s)", exp.Metadata.Name, result.Verdict)
+		r.verdict = fmt.Sprintf("FAIL  %s (%s, %s recovery, %d deviations)",
+			exp.Metadata.Name, verdictStr, recoveryStr, deviationCount)
 		r.status = "fail"
 	}
 

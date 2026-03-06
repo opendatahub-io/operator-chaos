@@ -91,6 +91,7 @@ func buildOrchestrator(knowledgePath string, dryRun bool, reportDir string, dist
 		Evaluator:  evaluator.New(maxCycles),
 		Lock:       lock,
 		Knowledge:  knowledge,
+		K8sClient:  k8sClient,
 		ReportDir:  reportDir,
 		Verbose:    verbose,
 	})
@@ -105,7 +106,7 @@ func buildOrchestrator(knowledgePath string, dryRun bool, reportDir string, dist
 // printExperimentResult prints a human-readable summary of an experiment result.
 func printExperimentResult(result *orchestrator.ExperimentResult) {
 	fmt.Printf("\nExperiment: %s\n", result.Experiment)
-	fmt.Printf("Verdict:    %s\n", result.Verdict)
+	fmt.Printf("Verdict:    %s\n", colorVerdict(string(result.Verdict)))
 	if result.Evaluation != nil {
 		fmt.Printf("Confidence: %s\n", result.Evaluation.Confidence)
 		if len(result.Evaluation.Deviations) > 0 {

@@ -2,11 +2,13 @@ package orchestrator
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
@@ -16,6 +18,9 @@ import (
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/reporter"
 	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 const (
@@ -33,6 +38,7 @@ type Orchestrator struct {
 	evaluator  *evaluator.Evaluator
 	lock       safety.ExperimentLock
 	knowledge  *model.OperatorKnowledge
+	k8sClient  client.Client
 	reportDir  string
 	verbose    bool
 	output     io.Writer
@@ -47,6 +53,7 @@ type OrchestratorConfig struct {
 	Evaluator  *evaluator.Evaluator
 	Lock       safety.ExperimentLock
 	Knowledge  *model.OperatorKnowledge
+	K8sClient  client.Client
 	ReportDir  string
 	Verbose    bool
 	Logger     *slog.Logger
@@ -83,6 +90,7 @@ func New(config OrchestratorConfig) *Orchestrator {
 		evaluator:  config.Evaluator,
 		lock:       config.Lock,
 		knowledge:  config.Knowledge,
+		k8sClient:  config.K8sClient,
 		reportDir:  config.ReportDir,
 		verbose:    config.Verbose,
 		output:     output,
@@ -273,6 +281,15 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 	result.Verdict = evalResult.Verdict
 
 	// 7. Report
+
+	// Extract injection targets from events
+	var injectionTargets []string
+	for _, ev := range events {
+		if ev.Target != "" {
+			injectionTargets = append(injectionTargets, ev.Target)
+		}
+	}
+
 	report := reporter.ExperimentReport{
 		Experiment: exp.Metadata.Name,
 		Timestamp:  time.Now(),
@@ -283,9 +300,15 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 		},
 		Injection: reporter.InjectionReport{
 			Type:      string(exp.Spec.Injection.Type),
+			Targets:   injectionTargets,
 			Timestamp: time.Now(),
 		},
-		Evaluation: *evalResult,
+		SteadyState: reporter.SteadyStateReport{
+			Pre:  preCheck,
+			Post: postCheck,
+		},
+		Evaluation:     *evalResult,
+		Reconciliation: reconciliationResult,
 	}
 	result.Report = &report
 
@@ -305,9 +328,78 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 		}
 	}
 
+	// Store result as ConfigMap in cluster
+	if o.k8sClient != nil {
+		o.storeResultConfigMap(ctx, exp, namespace, report)
+	}
+
 	o.logger.Info("phase transition", "phase", "COMPLETE", "verdict", evalResult.Verdict)
 	result.Phase = v1alpha1.PhaseComplete
 
 	return result, nil
+}
+
+// configMapNameMaxLen is the maximum length for a Kubernetes resource name.
+const configMapNameMaxLen = 253
+
+// labelValueMaxLen is the maximum length for a Kubernetes label value.
+const labelValueMaxLen = 63
+
+// truncateLabel truncates a string to the maximum Kubernetes label value length.
+func truncateLabel(s string) string {
+	if len(s) <= labelValueMaxLen {
+		return s
+	}
+	return s[:labelValueMaxLen]
+}
+
+// storeResultConfigMap creates a ConfigMap in the experiment's namespace
+// containing the JSON-serialized ExperimentReport, making results visible
+// via kubectl get configmap -l app.kubernetes.io/managed-by=odh-chaos.
+func (o *Orchestrator) storeResultConfigMap(ctx context.Context, exp *v1alpha1.ChaosExperiment, namespace string, report reporter.ExperimentReport) {
+	// Use a dedicated context so that ConfigMap storage succeeds even if the
+	// parent context is near its deadline.
+	storeCtx, storeCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer storeCancel()
+
+	reportJSON, err := json.Marshal(report)
+	if err != nil {
+		o.logger.Warn("marshaling report for ConfigMap", "error", err)
+		return
+	}
+
+	cmName := "chaos-result-" + exp.Metadata.Name
+	if len(cmName) > configMapNameMaxLen {
+		cmName = cmName[:configMapNameMaxLen]
+	}
+	// Ensure the name does not end with a non-alphanumeric character
+	cmName = strings.TrimRight(cmName, "-._")
+
+	cmLabels := map[string]string{
+		"app.kubernetes.io/managed-by":    "odh-chaos",
+		"chaos.opendatahub.io/experiment": truncateLabel(exp.Metadata.Name),
+		"chaos.opendatahub.io/verdict":    strings.ToLower(string(report.Evaluation.Verdict)),
+	}
+	cmAnnotations := map[string]string{
+		"chaos.opendatahub.io/timestamp": report.Timestamp.UTC().Format(time.RFC3339),
+	}
+	cmData := map[string]string{
+		"result.json": string(reportJSON),
+	}
+
+	existing := &corev1.ConfigMap{}
+	existing.Name = cmName
+	existing.Namespace = namespace
+	result, err := controllerutil.CreateOrUpdate(storeCtx, o.k8sClient, existing, func() error {
+		existing.Labels = cmLabels
+		existing.Annotations = cmAnnotations
+		existing.Data = cmData
+		return nil
+	})
+	if err != nil {
+		o.logger.Warn("storing result ConfigMap", "name", cmName, "namespace", namespace, "error", err)
+	} else {
+		o.logger.Info("result ConfigMap stored", "name", cmName, "namespace", namespace, "operation", result)
+	}
 }
 
