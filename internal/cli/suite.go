@@ -63,8 +63,7 @@ func newSuiteCommand() *cobra.Command {
 			}
 
 			if len(experimentFiles) == 0 {
-				fmt.Fprintf(os.Stderr, "No experiment files found in %s\n", dir)
-				return nil
+				return fmt.Errorf("no experiment files found in %s", dir)
 			}
 
 			fmt.Fprintf(os.Stderr, "Found %d experiments in %s\n\n", len(experimentFiles), dir)
