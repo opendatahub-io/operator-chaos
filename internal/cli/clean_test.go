@@ -2011,3 +2011,15 @@ func TestCleanSummaryDiff(t *testing.T) {
 	cleanSummaryDiff(cleanSummary{NetworkPolicies: 3}, cleanSummary{})
 	cleanSummaryDiff(cleanSummary{Leases: 1}, cleanSummary{Leases: 1})
 }
+
+func TestRunCleanWatch_RejectsNonPositiveInterval(t *testing.T) {
+	k8sClient := fake.NewClientBuilder().WithScheme(newTestScheme()).Build()
+
+	err := runCleanWatch(context.Background(), k8sClient, "default", 0)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "--interval must be positive")
+
+	err = runCleanWatch(context.Background(), k8sClient, "default", -1*time.Second)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "--interval must be positive")
+}

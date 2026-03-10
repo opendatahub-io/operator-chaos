@@ -131,22 +131,50 @@ func newCleanCommand() *cobra.Command {
 	return cmd
 }
 
-// cleanSummaryDiff logs the difference between two scan summaries.
+// cleanSummaryDiff logs the per-type difference between two scan summaries.
 func cleanSummaryDiff(prev, curr cleanSummary) {
 	diff := curr.total() - prev.total()
-	switch {
-	case diff > 0:
-		fmt.Fprintf(os.Stderr, "  Delta: +%d artifacts since last scan\n", diff)
-	case diff < 0:
-		fmt.Fprintf(os.Stderr, "  Delta: %d artifacts since last scan\n", diff)
-	default:
+	if diff == 0 {
 		fmt.Fprintf(os.Stderr, "  Delta: no change since last scan\n")
+		return
+	}
+	if diff > 0 {
+		fmt.Fprintf(os.Stderr, "  Delta: +%d artifacts since last scan\n", diff)
+	} else {
+		fmt.Fprintf(os.Stderr, "  Delta: %d artifacts since last scan\n", diff)
+	}
+	// Per-type breakdown
+	type entry struct {
+		name string
+		diff int
+	}
+	entries := []entry{
+		{"NetworkPolicies", curr.NetworkPolicies - prev.NetworkPolicies},
+		{"Leases", curr.Leases - prev.Leases},
+		{"ClusterRoles", curr.ClusterRoles - prev.ClusterRoles},
+		{"RoleBindings", curr.RoleBindings - prev.RoleBindings},
+		{"TTLExpired", curr.TTLExpired - prev.TTLExpired},
+		{"WebhooksRestored", curr.WebhooksRestored - prev.WebhooksRestored},
+		{"RBACBindingsFixed", curr.RBACBindingsFixed - prev.RBACBindingsFixed},
+		{"FinalizersRemoved", curr.FinalizersRemoved - prev.FinalizersRemoved},
+		{"ConfigDriftsFixed", curr.ConfigDriftsFixed - prev.ConfigDriftsFixed},
+		{"CRDMutationsFixed", curr.CRDMutationsFixed - prev.CRDMutationsFixed},
+		{"ResultConfigMaps", curr.ResultConfigMaps - prev.ResultConfigMaps},
+	}
+	for _, e := range entries {
+		if e.diff != 0 {
+			fmt.Fprintf(os.Stderr, "    %s: %+d\n", e.name, e.diff)
+		}
 	}
 }
 
 // runCleanWatch runs the clean loop on a ticker until the context is cancelled
 // or a SIGINT/SIGTERM is received.
 func runCleanWatch(ctx context.Context, k8sClient client.Client, namespace string, interval time.Duration) error {
+	if interval <= 0 {
+		return fmt.Errorf("--interval must be positive, got %v", interval)
+	}
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
