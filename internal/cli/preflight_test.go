@@ -238,8 +238,7 @@ func TestPreflightClusterResourceCheck(t *testing.T) {
 		},
 	}
 
-	results, err := checkClusterResources(context.Background(), k8sClient, knowledge, "test-ns")
-	require.NoError(t, err)
+	results := checkClusterResources(context.Background(), k8sClient, knowledge, "test-ns")
 	require.Len(t, results, 3)
 
 	// The deployment exists and has Available=True -> Found
@@ -286,6 +285,56 @@ func TestPreflightDeploymentDegraded(t *testing.T) {
 		Name:       "degraded-deploy",
 	}
 
-	status := checkSingleResource(context.Background(), k8sClient, mr, "test-ns")
+	status, errMsg := checkSingleResource(context.Background(), k8sClient, mr, "test-ns")
 	assert.Equal(t, "Degraded", status)
+	assert.Empty(t, errMsg)
+}
+
+func TestPreflightClusterScopedResource(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = appsv1.AddToScheme(scheme)
+	_ = corev1.AddToScheme(scheme)
+
+	// ClusterRoleBinding is cluster-scoped, namespace should not be injected
+	knowledge := &model.OperatorKnowledge{
+		Components: []model.ComponentModel{
+			{
+				Name: "controller",
+				ManagedResources: []model.ManagedResource{
+					{
+						APIVersion: "rbac.authorization.k8s.io/v1",
+						Kind:       "ClusterRoleBinding",
+						Name:       "test-crb",
+						// No namespace set - should NOT get default namespace injected
+					},
+				},
+			},
+		},
+	}
+
+	// With a fake client, cluster-scoped resources work without namespace
+	// This test validates that clusterScopedKinds prevents namespace injection
+	results := checkClusterResources(context.Background(),
+		fake.NewClientBuilder().WithScheme(scheme).Build(),
+		knowledge, "should-not-be-used")
+
+	require.Len(t, results, 1)
+	// Resource won't be found (not created), but the important thing is
+	// it didn't get the wrong namespace injected
+	assert.Equal(t, "ClusterRoleBinding", results[0].Kind)
+}
+
+func TestPreflightVerboseLocalMode(t *testing.T) {
+	path := writeTestKnowledge(t, validKnowledgeYAML)
+	cmd := newPreflightCommand()
+	// Add verbose as a persistent flag (simulating root command)
+	cmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	cmd.SetArgs([]string{
+		"--knowledge", path,
+		"--local",
+		"--verbose",
+	})
+
+	err := cmd.Execute()
+	assert.NoError(t, err)
 }

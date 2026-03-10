@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"text/tabwriter"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -21,7 +22,8 @@ type resourceStatus struct {
 	Component string
 	Name      string
 	Kind      string
-	Status    string // "Found", "Missing", "Degraded"
+	Status    string // "Found", "Missing", "Degraded", "Error"
+	Error     string // non-empty when Status is "Error"
 }
 
 func newPreflightCommand() *cobra.Command {
@@ -82,22 +84,33 @@ knowledge file structure without connecting to a cluster.`,
 				return fmt.Errorf("creating k8s client: %w", err)
 			}
 
-			results, err := checkClusterResources(cmd.Context(), k8sClient, knowledge, namespace)
-			if err != nil {
-				return fmt.Errorf("checking cluster resources: %w", err)
-			}
+			results := checkClusterResources(cmd.Context(), k8sClient, knowledge, namespace)
 
 			printResourceTable(results)
 
 			// Check for critical failures
 			missing := 0
+			degraded := 0
+			errored := 0
 			for _, r := range results {
-				if r.Status == "Missing" {
+				switch r.Status {
+				case "Missing":
 					missing++
+				case "Degraded":
+					degraded++
+				case "Error":
+					errored++
 				}
 			}
-			if missing > 0 {
-				return fmt.Errorf("%d critical resources missing from cluster", missing)
+
+			if errored > 0 {
+				fmt.Fprintf(os.Stderr, "\nWarning: %d resources could not be checked (RBAC/connectivity issues)\n", errored)
+			}
+			if degraded > 0 {
+				fmt.Fprintf(os.Stderr, "\nWarning: %d resources are degraded\n", degraded)
+			}
+			if missing > 0 || errored > 0 {
+				return fmt.Errorf("%d resources missing, %d resources could not be checked", missing, errored)
 			}
 
 			fmt.Println("\nCluster preflight passed.")
@@ -113,35 +126,16 @@ knowledge file structure without connecting to a cluster.`,
 }
 
 // crossReferenceChecks validates internal consistency of the knowledge file
-// beyond basic field validation.
+// beyond basic field validation (which is already handled by model.ValidateKnowledge).
 func crossReferenceChecks(k *model.OperatorKnowledge) []string {
 	var errs []string
 
 	for i, comp := range k.Components {
 		// Build a set of managed resource names for this component
 		resourceNames := make(map[string]bool)
-		for j, mr := range comp.ManagedResources {
-			prefix := fmt.Sprintf("components[%d].managedResources[%d]", i, j)
-			if mr.APIVersion == "" {
-				errs = append(errs, prefix+": apiVersion must not be empty")
-			}
-			if mr.Kind == "" {
-				errs = append(errs, prefix+": kind must not be empty")
-			}
-			if mr.Name == "" {
-				errs = append(errs, prefix+": name must not be empty")
-			}
-			resourceNames[mr.Name] = true
-		}
-
-		// Check webhooks
-		for j, wh := range comp.Webhooks {
-			prefix := fmt.Sprintf("components[%d].webhooks[%d]", i, j)
-			if wh.Name == "" {
-				errs = append(errs, prefix+": name must not be empty")
-			}
-			if wh.Type == "" {
-				errs = append(errs, prefix+": type must not be empty")
+		for _, mr := range comp.ManagedResources {
+			if mr.Name != "" {
+				resourceNames[mr.Name] = true
 			}
 		}
 
@@ -194,54 +188,75 @@ func printKnowledgeSummary(k *model.OperatorKnowledge, verbose bool) {
 	}
 }
 
+// clusterScopedKinds lists Kubernetes resource kinds that are cluster-scoped
+// (no namespace). This prevents injecting a namespace for resources that
+// should be looked up without one.
+var clusterScopedKinds = map[string]bool{
+	"ClusterRole":                      true,
+	"ClusterRoleBinding":               true,
+	"CustomResourceDefinition":         true,
+	"ValidatingWebhookConfiguration":   true,
+	"MutatingWebhookConfiguration":     true,
+	"Namespace":                        true,
+	"PersistentVolume":                 true,
+	"StorageClass":                     true,
+	"PriorityClass":                    true,
+	"Node":                             true,
+}
+
 // checkClusterResources checks each managed resource on the cluster and returns
 // a slice of resourceStatus results.
-func checkClusterResources(ctx context.Context, k8sClient client.Client, k *model.OperatorKnowledge, namespace string) ([]resourceStatus, error) {
+func checkClusterResources(ctx context.Context, k8sClient client.Client, k *model.OperatorKnowledge, namespace string) []resourceStatus {
 	var results []resourceStatus
 
 	for _, comp := range k.Components {
 		for _, mr := range comp.ManagedResources {
 			ns := mr.Namespace
-			if ns == "" {
+			if ns == "" && !clusterScopedKinds[mr.Kind] {
 				ns = namespace
 			}
+			if clusterScopedKinds[mr.Kind] {
+				ns = ""
+			}
 
-			status := checkSingleResource(ctx, k8sClient, mr, ns)
+			status, errMsg := checkSingleResource(ctx, k8sClient, mr, ns)
 			results = append(results, resourceStatus{
 				Component: comp.Name,
 				Name:      mr.Name,
 				Kind:      mr.Kind,
 				Status:    status,
+				Error:     errMsg,
 			})
 		}
 	}
 
-	return results, nil
+	return results
 }
 
 // checkSingleResource checks whether a single managed resource exists and is healthy.
-func checkSingleResource(ctx context.Context, k8sClient client.Client, mr model.ManagedResource, namespace string) string {
+// Returns a status string and an optional error message for the "Error" status.
+func checkSingleResource(ctx context.Context, k8sClient client.Client, mr model.ManagedResource, namespace string) (string, string) {
 	// Special handling for Deployments: check health condition
 	if mr.Kind == "Deployment" && (mr.APIVersion == "apps/v1" || mr.APIVersion == "extensions/v1beta1") {
 		deploy := &appsv1.Deployment{}
 		err := k8sClient.Get(ctx, client.ObjectKey{Name: mr.Name, Namespace: namespace}, deploy)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
-				return "Missing"
+				return "Missing", ""
 			}
-			return "Missing"
+			return "Error", err.Error()
 		}
 		// Check for Available condition
 		for _, cond := range deploy.Status.Conditions {
 			if cond.Type == appsv1.DeploymentAvailable {
 				if cond.Status == "True" {
-					return "Found"
+					return "Found", ""
 				}
-				return "Degraded"
+				return "Degraded", ""
 			}
 		}
 		// No Available condition found - treat as degraded
-		return "Degraded"
+		return "Degraded", ""
 	}
 
 	// Generic resource check using unstructured
@@ -250,20 +265,26 @@ func checkSingleResource(ctx context.Context, k8sClient client.Client, mr model.
 	err := k8sClient.Get(ctx, client.ObjectKey{Name: mr.Name, Namespace: namespace}, obj)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			return "Missing"
+			return "Missing", ""
 		}
-		return "Missing"
+		return "Error", err.Error()
 	}
 
-	return "Found"
+	return "Found", ""
 }
 
 // printResourceTable prints a formatted table of resource check results.
 func printResourceTable(results []resourceStatus) {
 	fmt.Println("\n--- Cluster Resource Check ---")
-	fmt.Printf("  %-20s %-20s %-15s %s\n", "COMPONENT", "NAME", "KIND", "STATUS")
-	fmt.Printf("  %-20s %-20s %-15s %s\n", "---------", "----", "----", "------")
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintf(w, "  COMPONENT\tNAME\tKIND\tSTATUS\n")
+	fmt.Fprintf(w, "  ---------\t----\t----\t------\n")
 	for _, r := range results {
-		fmt.Printf("  %-20s %-20s %-15s %s\n", r.Component, r.Name, r.Kind, r.Status)
+		status := r.Status
+		if r.Error != "" {
+			status = fmt.Sprintf("%s (%s)", r.Status, r.Error)
+		}
+		fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n", r.Component, r.Name, r.Kind, status)
 	}
+	w.Flush()
 }
