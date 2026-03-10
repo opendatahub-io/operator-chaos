@@ -383,9 +383,8 @@ spec:
         - name: reports
           workspace: report-workspace
 
+  finally:
     - name: publish-report
-      runAfter:
-        - run-suite
       taskRef:
         name: odh-chaos-report
       params:
@@ -395,6 +394,8 @@ spec:
         - name: reports
           workspace: report-workspace
 ```
+
+> **Note:** The `publish-report` task is in the `finally` block so it runs even when the suite fails. The `suite` command writes JUnit XML to `--report-dir` *before* returning a non-zero exit, so the report file exists in the workspace regardless of the outcome. The `publish-report` task is only needed if you want to regenerate reports from raw JSON files.
 
 ### Report Generation Task
 
