@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	admissionregv1 "k8s.io/api/admissionregistration/v1"
@@ -25,6 +27,7 @@ import (
 )
 
 const defaultCleanTimeout = 60 * time.Second
+const defaultWatchInterval = 60 * time.Second
 
 // cleanSummary tracks what was cleaned per artifact type.
 type cleanSummary struct {
@@ -91,7 +94,7 @@ func (s cleanSummary) print() {
 }
 
 func newCleanCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "clean",
 		Short: "Remove all chaos artifacts from the cluster (emergency stop)",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -107,13 +110,80 @@ func newCleanCommand() *cobra.Command {
 				return fmt.Errorf("creating k8s client: %w", err)
 			}
 
-			ctx, cancel := context.WithTimeout(cmd.Context(), defaultCleanTimeout)
-			defer cancel()
+			watch, _ := cmd.Flags().GetBool("watch")
+			if !watch {
+				ctx, cancel := context.WithTimeout(cmd.Context(), defaultCleanTimeout)
+				defer cancel()
 
-			summary := runClean(ctx, k8sClient, namespace)
-			summary.print()
-			return nil
+				summary := runClean(ctx, k8sClient, namespace)
+				summary.print()
+				return nil
+			}
+
+			interval, _ := cmd.Flags().GetDuration("interval")
+			return runCleanWatch(cmd.Context(), k8sClient, namespace, interval)
 		},
+	}
+
+	cmd.Flags().Bool("watch", false, "continuously scan and clean chaos artifacts")
+	cmd.Flags().Duration("interval", defaultWatchInterval, "scan interval when --watch is set")
+
+	return cmd
+}
+
+// cleanSummaryDiff logs the difference between two scan summaries.
+func cleanSummaryDiff(prev, curr cleanSummary) {
+	diff := curr.total() - prev.total()
+	switch {
+	case diff > 0:
+		fmt.Fprintf(os.Stderr, "  Delta: +%d artifacts since last scan\n", diff)
+	case diff < 0:
+		fmt.Fprintf(os.Stderr, "  Delta: %d artifacts since last scan\n", diff)
+	default:
+		fmt.Fprintf(os.Stderr, "  Delta: no change since last scan\n")
+	}
+}
+
+// runCleanWatch runs the clean loop on a ticker until the context is cancelled
+// or a SIGINT/SIGTERM is received.
+func runCleanWatch(ctx context.Context, k8sClient client.Client, namespace string, interval time.Duration) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	var prev cleanSummary
+	scan := 0
+
+	for {
+		scan++
+		fmt.Fprintf(os.Stderr, "\n=== Watch scan #%d ===\n", scan)
+
+		scanCtx, scanCancel := context.WithTimeout(ctx, defaultCleanTimeout)
+		summary := runClean(scanCtx, k8sClient, namespace)
+		scanCancel()
+
+		summary.print()
+		if scan > 1 {
+			cleanSummaryDiff(prev, summary)
+		}
+		prev = summary
+
+		select {
+		case <-ctx.Done():
+			fmt.Fprintf(os.Stderr, "\nWatch stopped: context cancelled\n")
+			return nil
+		case sig := <-sigCh:
+			fmt.Fprintf(os.Stderr, "\nReceived %v, shutting down watch\n", sig)
+			return nil
+		case <-ticker.C:
+			// next iteration
+		}
 	}
 }
 

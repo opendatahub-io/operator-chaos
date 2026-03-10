@@ -1939,3 +1939,75 @@ func TestCleanConfigDrift_SecretRollbackSecretMissing(t *testing.T) {
 func strPtr(s string) *string { return &s }
 
 func sideEffectPtr(se admissionregv1.SideEffectClass) *admissionregv1.SideEffectClass { return &se }
+
+// ---------------------------------------------------------------------------
+// Watch mode tests
+// ---------------------------------------------------------------------------
+
+func TestNewCleanCommand_WatchFlagDefaults(t *testing.T) {
+	cmd := newCleanCommand()
+
+	watchFlag := cmd.Flags().Lookup("watch")
+	require.NotNil(t, watchFlag, "--watch flag should be registered")
+	assert.Equal(t, "false", watchFlag.DefValue, "--watch should default to false")
+
+	intervalFlag := cmd.Flags().Lookup("interval")
+	require.NotNil(t, intervalFlag, "--interval flag should be registered")
+	assert.Equal(t, "1m0s", intervalFlag.DefValue, "--interval should default to 60s")
+}
+
+func TestRunCleanWatch_ExitsOnContextCancel(t *testing.T) {
+	scheme := newTestScheme()
+	k8sClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	// Cancel immediately so the watch loop exits after the first scan.
+	cancel()
+
+	err := runCleanWatch(ctx, k8sClient, "default", 100*time.Millisecond)
+	assert.NoError(t, err, "runCleanWatch should return nil on context cancellation")
+}
+
+func TestRunCleanWatch_RunsMultipleScans(t *testing.T) {
+	scheme := newTestScheme()
+
+	// Seed a chaos NetworkPolicy so the first scan finds something.
+	np := &networkingv1.NetworkPolicy{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "chaos-np",
+			Namespace: "default",
+			Labels:    chaosLabelsFor(v1alpha1.NetworkPartition),
+		},
+	}
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(np).
+		Build()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Use a very short interval so we get at least 2 scans quickly.
+	done := make(chan error, 1)
+	go func() {
+		done <- runCleanWatch(ctx, k8sClient, "default", 50*time.Millisecond)
+	}()
+
+	// Wait enough time for at least 2 scans, then cancel.
+	time.Sleep(200 * time.Millisecond)
+	cancel()
+
+	err := <-done
+	assert.NoError(t, err, "runCleanWatch should return nil after cancellation")
+
+	// Verify the NetworkPolicy was cleaned up by the first scan.
+	var remaining networkingv1.NetworkPolicyList
+	require.NoError(t, k8sClient.List(context.Background(), &remaining, client.InNamespace("default")))
+	assert.Empty(t, remaining.Items, "chaos NetworkPolicy should have been cleaned")
+}
+
+func TestCleanSummaryDiff(t *testing.T) {
+	// Just verify it doesn't panic with various inputs.
+	cleanSummaryDiff(cleanSummary{}, cleanSummary{NetworkPolicies: 2})
+	cleanSummaryDiff(cleanSummary{NetworkPolicies: 3}, cleanSummary{})
+	cleanSummaryDiff(cleanSummary{Leases: 1}, cleanSummary{Leases: 1})
+}
