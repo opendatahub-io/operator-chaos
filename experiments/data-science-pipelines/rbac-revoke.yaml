@@ -1,0 +1,37 @@
+apiVersion: chaos.opendatahub.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-rbac-revoke
+spec:
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: ClusterRoleBinding/data-science-pipelines-operator-manager-rolebinding
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: data-science-pipelines-operator-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: data-science-pipelines-operator-manager-rolebinding
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the DSPO ClusterRoleBinding subjects are revoked, the operator
+      should lose its ability to reconcile DataSciencePipelinesApplication
+      resources across namespaces and surface permission-denied errors.
+      Once permissions are restored, reconciliation should resume.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true

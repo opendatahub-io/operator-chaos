@@ -1,0 +1,35 @@
+apiVersion: chaos.opendatahub.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: opendatahub-operator-pod-kill
+spec:
+  target:
+    operator: opendatahub-operator
+    component: opendatahub-operator
+    resource: Deployment/opendatahub-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: opendatahub-operator-controller-manager
+        namespace: opendatahub-operator-system
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: control-plane=controller-manager
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When one operator pod is killed, the remaining replicas should
+      maintain the leader lease. Kubernetes should recreate the killed pod
+      within the recovery timeout. The 3-replica HA deployment ensures
+      continuous reconciliation of DataScienceCluster resources.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub-operator-system

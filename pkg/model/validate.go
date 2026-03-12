@@ -44,7 +44,7 @@ func ValidateKnowledge(k *OperatorKnowledge) []string {
 			errs = append(errs, prefix+" must have at least one managedResource")
 		}
 
-		resourceNames := make(map[string]bool)
+		resourceKeys := make(map[string]bool)
 		for j, mr := range comp.ManagedResources {
 			mrPrefix := fmt.Sprintf("%s.managedResources[%d]", prefix, j)
 
@@ -56,11 +56,13 @@ func ValidateKnowledge(k *OperatorKnowledge) []string {
 			}
 			if mr.Name == "" {
 				errs = append(errs, mrPrefix+".name is required")
-			} else {
-				if resourceNames[mr.Name] {
-					errs = append(errs, fmt.Sprintf("%s: duplicate managedResource name %q", prefix, mr.Name))
+			}
+			if mr.Kind != "" && mr.Name != "" {
+				key := mr.Kind + "/" + mr.Namespace + "/" + mr.Name
+				if resourceKeys[key] {
+					errs = append(errs, fmt.Sprintf("%s: duplicate managedResource %s/%s", prefix, mr.Kind, mr.Name))
 				}
-				resourceNames[mr.Name] = true
+				resourceKeys[key] = true
 			}
 		}
 

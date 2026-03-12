@@ -151,12 +151,25 @@ func TestValidateKnowledge_DuplicateComponentNames(t *testing.T) {
 func TestValidateKnowledge_DuplicateManagedResourceNames(t *testing.T) {
 	k := validKnowledge()
 	k.Components[0].ManagedResources = append(k.Components[0].ManagedResources, ManagedResource{
-		APIVersion: "v1",
-		Kind:       "Service",
+		APIVersion: "apps/v1",
+		Kind:       "Deployment",
 		Name:       "test-dashboard",
 	})
 	errs := ValidateKnowledge(k)
-	assertContains(t, errs, `components[0]: duplicate managedResource name "test-dashboard"`)
+	assertContains(t, errs, `components[0]: duplicate managedResource Deployment/test-dashboard`)
+}
+
+func TestValidateKnowledge_SameNameDifferentKindNotDuplicate(t *testing.T) {
+	k := validKnowledge()
+	k.Components[0].ManagedResources = append(k.Components[0].ManagedResources, ManagedResource{
+		APIVersion: "v1",
+		Kind:       "ServiceAccount",
+		Name:       "test-dashboard",
+	})
+	errs := ValidateKnowledge(k)
+	if len(errs) > 0 {
+		t.Errorf("expected no errors for same name with different kinds, got %v", errs)
+	}
 }
 
 func TestValidateKnowledge_Nil(t *testing.T) {
