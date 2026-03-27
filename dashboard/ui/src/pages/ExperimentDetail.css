@@ -57,7 +57,7 @@
   margin-right: 12px;
 }
 
-.yaml-block {
+.json-block {
   background: #1e1e1e;
   color: #d4d4d4;
   padding: 16px;
@@ -71,7 +71,7 @@
   overflow-y: auto;
 }
 
-.yaml-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.json-actions { display: flex; gap: 8px; margin-bottom: 12px; }
 
 .detail-danger-badge {
   padding: 2px 8px;

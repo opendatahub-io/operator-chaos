@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -48,7 +49,9 @@ func (s *Server) registerRoutes() {
 func writeJSON(w http.ResponseWriter, status int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		log.Printf("json encode: %v", err)
+	}
 }
 
 func writeError(w http.ResponseWriter, status int, msg string) {
@@ -64,17 +67,17 @@ func pathSegment(r *http.Request, name string) string {
 	return r.PathValue(name)
 }
 
-func parseSince(r *http.Request) *time.Time {
+func parseSince(r *http.Request) (*time.Time, error) {
 	v := r.URL.Query().Get("since")
 	if v == "" {
-		return nil
+		return nil, nil
 	}
 	if t, err := time.Parse(time.RFC3339, v); err == nil {
-		return &t
+		return &t, nil
 	}
 	if d, err := time.ParseDuration(v); err == nil {
 		t := time.Now().Add(-d)
-		return &t
+		return &t, nil
 	}
-	return nil
+	return nil, fmt.Errorf("invalid since value %q: expected RFC3339 or Go duration", v)
 }

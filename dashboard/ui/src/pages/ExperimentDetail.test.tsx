@@ -73,7 +73,7 @@ describe('ExperimentDetail', () => {
       expect(screen.getByText('Steady State')).toBeInTheDocument();
       expect(screen.getByText('Injection Log')).toBeInTheDocument();
       expect(screen.getByText('Conditions')).toBeInTheDocument();
-      expect(screen.getByText('YAML')).toBeInTheDocument();
+      expect(screen.getByText('JSON')).toBeInTheDocument();
       expect(screen.getByText('Debug')).toBeInTheDocument();
     });
   });

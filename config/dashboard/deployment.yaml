@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odh-chaos-dashboard
+  labels:
+    app.kubernetes.io/name: odh-chaos-dashboard
+    app.kubernetes.io/part-of: odh-platform-chaos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: odh-chaos-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: odh-chaos-dashboard
+        app.kubernetes.io/part-of: odh-platform-chaos
+    spec:
+      serviceAccountName: odh-chaos-dashboard
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: dashboard
+          image: quay.io/opendatahub/chaos-dashboard:latest
+          args:
+            - -addr=:8080
+            - -db=/data/dashboard.db
+            - -knowledge-dir=/knowledge
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/overview/stats
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: knowledge
+              mountPath: /knowledge
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: odh-chaos-dashboard-data
+        - name: knowledge
+          configMap:
+            name: odh-chaos-knowledge
+            optional: true

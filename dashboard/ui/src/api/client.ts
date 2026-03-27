@@ -12,8 +12,8 @@ export function apiUrl(path: string, params?: Record<string, string | number | u
   return url.pathname + url.search;
 }
 
-export async function apiFetch<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+export async function apiFetch<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, { signal });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);

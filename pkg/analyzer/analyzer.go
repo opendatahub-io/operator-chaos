@@ -25,7 +25,7 @@ func AnalyzeFile(path string) ([]Finding, error) {
 // returns aggregated findings.
 func AnalyzeDirectory(dir string) ([]Finding, error) {
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments) //nolint:staticcheck // TODO: migrate to go/packages
+	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments) //nolint:staticcheck // sufficient for single-directory AST analysis
 	if err != nil {
 		return nil, fmt.Errorf("parsing directory %s: %w", dir, err)
 	}

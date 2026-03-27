@@ -528,11 +528,11 @@ odh-chaos run experiments/odh-model-controller/01-podkill.yaml \
 To detect collateral damage on components that depend on odh-model-controller, add knowledge models for dependent operators:
 
 ```bash
-# Create knowledge files for kserve, llmisvc, etc.
+# Knowledge files for kserve and odh-model-controller
+# (llmisvc-controller-manager is a component within kserve.yaml)
 ls knowledge/
   odh-model-controller.yaml
   kserve.yaml
-  llmisvc.yaml
 
 # Run with --knowledge-dir to enable dependency graph
 odh-chaos run experiments/odh-model-controller/01-podkill.yaml \

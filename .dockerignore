@@ -2,8 +2,11 @@ bin/
 .git/
 .github/
 .serena/
+.superpowers/
 docs/
 testdata/
 tests/
 *.md
 LICENSE
+dashboard/ui/node_modules/
+dashboard/ui-dist/

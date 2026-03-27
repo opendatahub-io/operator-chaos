@@ -1,0 +1,51 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: odh-chaos-controller
+rules:
+  # ChaosExperiment CRD
+  - apiGroups: ["chaos.opendatahub.io"]
+    resources: ["chaosexperiments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["chaos.opendatahub.io"]
+    resources: ["chaosexperiments/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["chaos.opendatahub.io"]
+    resources: ["chaosexperiments/finalizers"]
+    verbs: ["update"]
+  # Leader election
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch", "update"]
+  # Pod injection (PodKill)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+  # ConfigDrift injection
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  # Namespace and ServiceAccount read
+  - apiGroups: [""]
+    resources: ["namespaces", "serviceaccounts"]
+    verbs: ["get", "list"]
+  # Deployment/ReplicaSet/StatefulSet manipulation
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  # NetworkPartition injection
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "create", "delete"]
+  # RBACRevoke injection
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+    verbs: ["get", "list", "update", "patch"]
+  # WebhookDisrupt injection
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+    verbs: ["get", "list", "update", "patch"]

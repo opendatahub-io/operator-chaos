@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/store"
 )
@@ -38,13 +37,11 @@ func (s *Server) handleListExperiments(w http.ResponseWriter, r *http.Request) {
 	if filter.PageSize > 500 {
 		filter.PageSize = 500
 	}
-	if v := q.Get("since"); v != "" {
-		if t, err := time.Parse(time.RFC3339, v); err == nil {
-			filter.Since = &t
-		} else if d, err := time.ParseDuration(v); err == nil {
-			t := time.Now().Add(-d)
-			filter.Since = &t
-		}
+	if since, err := parseSince(r); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	} else if since != nil {
+		filter.Since = since
 	}
 
 	result, err := s.store.List(filter)

@@ -146,7 +146,7 @@ func startController(namespace, metricsAddr, healthAddr string, leaderElect bool
 		Orchestrator: orch,
 		Lock:         lock,
 		Clock:        clock.RealClock{},
-		Recorder:     mgr.GetEventRecorderFor("chaosexperiment-controller"), //nolint:staticcheck // TODO: migrate to events.EventRecorder interface
+		Recorder:     mgr.GetEventRecorderFor("chaosexperiment-controller"), //nolint:staticcheck // standard controller-runtime API; no replacement available yet
 	}
 
 	if err := reconciler.SetupWithManager(mgr); err != nil {

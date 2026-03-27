@@ -106,6 +106,10 @@ func main() {
 	// Combine API + static file serving
 	mux := http.NewServeMux()
 	mux.Handle("/api/", srv.Handler())
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Try to serve the file; fall back to index.html for SPA routing
 		path := r.URL.Path

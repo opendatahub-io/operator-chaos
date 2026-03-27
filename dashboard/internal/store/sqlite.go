@@ -119,7 +119,7 @@ func (s *SQLiteStore) List(f ListFilter) (ListResult, error) {
 	if err != nil { return ListResult{}, err }
 	defer rows.Close()
 
-	var items []Experiment
+	items := []Experiment{}
 	for rows.Next() {
 		exp, err := scanExperimentRows(rows)
 		if err != nil { return ListResult{}, err }
@@ -142,7 +142,7 @@ func (s *SQLiteStore) ListRunning() ([]Experiment, error) {
 		strings.Join(placeholders, ",")), args...)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var items []Experiment
+	items := []Experiment{}
 	for rows.Next() {
 		exp, err := scanExperimentRows(rows)
 		if err != nil { return nil, err }
@@ -190,7 +190,7 @@ func (s *SQLiteStore) AvgRecoveryByType(since *time.Time) ([]RecoveryAvg, error)
 	rows, err := s.db.Query(fmt.Sprintf("SELECT injection_type, AVG(recovery_ms) FROM experiments %s GROUP BY injection_type ORDER BY injection_type", whereClause), args...)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var result []RecoveryAvg
+	result := []RecoveryAvg{}
 	for rows.Next() {
 		var r RecoveryAvg
 		if err := rows.Scan(&r.InjectionType, &r.AvgMs); err != nil { return nil, err }
@@ -256,7 +256,7 @@ func (s *SQLiteStore) VerdictTimeline(days int) ([]DayVerdicts, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var result []DayVerdicts
+	result := []DayVerdicts{}
 	for rows.Next() {
 		var dv DayVerdicts
 		if err := rows.Scan(&dv.Date, &dv.Resilient, &dv.Degraded, &dv.Failed); err != nil {
@@ -275,7 +275,7 @@ func (s *SQLiteStore) ListOperators(since *time.Time) ([]string, error) {
 	rows, err := s.db.Query("SELECT DISTINCT operator FROM experiments "+whereClause+" ORDER BY operator", args...)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var ops []string
+	ops := []string{}
 	for rows.Next() {
 		var op string
 		if err := rows.Scan(&op); err != nil { return nil, err }
@@ -295,7 +295,7 @@ func (s *SQLiteStore) ListByOperator(operator string, since *time.Time) ([]Exper
 		created_at, updated_at FROM experiments %s ORDER BY start_time DESC`, where), args...)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var items []Experiment
+	items := []Experiment{}
 	for rows.Next() {
 		exp, err := scanExperimentRows(rows)
 		if err != nil { return nil, err }
@@ -312,7 +312,7 @@ func (s *SQLiteStore) ListBySuiteRunID(runID string) ([]Experiment, error) {
 		created_at, updated_at FROM experiments WHERE suite_run_id=? ORDER BY name`, runID)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var items []Experiment
+	items := []Experiment{}
 	for rows.Next() {
 		exp, err := scanExperimentRows(rows)
 		if err != nil { return nil, err }
@@ -323,7 +323,7 @@ func (s *SQLiteStore) ListBySuiteRunID(runID string) ([]Experiment, error) {
 }
 
 func (s *SQLiteStore) ListSuiteRuns() ([]SuiteRun, error) {
-	rows, err := s.db.Query(`SELECT suite_name, suite_run_id, operator_version,
+	rows, err := s.db.Query(`SELECT COALESCE(suite_name, ''), suite_run_id, COALESCE(operator_version, ''),
 		COUNT(*) as total, SUM(CASE WHEN verdict='Resilient' THEN 1 ELSE 0 END),
 		SUM(CASE WHEN verdict='Degraded' THEN 1 ELSE 0 END),
 		SUM(CASE WHEN verdict='Failed' THEN 1 ELSE 0 END)
@@ -331,7 +331,7 @@ func (s *SQLiteStore) ListSuiteRuns() ([]SuiteRun, error) {
 		GROUP BY suite_name, suite_run_id, operator_version ORDER BY MAX(start_time) DESC`)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var runs []SuiteRun
+	runs := []SuiteRun{}
 	for rows.Next() {
 		var r SuiteRun
 		if err := rows.Scan(&r.SuiteName, &r.SuiteRunID, &r.OperatorVersion, &r.Total, &r.Resilient, &r.Degraded, &r.Failed); err != nil { return nil, err }
@@ -357,7 +357,7 @@ func (s *SQLiteStore) querySuiteExperiments(query, suiteName, runID string) ([]E
 	rows, err := s.db.Query(query, suiteName, runID)
 	if err != nil { return nil, err }
 	defer rows.Close()
-	var items []Experiment
+	items := []Experiment{}
 	for rows.Next() {
 		exp, err := scanExperimentRows(rows)
 		if err != nil { return nil, err }

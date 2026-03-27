@@ -12,31 +12,35 @@ export function useApi<T>(url: string | null): ApiState<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(url !== null);
   const [error, setError] = useState<string | null>(null);
-  const mountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchData = useCallback(async () => {
     if (url === null) return;
+
+    // Abort any in-flight request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
-      const result = await apiFetch<T>(url);
-      if (mountedRef.current) {
+      const result = await apiFetch<T>(url, controller.signal);
+      if (!controller.signal.aborted) {
         setData(result);
         setLoading(false);
       }
     } catch (err) {
-      if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setData(null);
-        setLoading(false);
-      }
+      if (controller.signal.aborted) return;
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setData(null);
+      setLoading(false);
     }
   }, [url]);
 
   useEffect(() => {
-    mountedRef.current = true;
     fetchData();
-    return () => { mountedRef.current = false; };
+    return () => { abortRef.current?.abort(); };
   }, [fetchData]);
 
   return { data, loading, error, refetch: fetchData };
@@ -92,7 +96,6 @@ export function useSSE<T extends { id: string }>(url: string | null): SSEState<T
             } else {
               updated = [...prev, data];
             }
-            // P1-2: Cap at 500 events
             if (updated.length > 500) {
               return updated.slice(-500);
             }
@@ -108,7 +111,6 @@ export function useSSE<T extends { id: string }>(url: string | null): SSEState<T
         setConnected(false);
         setError('SSE connection error');
 
-        // P1-1: Close EventSource to prevent aggressive auto-retry
         es.close();
         eventSourceRef.current = null;
 

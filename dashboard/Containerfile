@@ -1,0 +1,41 @@
+# NOTE: For production deployments, pin base images by digest
+# e.g., node:18-alpine@sha256:<digest> to ensure reproducible builds.
+
+# Stage 1: Build React frontend
+FROM node:18-alpine AS ui-builder
+
+WORKDIR /ui
+COPY dashboard/ui/package.json dashboard/ui/package-lock.json ./
+RUN npm ci
+COPY dashboard/ui/ ./
+RUN npm run build
+
+# Stage 2: Build Go backend with embedded UI
+FROM golang:1.25 AS builder
+
+ARG TARGETARCH=amd64
+
+WORKDIR /workspace
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+COPY --from=ui-builder /ui-dist/ ./dashboard/ui-dist/
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
+    -o /chaos-dashboard ./dashboard/cmd/dashboard/
+
+# NOTE: For production deployments, pin base images by digest
+# e.g., gcr.io/distroless/static:nonroot@sha256:<digest>
+
+# Stage 3: Runtime
+FROM gcr.io/distroless/static:nonroot
+
+COPY --from=builder /chaos-dashboard /chaos-dashboard
+
+USER 65532:65532
+
+EXPOSE 8080
+
+ENTRYPOINT ["/chaos-dashboard"]

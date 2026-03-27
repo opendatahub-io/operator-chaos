@@ -3,7 +3,11 @@ package api
 import "net/http"
 
 func (s *Server) handleOverviewStats(w http.ResponseWriter, r *http.Request) {
-	since := parseSince(r)
+	since, err := parseSince(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	stats, err := s.store.OverviewStats(since)
 	if err != nil {

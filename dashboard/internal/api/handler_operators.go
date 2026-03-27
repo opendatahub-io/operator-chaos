@@ -3,7 +3,11 @@ package api
 import "net/http"
 
 func (s *Server) handleListOperators(w http.ResponseWriter, r *http.Request) {
-	since := parseSince(r)
+	since, err := parseSince(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	ops, err := s.store.ListOperators(since)
 	if err != nil {
 		internalError(w, "list operators", err)
@@ -14,7 +18,11 @@ func (s *Server) handleListOperators(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleListComponents(w http.ResponseWriter, r *http.Request) {
 	operator := pathSegment(r, "operator")
-	since := parseSince(r)
+	since, err := parseSince(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	exps, err := s.store.ListByOperator(operator, since)
 	if err != nil {
 		internalError(w, "list components", err)
@@ -22,7 +30,7 @@ func (s *Server) handleListComponents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	seen := map[string]bool{}
-	var components []string
+	components := []string{}
 	for _, e := range exps {
 		if !seen[e.Component] {
 			seen[e.Component] = true

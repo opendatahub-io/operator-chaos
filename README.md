@@ -509,6 +509,21 @@ injection:
     bindingType: ClusterRoleBinding
 ```
 
+### ClientFault
+
+Inject API-level faults into the controller's Kubernetes client operations (get, list, create, update, etc.). Used by the controller to test reconciler behavior under API failures without network-level disruption. **Danger: medium**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `faults` | Yes | JSON map of operation to fault spec. Operations: `get`, `list`, `create`, `update`, `delete`, `patch`, `deleteAllOf`, `reconcile`, `apply`. Each fault spec has `errorRate` (0.0-1.0), `error` (message), `delay` (fixed), `maxDelay` (jitter). |
+
+```yaml
+injection:
+  type: ClientFault
+  parameters:
+    faults: '{"get":{"errorRate":0.3,"error":"connection refused"},"list":{"maxDelay":"2s"}}'
+```
+
 ## CLI Reference
 
 | Command | Description |
@@ -728,6 +743,7 @@ graph TD
     FUZZ["Fuzz Testing<br/>Harness + DecodeFaultConfig + Invariants"]
     KNOW["Knowledge Models<br/>Operator YAML specs"]
     EXP["Experiment Specs<br/>ChaosExperiment YAML"]
+    DASH["Dashboard<br/>Web UI + REST API + SSE"]
 
     CLI --> ORCH
     ORCH --> INJ
@@ -738,7 +754,9 @@ graph TD
     SDK -.-> INJ
     FUZZ -.-> SDK
     KNOW --> ORCH
+    KNOW --> DASH
     EXP --> CLI
+    DASH -.->|"K8s Watch"| EXP
 ```
 
 ### Experiment Lifecycle
@@ -771,7 +789,7 @@ pkg/
   evaluator/            Verdict engine
   experiment/           Experiment loading and validation
   injection/            8 injection type implementations
-  model/                Knowledge model types, validation, DependencyGraph
+  model/                Knowledge model types, validation, DependencyGraph, loader
   observer/             Reconciliation, K8s resource observation, Blackboard pattern (ObservationBoard, Contributors)
   orchestrator/         Experiment lifecycle state machine
   reporter/             JSON and JUnit report generation
@@ -779,7 +797,75 @@ pkg/
   sdk/                  ChaosClient, WrapReconciler, TestChaos, FaultConfig
     fuzz/               Fuzz testing harness (Harness, DecodeFaultConfig, Invariants)
     faults/             Process-level fault types (CPU, memory, IO, network, timing, concurrency)
+dashboard/
+  cmd/dashboard/        Dashboard binary entrypoint
+  internal/
+    api/                REST API handlers, SSE broker
+    store/              SQLite persistence, migrations
+    watcher/            K8s ChaosExperiment informer
+    convert/            CR-to-model conversion
+  ui/                   React 18 + TypeScript frontend (Vite)
+  embed.go              go:embed for serving built UI assets
+knowledge/              Operator knowledge YAML files (7 operators)
+experiments/            Pre-built experiment suites (40 experiments)
 ```
+
+## Dashboard
+
+A web dashboard for visualizing chaos experiment results, live monitoring, and operator resilience insights. Runs as a standalone Go binary that watches ChaosExperiment CRs, persists history in SQLite, and serves a React frontend.
+
+### Features
+
+- **Overview** --- cluster-wide resilience health with trend indicators, verdict timeline, and recovery metrics
+- **Live Monitoring** --- real-time experiment progress via Server-Sent Events with phase stepper visualization
+- **Experiment Browser** --- filterable, sortable table with drill-down to full experiment detail (7 tabs: Summary, Evaluation, Steady State, Injection Log, Conditions, YAML, Debug)
+- **Suite Comparison** --- version-to-version comparison with delta indicators (improved/regressed/no change)
+- **Operator Insights** --- per-operator health bars, component accordion, injection coverage matrix
+- **Knowledge Graph** --- interactive SVG dependency graph with chaos coverage overlays
+
+### Running the Dashboard
+
+```bash
+# Build the dashboard binary (includes embedded React UI)
+cd dashboard/ui && npm ci && npm run build && cd ../..
+go build -o bin/chaos-dashboard ./dashboard/cmd/dashboard/
+
+# Run with knowledge models
+bin/chaos-dashboard \
+  -addr :8080 \
+  -db dashboard.db \
+  -knowledge-dir knowledge/ \
+  -sync-interval 30s
+```
+
+Open `http://localhost:8080` in your browser.
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-addr` | HTTP listen address | `:8080` |
+| `-db` | SQLite database path | `dashboard.db` |
+| `-kubeconfig` | Path to kubeconfig (uses in-cluster if empty) | |
+| `-knowledge-dir` | Directory of operator knowledge YAML files | |
+| `-sync-interval` | Interval for K8s sync polling | `30s` |
+
+### REST API
+
+All endpoints are read-only (`GET`), prefixed with `/api/v1/`.
+
+| Endpoint | Description |
+|----------|-------------|
+| `/experiments` | List experiments (filterable by namespace, operator, component, type, verdict, phase, search) |
+| `/experiments/:namespace/:name` | Single experiment detail (latest run) |
+| `/experiments/live` | SSE stream of running experiments |
+| `/overview/stats` | Aggregated stats, trends, verdict timeline, recovery metrics |
+| `/operators` | List operator names |
+| `/operators/:operator/components` | Components for an operator |
+| `/knowledge/:operator/:component` | Dependency graph data from knowledge model |
+| `/suites` | Suite run history (grouped by label) |
+| `/suites/:runId` | Experiments in a suite run |
+| `/suites/compare?suite=X&runA=Y&runB=Z` | Version comparison |
+
+For full dashboard documentation, see [Dashboard Guide](docs/dashboard-guide.md).
 
 ## Quick Start
 
@@ -838,6 +924,8 @@ go test ./... -fuzz=FuzzMyReconciler -fuzztime=30s
 ## Further Reading
 
 - [End-to-End Testing Guide](docs/e2e-testing-guide.md) --- Full walkthrough with knowledge models, all injection types, suite execution, and expected verdicts for odh-model-controller and kserve
+- [Dashboard Guide](docs/dashboard-guide.md) --- Detailed dashboard setup, views, API reference, and deployment options
+- [CI Integration Guide](docs/ci-integration-guide.md) --- GitHub Actions, Tekton, JUnit reporting, and exit code conventions
 - [Go Fuzz Testing](https://go.dev/doc/security/fuzz/) --- Go's native fuzz testing documentation (required for understanding `testing.F`)
 
 ## Contributing

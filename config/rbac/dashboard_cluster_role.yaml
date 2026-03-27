@@ -1,0 +1,8 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: odh-chaos-dashboard
+rules:
+  - apiGroups: ["chaos.opendatahub.io"]
+    resources: ["chaosexperiments"]
+    verbs: ["get", "list", "watch"]

@@ -196,7 +196,7 @@ export function Suites() {
                       onChange={(e) => setCompareA(e.target.value)}
                     >
                       <option value="">Select version...</option>
-                      {compareRuns.map((run) => (
+                      {compareRuns.filter((run) => run.suiteRunId !== compareB).map((run) => (
                         <option key={run.suiteRunId} value={run.suiteRunId}>
                           {run.operatorVersion}
                         </option>
@@ -212,7 +212,7 @@ export function Suites() {
                       onChange={(e) => setCompareB(e.target.value)}
                     >
                       <option value="">Select version...</option>
-                      {compareRuns.map((run) => (
+                      {compareRuns.filter((run) => run.suiteRunId !== compareA).map((run) => (
                         <option key={run.suiteRunId} value={run.suiteRunId}>
                           {run.operatorVersion}
                         </option>

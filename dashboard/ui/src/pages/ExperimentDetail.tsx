@@ -220,9 +220,9 @@ export function ExperimentDetail() {
             </div>
           </Tab>
 
-          <Tab eventKey={5} title={<TabTitleText>YAML</TabTitleText>}>
+          <Tab eventKey={5} title={<TabTitleText>JSON</TabTitleText>}>
             <div className="tab-content">
-              <div className="yaml-actions">
+              <div className="json-actions">
                 <Button
                   variant="secondary"
                   onClick={() => navigator.clipboard.writeText(JSON.stringify({ spec, status }, null, 2))}
@@ -230,7 +230,7 @@ export function ExperimentDetail() {
                   Copy
                 </Button>
               </div>
-              <pre className="yaml-block">
+              <pre className="json-block">
                 {JSON.stringify({ spec, status }, null, 2)}
               </pre>
             </div>
@@ -249,7 +249,7 @@ export function ExperimentDetail() {
               <h3 style={{ marginTop: 24 }}>Raw Status JSON</h3>
               <details>
                 <summary>Expand</summary>
-                <pre className="yaml-block">{JSON.stringify(status, null, 2)}</pre>
+                <pre className="json-block">{JSON.stringify(status, null, 2)}</pre>
               </details>
             </div>
           </Tab>

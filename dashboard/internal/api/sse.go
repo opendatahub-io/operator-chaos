@@ -49,6 +49,14 @@ func (b *SSEBroker) Run() {
 
 func (b *SSEBroker) Stop() {
 	close(b.stop)
+	// Drain any pending broadcast messages to prevent goroutine leaks
+	for {
+		select {
+		case <-b.broadcast:
+		default:
+			return
+		}
+	}
 }
 
 func (b *SSEBroker) Broadcast(data []byte) {
