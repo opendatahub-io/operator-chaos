@@ -12,7 +12,7 @@ func newTestStore(t *testing.T) *SQLiteStore {
 	t.Helper()
 	s, err := NewSQLiteStore(":memory:")
 	require.NoError(t, err)
-	t.Cleanup(func() { s.Close() })
+	t.Cleanup(func() { _ = s.Close() })
 	return s
 }
 

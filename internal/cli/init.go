@@ -86,7 +86,7 @@ func newInitCommand() *cobra.Command {
 				injType == v1alpha1.RBACRevoke
 
 			if clusterScoped && namespace != v1alpha1.DefaultNamespace {
-				fmt.Fprintf(cmd.ErrOrStderr(), "Warning: --namespace is ignored for cluster-scoped injection type %s\n", injType)
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Warning: --namespace is ignored for cluster-scoped injection type %s\n", injType)
 			}
 
 			var blastRadiusBlock string

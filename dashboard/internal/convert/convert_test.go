@@ -83,5 +83,5 @@ func TestFromCR_NoStartTime_UsesCreationTimestamp(t *testing.T) {
 
 	exp, err := FromCR(cr)
 	require.NoError(t, err)
-	assert.Contains(t, exp.ID, now.Time.Format(time.RFC3339))
+	assert.Contains(t, exp.ID, now.Format(time.RFC3339))
 }

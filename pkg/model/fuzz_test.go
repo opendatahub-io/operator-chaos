@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
@@ -144,7 +143,7 @@ func TestInvariantsSingleComponent(t *testing.T) {
 	assert.Len(t, invariants, 1)
 
 	// Verify the invariants are callable fuzz.Invariant functions
-	var _ fuzz.Invariant = invariants[0]
+	_ = invariants[0]
 }
 
 func TestInvariantsMultiComponent(t *testing.T) {

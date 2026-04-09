@@ -12,7 +12,7 @@ import (
 func TestMigrate_AppliesInitialSchema(t *testing.T) {
 	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	err = Migrate(db)
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestMigrate_AppliesInitialSchema(t *testing.T) {
 func TestMigrate_IsIdempotent(t *testing.T) {
 	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	require.NoError(t, Migrate(db))
 	require.NoError(t, Migrate(db))

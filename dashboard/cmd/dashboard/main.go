@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("opening store: %v", err)
 	}
-	defer s.Close()
+	defer func() { _ = s.Close() }()
 
 	scheme := runtime.NewScheme()
 	if err := v1alpha1.AddToScheme(scheme); err != nil {
@@ -108,7 +108,7 @@ func main() {
 	mux.Handle("/api/", srv.Handler())
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
+		_, _ = w.Write([]byte("ok"))
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Try to serve the file; fall back to index.html for SPA routing
@@ -142,7 +142,7 @@ func main() {
 		broker.Stop()
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdownCancel()
-		httpServer.Shutdown(shutdownCtx)
+		_ = httpServer.Shutdown(shutdownCtx)
 	}()
 
 	log.Printf("dashboard listening on %s", *addr)

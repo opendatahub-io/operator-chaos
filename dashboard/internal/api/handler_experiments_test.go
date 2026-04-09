@@ -117,7 +117,7 @@ func TestSSERoute_DoesNotShadowExperimentGet(t *testing.T) {
 			return
 		}
 		ct := resp.Header.Get("Content-Type")
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		ch <- result{contentType: ct}
 	}()
 
