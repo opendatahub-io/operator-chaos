@@ -1137,17 +1137,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#dashboard-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dashboard Integration
-      
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2059,17 +2048,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#dashboard-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dashboard Integration
-      
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2249,22 +2227,36 @@
     Orchestrator --&gt; Injector
     Orchestrator --&gt; Observer
     Orchestrator --&gt; Evaluator
-    Evaluator --&gt;|updates| CR</code></pre>
+    Evaluator --&gt;|updates status| CR
+
+    style CR fill:#1565c0,color:#fff,stroke:#0d47a1
+    style Controller fill:#6a1b9a,color:#fff,stroke:#4a148c
+    style Orchestrator fill:#6a1b9a,color:#fff,stroke:#4a148c
+    style Injector fill:#e65100,color:#fff,stroke:#bf360c
+    style Observer fill:#2e7d32,color:#fff,stroke:#1b5e20
+    style Evaluator fill:#c62828,color:#fff,stroke:#b71c1c</code></pre>
 <p>The controller uses the <strong>phase-per-reconcile</strong> pattern: each reconcile loop advances the experiment by exactly one phase, updating <code>.status.phase</code> and <code>.status.conditions</code>. This ensures crash safety—if the controller restarts, it resumes from the last completed phase.</p>
 <h2 id="experiment-lifecycle">Experiment Lifecycle<a class="headerlink" href="#experiment-lifecycle" title="Permanent link">&para;</a></h2>
 <p>Each <code>ChaosExperiment</code> CR progresses through these phases:</p>
 <pre class="mermaid"><code>stateDiagram-v2
     [*] --&gt; Pending: CR Created
-    Pending --&gt; SteadyStatePre: Validation &amp; Lock Acquired
-    SteadyStatePre --&gt; Injecting: Baseline Established
-    SteadyStatePre --&gt; Aborted: Baseline Failed
-    Injecting --&gt; Observing: Fault Injected
-    Injecting --&gt; Aborted: Injection Error
-    Observing --&gt; SteadyStatePost: Recovery Timeout Elapsed
-    SteadyStatePost --&gt; Evaluating: Post-Check Complete
-    Evaluating --&gt; Complete: Verdict Rendered
+
+    state "Happy Path" as happy {
+        Pending --&gt; SteadyStatePre: Validation OK\nLock Acquired
+        SteadyStatePre --&gt; Injecting: Baseline\nEstablished
+        Injecting --&gt; Observing: Fault Injected
+        Observing --&gt; SteadyStatePost: Recovery Timeout\nElapsed
+        SteadyStatePost --&gt; Evaluating: Post-Check\nComplete
+        Evaluating --&gt; Complete: Verdict Rendered
+    }
+
+    state "Error Path" as error {
+        SteadyStatePre --&gt; Aborted: Baseline Failed
+        Injecting --&gt; Aborted: Injection Error
+    }
+
     Complete --&gt; [*]: Finalizer Removed
-    Aborted --&gt; [*]: Cleanup &amp; Finalizer Removed</code></pre>
+    Aborted --&gt; [*]: Cleanup Done</code></pre>
 <table>
 <thead>
 <tr>
@@ -2449,7 +2441,7 @@
 <p><strong>Key fields:</strong></p>
 <ul>
 <li><strong><code>target</code></strong>: Which operator/component to fault</li>
-<li><strong><code>injection</code></strong>: Fault type and parameters (see <a href="../reference/injection-types.md">Injection Types</a>)</li>
+<li><strong><code>injection</code></strong>: Fault type and parameters (see <a href="../../reference/experiment-types/">Injection Types</a>)</li>
 <li><strong><code>hypothesis</code></strong>: Expected behavior and recovery timeout</li>
 <li><strong><code>steadyState</code></strong>: Checks to run pre/post injection</li>
 <li><strong><code>blastRadius</code></strong>: Safety constraints</li>
@@ -2876,34 +2868,17 @@
 <a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">      </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">      </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Don&#39;t auto-heal to preserve experiment history</span>
 </code></pre></div>
-<h3 id="dashboard-integration">Dashboard Integration<a class="headerlink" href="#dashboard-integration" title="Permanent link">&para;</a></h3>
-<p>The <a href="../dashboard-guide.md">Dashboard</a> watches ChaosExperiment CRs in real time and provides:</p>
-<ul>
-<li>Live experiment progress via Server-Sent Events</li>
-<li>Experiment history and trend analysis</li>
-<li>Verdict timeline and recovery metrics</li>
-<li>Component health visualization</li>
-</ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Run the dashboard (assumes knowledge models in knowledge/)</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>bin/chaos-dashboard<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span>-addr<span class="w"> </span>:8080<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span>-db<span class="w"> </span>dashboard.db<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span>-knowledge-dir<span class="w"> </span>knowledge/
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="c1"># Open http://localhost:8080</span>
-</code></pre></div>
-<p>The dashboard auto-discovers ChaosExperiment CRs across all namespaces and displays them in a filterable, sortable table.</p>
 <h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">&para;</a></h2>
 <h3 id="delete-a-single-experiment">Delete a Single Experiment<a class="headerlink" href="#delete-a-single-experiment" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># This triggers finalizer cleanup (reverts fault if still active)</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># This triggers finalizer cleanup (reverts fault if still active)</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment
 </code></pre></div>
 <h3 id="uninstall-the-controller">Uninstall the Controller<a class="headerlink" href="#uninstall-the-controller" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Delete all experiments first (ensures cleanup runs)</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiments<span class="w"> </span>--all<span class="w"> </span>-A
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># Uninstall controller and CRD</span>
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-k<span class="w"> </span>config/default
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Delete all experiments first (ensures cleanup runs)</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiments<span class="w"> </span>--all<span class="w"> </span>-A
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># Uninstall controller and CRD</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-k<span class="w"> </span>config/default
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">CRD Deletion</p>
@@ -2911,16 +2886,16 @@
 </div>
 <h3 id="emergency-stop">Emergency Stop<a class="headerlink" href="#emergency-stop" title="Permanent link">&para;</a></h3>
 <p>If experiments are stuck or the controller is misbehaving:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Delete the controller deployment (stops new experiments)</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>deployment<span class="w"> </span>odh-chaos-controller<span class="w"> </span>-n<span class="w"> </span>odh-chaos-system
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># Use the CLI to clean up faults manually</span>
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>odh-chaos<span class="w"> </span>clean<span class="w"> </span>--namespace<span class="w"> </span>&lt;namespace&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Delete the controller deployment (stops new experiments)</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>deployment<span class="w"> </span>odh-chaos-controller<span class="w"> </span>-n<span class="w"> </span>odh-chaos-system
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># Use the CLI to clean up faults manually</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>odh-chaos<span class="w"> </span>clean<span class="w"> </span>--namespace<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="experiment-stuck-in-pending">Experiment stuck in Pending<a class="headerlink" href="#experiment-stuck-in-pending" title="Permanent link">&para;</a></h3>
 <p><strong>Check controller logs:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>odh-chaos-system<span class="w"> </span>deployment/odh-chaos-controller
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>odh-chaos-system<span class="w"> </span>deployment/odh-chaos-controller
 </code></pre></div>
 <p><strong>Common causes:</strong></p>
 <ul>
@@ -2930,32 +2905,31 @@
 </ul>
 <h3 id="experiment-stuck-in-observing">Experiment stuck in Observing<a class="headerlink" href="#experiment-stuck-in-observing" title="Permanent link">&para;</a></h3>
 <p>The controller is waiting for the recovery timeout to elapse. Check:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.spec.hypothesis.recoveryTimeout}&#39;</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="c1"># 120s</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Check how long we&#39;ve been observing</span>
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.injectionStartedAt}&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.spec.hypothesis.recoveryTimeout}&#39;</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="c1"># 120s</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># Check how long we&#39;ve been observing</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.injectionStartedAt}&#39;</span>
 </code></pre></div>
 <h3 id="verdict-is-inconclusive">Verdict is Inconclusive<a class="headerlink" href="#verdict-is-inconclusive" title="Permanent link">&para;</a></h3>
 <p>The pre-injection steady-state check failed. Check:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.steadyStatePre}&#39;</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="c1"># {&quot;passed&quot;:false,&quot;checksRun&quot;:1,&quot;checksPassed&quot;:0,&quot;details&quot;:[...]}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.steadyStatePre}&#39;</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="c1"># {&quot;passed&quot;:false,&quot;checksRun&quot;:1,&quot;checksPassed&quot;:0,&quot;details&quot;:[...]}</span>
 </code></pre></div>
 <p>Verify the target resource is healthy before running the experiment.</p>
 <h3 id="finalizer-not-removed">Finalizer not removed<a class="headerlink" href="#finalizer-not-removed" title="Permanent link">&para;</a></h3>
 <p>If an experiment is stuck deleting with a finalizer:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Check phase</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.phase}&#39;</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="c1"># If phase is Complete or Aborted, force-remove finalizer</span>
-<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>kubectl<span class="w"> </span>patch<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-p<span class="w"> </span><span class="s1">&#39;{&quot;metadata&quot;:{&quot;finalizers&quot;:[]}}&#39;</span><span class="w"> </span>--type<span class="o">=</span>merge
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Check phase</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.phase}&#39;</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># If phase is Complete or Aborted, force-remove finalizer</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>kubectl<span class="w"> </span>patch<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment<span class="w"> </span>-p<span class="w"> </span><span class="s1">&#39;{&quot;metadata&quot;:{&quot;finalizers&quot;:[]}}&#39;</span><span class="w"> </span>--type<span class="o">=</span>merge
 </code></pre></div>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Learn about <a href="../knowledge-models/">Knowledge Models</a> to define operator semantics</li>
-<li>See <a href="../reference/injection-types.md">Injection Types</a> for all available fault types</li>
-<li>Explore <a href="../dashboard-guide.md">Dashboard Guide</a> for visualization and monitoring</li>
-<li>Read <a href="../ci-integration-guide.md">CI Integration Guide</a> for pipeline integration</li>
+<li>See <a href="../../reference/experiment-types/">Injection Types</a> for all available fault types</li>
+<li>Read <a href="../ci-integration/">CI Integration Guide</a> for pipeline integration</li>
 </ul>
 
 
@@ -2979,7 +2953,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 30, 2026 11:18:28 UTC">March 30, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 9, 2026 11:40:44 UTC">April 9, 2026</span>
   </span>
 
     

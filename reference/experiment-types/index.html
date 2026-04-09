@@ -2921,14 +2921,25 @@
 <h2 id="choosing-the-right-injection-type">Choosing the Right Injection Type<a class="headerlink" href="#choosing-the-right-injection-type" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
     Start[What do you want to test?] --&gt; Q1{Target type?}
-    Q1 --&gt;|Pod crashes| PodKill
-    Q1 --&gt;|Network issues| NetworkPartition
-    Q1 --&gt;|Config changes| ConfigDrift
-    Q1 --&gt;|Spec drift| CRDMutation
-    Q1 --&gt;|Webhook failure| WebhookDisrupt
-    Q1 --&gt;|Permission loss| RBACRevoke
-    Q1 --&gt;|Stuck deletion| FinalizerBlock
-    Q1 --&gt;|API errors| ClientFault</code></pre>
+    Q1 --&gt;|Pod crashes| PK["PodKill\n(low danger)"]
+    Q1 --&gt;|Network issues| NP["NetworkPartition\n(medium danger)"]
+    Q1 --&gt;|Config changes| CD["ConfigDrift\n(low danger)"]
+    Q1 --&gt;|Spec drift| CM["CRDMutation\n(medium danger)"]
+    Q1 --&gt;|Webhook failure| WD["WebhookDisrupt\n(high danger)"]
+    Q1 --&gt;|Permission loss| RR["RBACRevoke\n(high danger)"]
+    Q1 --&gt;|Stuck deletion| FB["FinalizerBlock\n(medium danger)"]
+    Q1 --&gt;|API errors| CF["ClientFault\n(low danger)"]
+
+    style Start fill:#1565c0,color:#fff,stroke:#0d47a1
+    style Q1 fill:#6a1b9a,color:#fff,stroke:#4a148c
+    style PK fill:#2e7d32,color:#fff,stroke:#1b5e20
+    style CD fill:#2e7d32,color:#fff,stroke:#1b5e20
+    style CF fill:#2e7d32,color:#fff,stroke:#1b5e20
+    style NP fill:#e65100,color:#fff,stroke:#bf360c
+    style CM fill:#e65100,color:#fff,stroke:#bf360c
+    style FB fill:#e65100,color:#fff,stroke:#bf360c
+    style WD fill:#c62828,color:#fff,stroke:#b71c1c
+    style RR fill:#c62828,color:#fff,stroke:#b71c1c</code></pre>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../crd-schema/">CRD Schema Reference</a> — Full CRD specification</li>
@@ -2957,7 +2968,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 30, 2026 11:18:28 UTC">March 30, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 9, 2026 11:40:44 UTC">April 9, 2026</span>
   </span>
 
     
