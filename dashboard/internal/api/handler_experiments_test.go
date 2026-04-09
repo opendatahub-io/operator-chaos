@@ -100,10 +100,37 @@ func TestSSERoute_DoesNotShadowExperimentGet(t *testing.T) {
 	defer broker.Stop()
 
 	srv := NewServer(ms, broker, nil)
-	req := httptest.NewRequest("GET", "/api/v1/experiments/live", nil)
-	rec := httptest.NewRecorder()
-	go srv.Handler().ServeHTTP(rec, req)
-	time.Sleep(50 * time.Millisecond)
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
 
-	assert.Equal(t, "text/event-stream", rec.Header().Get("Content-Type"))
+	// Send a request and immediately broadcast to unblock the SSE handler's
+	// write path so headers get flushed.
+	type result struct {
+		contentType string
+		err         error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		resp, err := http.Get(ts.URL + "/api/v1/experiments/live")
+		if err != nil {
+			ch <- result{err: err}
+			return
+		}
+		ct := resp.Header.Get("Content-Type")
+		resp.Body.Close()
+		ch <- result{contentType: ct}
+	}()
+
+	// Give the handler time to register the SSE client, then broadcast
+	// a message so it flushes headers + data.
+	time.Sleep(50 * time.Millisecond)
+	broker.Broadcast([]byte(`{"ping":true}`))
+
+	select {
+	case r := <-ch:
+		require.NoError(t, r.err)
+		assert.Equal(t, "text/event-stream", r.contentType)
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for SSE response")
+	}
 }

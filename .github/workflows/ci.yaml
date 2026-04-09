@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.0"
+      - name: Create dashboard UI placeholder
+        run: mkdir -p dashboard/ui-dist
       - name: Run tests
         run: go test -race ./... -count=1
 
@@ -28,6 +30,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.0"
+      - name: Create dashboard UI placeholder
+        run: mkdir -p dashboard/ui-dist
       - name: Run go vet
         run: go vet ./...
 
@@ -38,6 +42,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.0"
+      - name: Create dashboard UI placeholder
+        run: mkdir -p dashboard/ui-dist
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
@@ -50,6 +56,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.0"
+      - name: Create dashboard UI placeholder
+        run: mkdir -p dashboard/ui-dist
       - name: Build CLI
         run: go build -o bin/odh-chaos ./cmd/odh-chaos
       - name: Validate experiment files
