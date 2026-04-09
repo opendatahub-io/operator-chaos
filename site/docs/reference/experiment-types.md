@@ -517,16 +517,16 @@ flowchart TD
     Q1 -->|Stuck deletion| FB["FinalizerBlock\n(medium danger)"]
     Q1 -->|API errors| CF["ClientFault\n(low danger)"]
 
-    style Start fill:#1565c0,color:#fff,stroke:#0d47a1
-    style Q1 fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style PK fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style CD fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style CF fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style NP fill:#e65100,color:#fff,stroke:#bf360c
-    style CM fill:#e65100,color:#fff,stroke:#bf360c
-    style FB fill:#e65100,color:#fff,stroke:#bf360c
-    style WD fill:#c62828,color:#fff,stroke:#b71c1c
-    style RR fill:#c62828,color:#fff,stroke:#b71c1c
+    style Start fill:#bbdefb,stroke:#1565c0
+    style Q1 fill:#ce93d8,stroke:#6a1b9a
+    style PK fill:#a5d6a7,stroke:#2e7d32
+    style CD fill:#a5d6a7,stroke:#2e7d32
+    style CF fill:#a5d6a7,stroke:#2e7d32
+    style NP fill:#ffcc80,stroke:#e65100
+    style CM fill:#ffcc80,stroke:#e65100
+    style FB fill:#ffcc80,stroke:#e65100
+    style WD fill:#ef9a9a,stroke:#c62828
+    style RR fill:#ef9a9a,stroke:#c62828
 ```
 
 ## Next Steps

@@ -37,14 +37,14 @@ flowchart LR
     E -->|partial| G["Degraded"]
     E -->|not recovered| F["Failed"]
 
-    style A fill:#1565c0,color:#fff,stroke:#0d47a1
-    style B fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style C fill:#e65100,color:#fff,stroke:#bf360c
-    style D fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style E fill:#37474f,color:#fff,stroke:#263238
-    style R fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style G fill:#e65100,color:#fff,stroke:#bf360c
-    style F fill:#c62828,color:#fff,stroke:#b71c1c
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#ce93d8,stroke:#6a1b9a
+    style C fill:#ffcc80,stroke:#e65100
+    style D fill:#a5d6a7,stroke:#2e7d32
+    style E fill:#b0bec5,stroke:#37474f
+    style R fill:#a5d6a7,stroke:#2e7d32
+    style G fill:#ffcc80,stroke:#e65100
+    style F fill:#ef9a9a,stroke:#c62828
 ```
 
 ## Three Usage Modes

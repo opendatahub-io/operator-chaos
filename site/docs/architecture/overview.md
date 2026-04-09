@@ -77,11 +77,11 @@ graph TB
     style obs fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
     style eval fill:#fce4ec,stroke:#c62828,stroke-width:2px,color:#b71c1c
 
-    style Controller fill:#7b1fa2,color:#fff
-    style Orchestrator fill:#7b1fa2,color:#fff
-    style Registry fill:#e65100,color:#fff
-    style Board fill:#2e7d32,color:#fff
-    style Evaluator fill:#c62828,color:#fff
+    style Controller fill:#ce93d8,stroke:#6a1b9a
+    style Orchestrator fill:#ce93d8,stroke:#6a1b9a
+    style Registry fill:#ffcc80,stroke:#e65100
+    style Board fill:#a5d6a7,stroke:#2e7d32
+    style Evaluator fill:#ef9a9a,stroke:#c62828
 ```
 
 ## Component Breakdown

@@ -13,12 +13,12 @@ flowchart LR
     FC -->|"no fault"| RC[Real Client]
     RC --> API[K8s API Server]
 
-    style Rec fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style CC fill:#e65100,color:#fff,stroke:#bf360c
+    style Rec fill:#ce93d8,stroke:#6a1b9a
+    style CC fill:#ffcc80,stroke:#e65100
     style FC fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c
-    style ERR fill:#c62828,color:#fff,stroke:#b71c1c
-    style RC fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style API fill:#1565c0,color:#fff,stroke:#0d47a1
+    style ERR fill:#ef9a9a,stroke:#c62828
+    style RC fill:#a5d6a7,stroke:#2e7d32
+    style API fill:#bbdefb,stroke:#1565c0
 ```
 
 ## Prerequisites

@@ -67,12 +67,12 @@ graph TB
     style p2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
     style ev fill:#fce4ec,stroke:#c62828,stroke-width:2px,color:#b71c1c
 
-    style Orchestrator fill:#6a1b9a,color:#fff
-    style Board fill:#e65100,color:#fff
-    style Recon fill:#1565c0,color:#fff
-    style Steady fill:#2e7d32,color:#fff
-    style Collateral fill:#2e7d32,color:#fff
-    style Evaluator fill:#c62828,color:#fff
+    style Orchestrator fill:#ce93d8,stroke:#6a1b9a
+    style Board fill:#ffcc80,stroke:#e65100
+    style Recon fill:#bbdefb,stroke:#1565c0
+    style Steady fill:#a5d6a7,stroke:#2e7d32
+    style Collateral fill:#a5d6a7,stroke:#2e7d32
+    style Evaluator fill:#ef9a9a,stroke:#c62828
 ```
 
 ## Core Components

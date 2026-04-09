@@ -38,12 +38,12 @@ graph TD
     Orchestrator --> Evaluator
     Evaluator -->|updates status| CR
 
-    style CR fill:#1565c0,color:#fff,stroke:#0d47a1
-    style Controller fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style Orchestrator fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style Injector fill:#e65100,color:#fff,stroke:#bf360c
-    style Observer fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style Evaluator fill:#c62828,color:#fff,stroke:#b71c1c
+    style CR fill:#bbdefb,stroke:#1565c0
+    style Controller fill:#ce93d8,stroke:#6a1b9a
+    style Orchestrator fill:#ce93d8,stroke:#6a1b9a
+    style Injector fill:#ffcc80,stroke:#e65100
+    style Observer fill:#a5d6a7,stroke:#2e7d32
+    style Evaluator fill:#ef9a9a,stroke:#c62828
 ```
 
 The controller uses the **phase-per-reconcile** pattern: each reconcile loop advances the experiment by exactly one phase, updating `.status.phase` and `.status.conditions`. This ensures crash safety—if the controller restarts, it resumes from the last completed phase.

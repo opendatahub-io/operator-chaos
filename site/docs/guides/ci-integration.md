@@ -119,12 +119,12 @@ flowchart LR
     D -->|All Resilient| E["Deploy to\nProduction"]
     D -->|Any Failed| F["Block &\nAlert"]
 
-    style A fill:#1565c0,color:#fff,stroke:#0d47a1
-    style B fill:#1565c0,color:#fff,stroke:#0d47a1
-    style C fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style D fill:#e65100,color:#fff,stroke:#bf360c
-    style E fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style F fill:#c62828,color:#fff,stroke:#b71c1c
+    style A fill:#bbdefb,stroke:#1565c0
+    style B fill:#bbdefb,stroke:#1565c0
+    style C fill:#ce93d8,stroke:#6a1b9a
+    style D fill:#ffcc80,stroke:#e65100
+    style E fill:#a5d6a7,stroke:#2e7d32
+    style F fill:#ef9a9a,stroke:#c62828
 ```
 
 ```yaml

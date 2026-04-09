@@ -118,13 +118,13 @@ flowchart TD
     style med fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c
     style high fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c
 
-    style A fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style B fill:#2e7d32,color:#fff,stroke:#1b5e20
-    style C fill:#e65100,color:#fff,stroke:#bf360c
-    style D fill:#e65100,color:#fff,stroke:#bf360c
-    style E fill:#e65100,color:#fff,stroke:#bf360c
-    style F fill:#c62828,color:#fff,stroke:#b71c1c
-    style G fill:#c62828,color:#fff,stroke:#b71c1c
+    style A fill:#a5d6a7,stroke:#2e7d32
+    style B fill:#a5d6a7,stroke:#2e7d32
+    style C fill:#ffcc80,stroke:#e65100
+    style D fill:#ffcc80,stroke:#e65100
+    style E fill:#ffcc80,stroke:#e65100
+    style F fill:#ef9a9a,stroke:#c62828
+    style G fill:#ef9a9a,stroke:#c62828
 ```
 
 Create a directory `experiments/odh-model-controller/` with one YAML per injection type.

@@ -53,18 +53,18 @@ flowchart TD
         INV -->|"all pass"| PASS["PASS"]
     end
 
-    style F fill:#1565c0,color:#fff,stroke:#0d47a1
-    style D fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style FC fill:#e65100,color:#fff,stroke:#bf360c
-    style CC fill:#e65100,color:#fff,stroke:#bf360c
+    style F fill:#bbdefb,stroke:#1565c0
+    style D fill:#ce93d8,stroke:#6a1b9a
+    style FC fill:#ffcc80,stroke:#e65100
+    style CC fill:#ffcc80,stroke:#e65100
     style harness fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
-    style R fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style OK1 fill:#1565c0,color:#fff,stroke:#0d47a1
-    style INV fill:#6a1b9a,color:#fff,stroke:#4a148c
-    style FAIL1 fill:#c62828,color:#fff,stroke:#b71c1c
-    style FAIL2 fill:#c62828,color:#fff,stroke:#b71c1c
-    style FAIL3 fill:#c62828,color:#fff,stroke:#b71c1c
-    style PASS fill:#2e7d32,color:#fff,stroke:#1b5e20
+    style R fill:#ce93d8,stroke:#6a1b9a
+    style OK1 fill:#bbdefb,stroke:#1565c0
+    style INV fill:#ce93d8,stroke:#6a1b9a
+    style FAIL1 fill:#ef9a9a,stroke:#c62828
+    style FAIL2 fill:#ef9a9a,stroke:#c62828
+    style FAIL3 fill:#ef9a9a,stroke:#c62828
+    style PASS fill:#a5d6a7,stroke:#2e7d32
 ```
 
 ## Prerequisites
