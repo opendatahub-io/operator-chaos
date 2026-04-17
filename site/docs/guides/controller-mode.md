@@ -110,7 +110,7 @@ The controller emits Kubernetes **events** at each phase transition for observab
 
 ```bash
 # Clone the repository
-git clone https://github.com/opendatahub-io/odh-platform-chaos.git
+git clone https://github.com/ugiordan/odh-platform-chaos.git
 cd odh-platform-chaos
 
 # Install CRD and controller

@@ -763,4 +763,4 @@ See [Upgrade Testing Guide](upgrade-testing.md) for full workflow.
 - Learn about [Controller Mode](controller-mode.md) to run experiments as CRDs
 - Generate fuzz tests with [Fuzz Quick Start](../getting-started/fuzz-quickstart.md)
 - Test operator upgrades with [Upgrade Testing Guide](upgrade-testing.md)
-- Explore the [knowledge/](https://github.com/opendatahub-io/odh-platform-chaos/tree/main/knowledge) directory for real-world examples
+- Explore the [knowledge/](https://github.com/ugiordan/odh-platform-chaos/tree/main/knowledge) directory for real-world examples

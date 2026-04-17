@@ -757,4 +757,4 @@ Real cluster validation (OCP 4.20 HyperShift, 2x m5.xlarge) confirmed operator r
 
 - Learn about [Knowledge Models](knowledge-models.md) to create version snapshots
 - Integrate upgrade testing into CI with [CI Integration](ci-integration.md)
-- Explore example knowledge snapshots in the [knowledge/](https://github.com/opendatahub-io/odh-platform-chaos/tree/main/knowledge) directory
+- Explore example knowledge snapshots in the [knowledge/](https://github.com/ugiordan/odh-platform-chaos/tree/main/knowledge) directory

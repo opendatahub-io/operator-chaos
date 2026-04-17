@@ -20,7 +20,7 @@ This guide walks you through setting up a local development environment for ODH 
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/opendatahub-io/odh-platform-chaos.git
+git clone https://github.com/ugiordan/odh-platform-chaos.git
 cd odh-platform-chaos
 ```
 
