@@ -7,8 +7,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 // GenerateUpgradeExperiments maps an UpgradeDiff to ChaosExperiment objects
@@ -251,11 +251,11 @@ func baseExperiment(name, operator, component string, diff *UpgradeDiff) v1alpha
 		ObjectMeta: metav1.ObjectMeta{
 			Name: sanitizeName(name),
 			Labels: map[string]string{
-				"chaos.opendatahub.io/upgrade-simulation": "true",
-				"chaos.opendatahub.io/operator":           operator,
-				"chaos.opendatahub.io/component":          component,
-				"chaos.opendatahub.io/source-version":     diff.SourceVersion,
-				"chaos.opendatahub.io/target-version":     diff.TargetVersion,
+				"chaos.operatorchaos.io/upgrade-simulation": "true",
+				"chaos.operatorchaos.io/operator":           operator,
+				"chaos.operatorchaos.io/component":          component,
+				"chaos.operatorchaos.io/source-version":     diff.SourceVersion,
+				"chaos.operatorchaos.io/target-version":     diff.TargetVersion,
 			},
 		},
 		Spec: v1alpha1.ChaosExperimentSpec{

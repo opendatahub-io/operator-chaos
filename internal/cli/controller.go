@@ -3,15 +3,15 @@ package cli
 import (
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/internal/controller"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/clock"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/injection"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/orchestrator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/internal/controller"
+	"github.com/opendatahub-io/operator-chaos/pkg/clock"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/injection"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
+	"github.com/opendatahub-io/operator-chaos/pkg/orchestrator"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -82,7 +82,7 @@ func startController(namespace, metricsAddr, healthAddr string, leaderElect bool
 		},
 		HealthProbeBindAddress:  healthAddr,
 		LeaderElection:          leaderElect,
-		LeaderElectionID:        "odh-chaos-controller",
+		LeaderElectionID:        "operator-chaos-controller",
 		LeaderElectionNamespace: namespace,
 	})
 	if err != nil {

@@ -24,7 +24,7 @@ When the modelmesh serving configuration is corrupted, new model deployments rec
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-config-drift
@@ -78,7 +78,7 @@ When the modelmesh-controller is network-partitioned from the API server, model 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-network-partition
@@ -128,7 +128,7 @@ When the modelmesh-controller pod is killed, existing model endpoints keep servi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-pod-kill
@@ -179,7 +179,7 @@ When the modelmesh ClusterRoleBinding subjects are revoked, the controller can n
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-rbac-revoke
@@ -230,7 +230,7 @@ When the modelmesh ServingRuntime validating webhook failurePolicy is weakened f
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-webhook-disrupt

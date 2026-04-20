@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -152,7 +152,7 @@ func TestValidate_MultipleErrors(t *testing.T) {
 func TestValidate_ValidWithAllFields(t *testing.T) {
 	exp := &v1alpha1.ChaosExperiment{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "chaos.opendatahub.io/v1alpha1",
+			APIVersion: "chaos.operatorchaos.io/v1alpha1",
 			Kind:       "ChaosExperiment",
 		},
 		ObjectMeta: metav1.ObjectMeta{

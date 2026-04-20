@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +29,8 @@ func TestJUnitReporter(t *testing.T) {
 			Experiment: "test-failed",
 			Timestamp:  time.Now(),
 			Evaluation: evaluator.EvaluationResult{
-				Verdict: v1alpha1.Failed,
+				Verdict:      v1alpha1.Failed,
+				RecoveryTime: 3 * time.Second,
 			},
 		},
 	}
@@ -42,6 +43,9 @@ func TestJUnitReporter(t *testing.T) {
 	assert.True(t, strings.Contains(output, "test-resilient"))
 	assert.True(t, strings.Contains(output, "test-failed"))
 	assert.True(t, strings.Contains(output, "<failure"))
+	// Verify suite-level time attribute is populated (12s + 3s = 15s)
+	assert.True(t, strings.Contains(output, `time="15.000"`),
+		"suite time should be sum of testcase times, got: %s", output)
 }
 
 func TestJUnitReporterSystemErr(t *testing.T) {

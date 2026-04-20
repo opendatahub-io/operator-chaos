@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/spf13/cobra"
 )
 
@@ -102,7 +102,7 @@ func newInitCommand() *cobra.Command {
     dryRun: false%s`, namespace, allowDangerousLine)
 			}
 
-			tmpl := `apiVersion: chaos.opendatahub.io/v1alpha1
+			tmpl := `apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: %s-%s

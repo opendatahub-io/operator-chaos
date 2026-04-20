@@ -1,7 +1,7 @@
 {
   "title": "Chaos Experiment Overview",
-  "uid": "odh-chaos-overview",
-  "tags": ["chaos", "odh", "resilience"],
+  "uid": "operator-chaos-overview",
+  "tags": ["chaos", "operator-chaos", "resilience"],
   "editable": true,
   "schemaVersion": 39,
   "time": {

@@ -1,4 +1,4 @@
-module github.com/opendatahub-io/odh-platform-chaos
+module github.com/opendatahub-io/operator-chaos
 
 go 1.25.0
 

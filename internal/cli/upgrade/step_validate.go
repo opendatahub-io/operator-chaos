@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 // KnowledgeValidator is a function that validates knowledge models against a cluster.

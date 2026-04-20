@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/clock"
+	"github.com/opendatahub-io/operator-chaos/pkg/clock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	coordinationv1 "k8s.io/api/coordination/v1"
@@ -87,7 +87,7 @@ func TestLeaseExperimentLockSetsExpiry(t *testing.T) {
 	// Fetch the created lease and verify expiry fields are set.
 	lease := &coordinationv1.Lease{}
 	err = c.Get(context.Background(), client.ObjectKey{
-		Name:      "odh-chaos-lock-test-operator",
+		Name:      "operator-chaos-lock-test-operator",
 		Namespace: "opendatahub",
 	}, lease)
 	require.NoError(t, err)
@@ -108,10 +108,10 @@ func TestLeaseExperimentLockExpiry(t *testing.T) {
 	expiredTime := metav1.NewMicroTime(time.Now().Add(-1 * time.Hour))
 	expiredLease := &coordinationv1.Lease{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "odh-chaos-lock-test-operator",
+			Name:      "operator-chaos-lock-test-operator",
 			Namespace: "opendatahub",
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "odh-chaos",
+				"app.kubernetes.io/managed-by": "operator-chaos",
 			},
 		},
 		Spec: coordinationv1.LeaseSpec{
@@ -131,7 +131,7 @@ func TestLeaseExperimentLockExpiry(t *testing.T) {
 	// Verify the new lease has the correct holder.
 	lease := &coordinationv1.Lease{}
 	err = c.Get(context.Background(), client.ObjectKey{
-		Name:      "odh-chaos-lock-test-operator",
+		Name:      "operator-chaos-lock-test-operator",
 		Namespace: "opendatahub",
 	}, lease)
 	require.NoError(t, err)
@@ -148,10 +148,10 @@ func TestLeaseExperimentLockAcquireUsesUpdateForExpiredLease(t *testing.T) {
 	expiredTime := metav1.NewMicroTime(time.Now().Add(-2 * time.Hour))
 	expiredLease := &coordinationv1.Lease{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "odh-chaos-lock-my-operator",
+			Name:      "operator-chaos-lock-my-operator",
 			Namespace: "opendatahub",
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "odh-chaos",
+				"app.kubernetes.io/managed-by": "operator-chaos",
 			},
 		},
 		Spec: coordinationv1.LeaseSpec{
@@ -173,7 +173,7 @@ func TestLeaseExperimentLockAcquireUsesUpdateForExpiredLease(t *testing.T) {
 	// 1. The holder changed to the new experiment
 	lease := &coordinationv1.Lease{}
 	err = c.Get(context.Background(), client.ObjectKey{
-		Name:      "odh-chaos-lock-my-operator",
+		Name:      "operator-chaos-lock-my-operator",
 		Namespace: "opendatahub",
 	}, lease)
 	require.NoError(t, err)
@@ -189,7 +189,7 @@ func TestLeaseExperimentLockAcquireUsesUpdateForExpiredLease(t *testing.T) {
 		"lease duration should be set to default")
 
 	// 4. The managed-by label should still be present (preserved from the original object)
-	assert.Equal(t, "odh-chaos", lease.Labels["app.kubernetes.io/managed-by"],
+	assert.Equal(t, "operator-chaos", lease.Labels["app.kubernetes.io/managed-by"],
 		"managed-by label should be preserved")
 }
 
@@ -207,7 +207,7 @@ func TestLeaseExperimentLockRenew(t *testing.T) {
 
 	// Get original acquire time
 	lease := &coordinationv1.Lease{}
-	err = c.Get(ctx, client.ObjectKey{Name: "odh-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
+	err = c.Get(ctx, client.ObjectKey{Name: "operator-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
 	require.NoError(t, err)
 	originalAcquireTime := lease.Spec.AcquireTime.Time
 
@@ -218,7 +218,7 @@ func TestLeaseExperimentLockRenew(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify RenewTime was set and AcquireTime unchanged
-	err = c.Get(ctx, client.ObjectKey{Name: "odh-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
+	err = c.Get(ctx, client.ObjectKey{Name: "operator-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
 	require.NoError(t, err)
 	assert.Equal(t, originalAcquireTime, lease.Spec.AcquireTime.Time,
 		"renew should NOT change acquire time")
@@ -338,10 +338,10 @@ func TestLeaseExperimentLockAcquireReclainsExpiredRenewedLease(t *testing.T) {
 	oldRenew := metav1.NewMicroTime(time.Now().Add(-10 * time.Minute))
 	lease := &coordinationv1.Lease{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "odh-chaos-lock-renew-operator",
+			Name:      "operator-chaos-lock-renew-operator",
 			Namespace: "opendatahub",
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "odh-chaos",
+				"app.kubernetes.io/managed-by": "operator-chaos",
 			},
 		},
 		Spec: coordinationv1.LeaseSpec{
@@ -362,7 +362,7 @@ func TestLeaseExperimentLockAcquireReclainsExpiredRenewedLease(t *testing.T) {
 	// Verify the lease was reclaimed with the new holder
 	result := &coordinationv1.Lease{}
 	err = c.Get(context.Background(), client.ObjectKey{
-		Name:      "odh-chaos-lock-renew-operator",
+		Name:      "operator-chaos-lock-renew-operator",
 		Namespace: "opendatahub",
 	}, result)
 	require.NoError(t, err)
@@ -384,7 +384,7 @@ func TestLeaseExperimentLockShortDurationUsesDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	lease := &coordinationv1.Lease{}
-	err = c.Get(ctx, client.ObjectKey{Name: "odh-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
+	err = c.Get(ctx, client.ObjectKey{Name: "operator-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
 	require.NoError(t, err)
 
 	assert.Equal(t, DefaultLeaseDurationSeconds, *lease.Spec.LeaseDurationSeconds,
@@ -405,7 +405,7 @@ func TestLeaseExperimentLockDynamicDuration(t *testing.T) {
 	require.NoError(t, err)
 
 	lease := &coordinationv1.Lease{}
-	err = c.Get(ctx, client.ObjectKey{Name: "odh-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
+	err = c.Get(ctx, client.ObjectKey{Name: "operator-chaos-lock-test-operator", Namespace: "opendatahub"}, lease)
 	require.NoError(t, err)
 
 	assert.Equal(t, int32(DefaultLeaseDurationSeconds+600), *lease.Spec.LeaseDurationSeconds,

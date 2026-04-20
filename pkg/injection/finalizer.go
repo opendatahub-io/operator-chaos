@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-const defaultFinalizerName = "chaos.opendatahub.io/block"
+const defaultFinalizerName = "chaos.operatorchaos.io/block"
 
 // FinalizerBlockInjector adds a stuck finalizer to a resource, blocking its
 // deletion and testing how operators handle resources stuck in a Terminating state.

@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-webhook-disrupt
+spec:
+  target:
+    operator: data-science-pipelines
+    component: ds-pipelines-webhook
+    resource: ValidatingWebhookConfiguration/validating.pipelineversions.pipelines.kubeflow.org
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ds-pipelines-webhook
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: validating.pipelineversions.pipelines.kubeflow.org
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the pipeline version validating webhook failurePolicy is
+      weakened from Fail to Ignore, invalid pipeline versions can bypass
+      admission validation. The chaos framework restores the original
+      failurePolicy via TTL-based cleanup after 60s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

@@ -11,13 +11,13 @@ import (
 	"strings"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/injection"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/reporter"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/injection"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
+	"github.com/opendatahub-io/operator-chaos/pkg/reporter"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -97,10 +97,22 @@ func New(config OrchestratorConfig) *Orchestrator {
 	}
 }
 
-// resolveNamespace returns the experiment namespace, falling back to DefaultNamespace.
+// resolveNamespace returns the experiment namespace. Priority order:
+//  1. experiment metadata namespace (set by user or --namespace override)
+//  2. single allowedNamespaces entry (unambiguous intent)
+//  3. first steady-state check namespace (common in single-namespace experiments)
+//  4. DefaultNamespace fallback
 func resolveNamespace(exp *v1alpha1.ChaosExperiment) string {
 	if exp.Namespace != "" {
 		return exp.Namespace
+	}
+	if len(exp.Spec.BlastRadius.AllowedNamespaces) == 1 {
+		return exp.Spec.BlastRadius.AllowedNamespaces[0]
+	}
+	for _, check := range exp.Spec.SteadyState.Checks {
+		if check.Namespace != "" {
+			return check.Namespace
+		}
 	}
 	return v1alpha1.DefaultNamespace
 }
@@ -409,7 +421,7 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 
 	namespace := resolveNamespace(exp)
 	if exp.Namespace == "" {
-		o.logger.Warn("no namespace specified, using default", "namespace", namespace)
+		o.logger.Warn("no metadata namespace, resolved from experiment spec", "namespace", namespace)
 	}
 
 	if err := o.ValidateExperiment(ctx, exp); err != nil {
@@ -624,7 +636,7 @@ func truncateLabel(s string) string {
 
 // storeResultConfigMap creates a ConfigMap in the experiment's namespace
 // containing the JSON-serialized ExperimentReport, making results visible
-// via kubectl get configmap -l app.kubernetes.io/managed-by=odh-chaos.
+// via kubectl get configmap -l app.kubernetes.io/managed-by=operator-chaos.
 func (o *Orchestrator) storeResultConfigMap(ctx context.Context, exp *v1alpha1.ChaosExperiment, namespace string, report reporter.ExperimentReport) {
 	// Use a dedicated context so that ConfigMap storage succeeds even if the
 	// parent context is near its deadline.
@@ -637,7 +649,7 @@ func (o *Orchestrator) storeResultConfigMap(ctx context.Context, exp *v1alpha1.C
 		return
 	}
 
-	cmName := "chaos-result-" + exp.Name
+	cmName := fmt.Sprintf("chaos-result-%s-%s", exp.Name, time.Now().UTC().Format("20060102-150405"))
 	if len(cmName) > configMapNameMaxLen {
 		cmName = cmName[:configMapNameMaxLen]
 	}
@@ -645,12 +657,12 @@ func (o *Orchestrator) storeResultConfigMap(ctx context.Context, exp *v1alpha1.C
 	cmName = strings.TrimRight(cmName, "-._")
 
 	cmLabels := map[string]string{
-		"app.kubernetes.io/managed-by":    "odh-chaos",
-		"chaos.opendatahub.io/experiment": truncateLabel(exp.Name),
-		"chaos.opendatahub.io/verdict":    strings.ToLower(string(report.Evaluation.Verdict)),
+		"app.kubernetes.io/managed-by":    "operator-chaos",
+		"chaos.operatorchaos.io/experiment": truncateLabel(exp.Name),
+		"chaos.operatorchaos.io/verdict":    strings.ToLower(string(report.Evaluation.Verdict)),
 	}
 	cmAnnotations := map[string]string{
-		"chaos.opendatahub.io/timestamp": report.Timestamp.UTC().Format(time.RFC3339),
+		"chaos.operatorchaos.io/timestamp": report.Timestamp.UTC().Format(time.RFC3339),
 	}
 	cmData := map[string]string{
 		"result.json": string(reportJSON),

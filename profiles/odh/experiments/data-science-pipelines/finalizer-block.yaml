@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-finalizer-block
+spec:
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: DataSciencePipelinesApplication
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: data-science-pipelines-operator-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    # IMPORTANT: "test-dspa" is a placeholder. Replace it with the name of an
+    # actual DataSciencePipelinesApplication resource deployed in the target
+    # namespace before running this experiment.
+    parameters:
+      apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+      kind: DataSciencePipelinesApplication
+      name: test-dspa
+      finalizer: datasciencepipelinesapplications.opendatahub.io/finalizer
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents a DataSciencePipelinesApplication
+      from being deleted, the DSPO should handle the Terminating state
+      gracefully, report the blocked deletion in its status, and not leak
+      associated pipeline resources. The chaos framework removes the
+      finalizer via TTL-based cleanup after 300s.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub

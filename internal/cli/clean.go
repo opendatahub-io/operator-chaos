@@ -21,8 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/spf13/cobra"
 )
 
@@ -294,7 +294,7 @@ func deleteMatchingResources(
 
 func cleanResultConfigMaps(ctx context.Context, k8sClient client.Client, namespace string) int {
 	list := &corev1.ConfigMapList{}
-	chaosResultLabels := client.MatchingLabels{"app.kubernetes.io/managed-by": "odh-chaos"}
+	chaosResultLabels := client.MatchingLabels{"app.kubernetes.io/managed-by": "operator-chaos"}
 	return deleteMatchingResources(ctx, k8sClient, list, func() []client.Object {
 		items := make([]client.Object, len(list.Items))
 		for i := range list.Items {

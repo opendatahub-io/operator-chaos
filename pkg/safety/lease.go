@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/clock"
+	"github.com/opendatahub-io/operator-chaos/pkg/clock"
 	coordinationv1 "k8s.io/api/coordination/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,7 +20,7 @@ const DefaultLeaseDurationSeconds = int32(900)
 
 // LeaseExperimentLock implements ExperimentLock using Kubernetes Lease objects
 // for distributed safety. Only one experiment per operator can run across
-// all instances of odh-chaos in the cluster.
+// all instances of operator-chaos in the cluster.
 type LeaseExperimentLock struct {
 	client    client.Client
 	namespace string
@@ -47,7 +47,7 @@ func (l *LeaseExperimentLock) WithClock(c clock.Clock) *LeaseExperimentLock {
 
 // leaseName returns the Kubernetes Lease name for the given operator.
 func leaseName(operator string) string {
-	return fmt.Sprintf("odh-chaos-lock-%s", operator)
+	return fmt.Sprintf("operator-chaos-lock-%s", operator)
 }
 
 // holderOf extracts the holder identity from a lease, returning empty string if not set.
@@ -76,7 +76,7 @@ func (l *LeaseExperimentLock) Acquire(ctx context.Context, operator string, expe
 			Name:      name,
 			Namespace: l.namespace,
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "odh-chaos",
+				"app.kubernetes.io/managed-by": "operator-chaos",
 			},
 		},
 		Spec: coordinationv1.LeaseSpec{

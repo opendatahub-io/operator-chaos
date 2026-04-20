@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	pkgupgrade "github.com/opendatahub-io/odh-platform-chaos/pkg/upgrade"
+	pkgupgrade "github.com/opendatahub-io/operator-chaos/pkg/upgrade"
 )
 
 // PlaybookSpec is the top-level structure for an upgrade or chaos playbook YAML file.

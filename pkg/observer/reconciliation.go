@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/clock"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/clock"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -16,7 +16,7 @@ const reconciliationPollInterval = 2 * time.Second
 
 // ReconciliationChecker verifies that an operator has properly reconciled
 // all managed resources for a given component. This is the key innovation
-// of odh-platform-chaos: checking semantic reconciliation (correct metadata,
+// of operator-chaos: checking semantic reconciliation (correct metadata,
 // spec, conditions, and owner references), not just pod restarts.
 type ReconciliationChecker struct {
 	client client.Client

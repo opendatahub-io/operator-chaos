@@ -443,7 +443,7 @@ go test ./pkg/injection -v -run TestResourceQuotaDisrupt
 Create `experiments/resourcequota-disrupt.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: resourcequota-cpu-exhaustion
@@ -503,7 +503,7 @@ injection:
 ### Example Experiment
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: quota-exhaustion

@@ -230,10 +230,10 @@ To enable dependency tracking, load multiple knowledge files:
 
 ```bash
 # Load all knowledge files from a directory
-odh-chaos run experiment.yaml --knowledge-dir knowledge/
+operator-chaos run experiment.yaml --knowledge-dir knowledge/
 
 # Or load multiple individual files
-odh-chaos run experiment.yaml --knowledge kserve.yaml --knowledge odh-model-controller.yaml
+operator-chaos run experiment.yaml --knowledge kserve.yaml --knowledge odh-model-controller.yaml
 ```
 
 ### Steady State
@@ -512,10 +512,10 @@ recovery:
 
 ```bash
 # Local validation (no cluster access)
-odh-chaos validate knowledge.yaml --knowledge
+operator-chaos validate knowledge.yaml --knowledge
 
 # Pre-flight checks (validates against live cluster)
-odh-chaos preflight --knowledge knowledge.yaml
+operator-chaos preflight --knowledge knowledge.yaml
 ```
 
 ## How Knowledge Models Are Used
@@ -600,7 +600,7 @@ You referenced a component or operator name that doesn't exist in any loaded kno
 **Fix**: Load all required knowledge files:
 
 ```bash
-odh-chaos run experiment.yaml --knowledge-dir knowledge/
+operator-chaos run experiment.yaml --knowledge-dir knowledge/
 ```
 
 ### "Steady-state check failed: condition Available not found"
@@ -641,7 +641,7 @@ The operator is reconciling too many times, indicating inefficient recovery.
 Knowledge models can automatically generate fuzz test files that exercise your operator's reconciler with architecturally relevant fault combinations:
 
 ```bash
-odh-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml --output fuzz_kserve_test.go
+operator-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml --output fuzz_kserve_test.go
 ```
 
 The generator reads your knowledge model and produces:
@@ -650,7 +650,7 @@ The generator reads your knowledge model and produces:
 - **Invariants** from `steadyState.checks` (verify resources survive reconciliation)
 - **Seed corpus entries** from architectural traits (webhooks produce webhook-denial seeds, finalizers produce conflict seeds, etc.)
 
-See the [Fuzz Quick Start](../getting-started/fuzz-quickstart.md) for details on the generated test structure, and the [CLI Reference](../reference/cli-commands.md#odh-chaos-generate-fuzz-targets) for command options.
+See the [Fuzz Quick Start](../getting-started/fuzz-quickstart.md) for details on the generated test structure, and the [CLI Reference](../reference/cli-commands.md#operator-chaos-generate-fuzz-targets) for command options.
 
 ## Versioned Knowledge Models
 
@@ -733,7 +733,7 @@ spec:
 Validate versioned knowledge models with:
 
 ```bash
-odh-chaos validate-version knowledge/v2.21/
+operator-chaos validate-version knowledge/v2.21/
 ```
 
 Checks:
@@ -747,10 +747,10 @@ Checks:
 
 ```bash
 # Compare two versions
-odh-chaos diff --old knowledge/v2.20/ --new knowledge/v2.21/
+operator-chaos diff --old knowledge/v2.20/ --new knowledge/v2.21/
 
 # Generate upgrade test suite
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --from knowledge/v2.20/ \
   --to knowledge/v2.21/ \
   --output experiments/upgrade-suite/

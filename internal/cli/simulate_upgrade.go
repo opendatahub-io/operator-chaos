@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/diff"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/diff"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 func newSimulateUpgradeCommand() *cobra.Command {

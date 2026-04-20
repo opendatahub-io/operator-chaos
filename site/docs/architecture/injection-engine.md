@@ -114,7 +114,7 @@ func (n *NetworkPartitionInjector) Inject(ctx context.Context, spec v1alpha1.Inj
     // Create deny-all NetworkPolicy
     policy := &networkingv1.NetworkPolicy{
         ObjectMeta: metav1.ObjectMeta{
-            Name:      "odh-chaos-np-" + sanitizeName(spec.Parameters["labelSelector"]),
+            Name:      "operator-chaos-np-" + sanitizeName(spec.Parameters["labelSelector"]),
             Namespace: namespace,
             Labels:    safety.ChaosLabels(string(v1alpha1.NetworkPartition)),
         },
@@ -248,7 +248,7 @@ All injectors use a standardized rollback annotation pattern to enable cleanup a
 
 ```yaml
 annotations:
-  chaos.opendatahub.io/rollback: |
+  chaos.operatorchaos.io/rollback: |
     {"data":"<base64-json>","checksum":"sha256:abcd1234..."}
 ```
 
@@ -281,15 +281,15 @@ All chaos-managed resources are labeled for traceability:
 labels := safety.ChaosLabels("PodKill")
 // Returns:
 // {
-//   "chaos.opendatahub.io/managed": "true",
-//   "chaos.opendatahub.io/type": "PodKill",
+//   "chaos.operatorchaos.io/managed": "true",
+//   "chaos.operatorchaos.io/type": "PodKill",
 // }
 ```
 
 Query resources managed by chaos:
 
 ```bash
-kubectl get all -l chaos.opendatahub.io/managed=true
+kubectl get all -l chaos.operatorchaos.io/managed=true
 ```
 
 ## Injection Type Taxonomy
@@ -350,7 +350,7 @@ injection:
 
 ```yaml
 annotations:
-  chaos.opendatahub.io/ttl-expiry: "2024-03-30T10:05:00Z"
+  chaos.operatorchaos.io/ttl-expiry: "2024-03-30T10:05:00Z"
 ```
 
 ### Cleanup Controller
@@ -362,12 +362,12 @@ func (c *CleanupController) Reconcile(ctx context.Context, req reconcile.Request
     // List all resources with TTL annotation
     list := &unstructured.UnstructuredList{}
     c.client.List(ctx, list, client.MatchingLabels{
-        "chaos.opendatahub.io/managed": "true",
+        "chaos.operatorchaos.io/managed": "true",
     })
 
     now := time.Now()
     for _, item := range list.Items {
-        expiryStr := item.GetAnnotations()["chaos.opendatahub.io/ttl-expiry"]
+        expiryStr := item.GetAnnotations()["chaos.operatorchaos.io/ttl-expiry"]
         if expiryStr == "" {
             continue
         }
@@ -502,7 +502,7 @@ if err != nil {
 Use deterministic naming for created resources:
 
 ```go
-policyName := "odh-chaos-np-" + sanitizeName(spec.Parameters["labelSelector"])
+policyName := "operator-chaos-np-" + sanitizeName(spec.Parameters["labelSelector"])
 ```
 
 This allows `Revert()` to reconstruct resource names without stored state.

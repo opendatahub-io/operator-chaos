@@ -1,6 +1,6 @@
 # Architecture Overview
 
-ODH Platform Chaos is a chaos engineering framework designed specifically for testing Kubernetes operator resilience. It combines declarative experiment definitions (CRDs) with a pluggable injection engine and observation-based evaluation.
+Operator Chaos is a chaos engineering framework designed specifically for testing Kubernetes operator resilience. It combines declarative experiment definitions (CRDs) with a pluggable injection engine and observation-based evaluation.
 
 ## Design Principles
 
@@ -103,10 +103,10 @@ Analyzes structural changes between operator releases to auto-generate upgrade t
 
 **CLI Commands:**
 
-- `odh-chaos diff` — Compare two versioned directories
-- `odh-chaos diff-crds` — Deep CRD schema analysis
-- `odh-chaos validate-version` — Validate versioned knowledge model structure
-- `odh-chaos simulate-upgrade` — Generate and run upgrade test suites
+- `operator-chaos diff` — Compare two versioned directories
+- `operator-chaos diff-crds` — Deep CRD schema analysis
+- `operator-chaos validate-version` — Validate versioned knowledge model structure
+- `operator-chaos simulate-upgrade` — Generate and run upgrade test suites
 
 See [Upgrade Diff Engine Deep Dive](upgrade-diff-engine.md) for implementation details.
 
@@ -186,7 +186,7 @@ All injectors store rollback data in resource annotations with integrity checksu
 
 ```yaml
 annotations:
-  chaos.opendatahub.io/rollback: |
+  chaos.operatorchaos.io/rollback: |
     {"data":"<base64-encoded-rollback-info>","checksum":"sha256:..."}
 ```
 

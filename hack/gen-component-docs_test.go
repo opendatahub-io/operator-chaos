@@ -183,7 +183,7 @@ func TestLoadExperiments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exp1 := `apiVersion: chaos.opendatahub.io/v1alpha1
+	exp1 := `apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: test-pod-kill
@@ -201,7 +201,7 @@ spec:
       When the pod is killed, it should recover.
     recoveryTimeout: 60s
 `
-	exp2 := `apiVersion: chaos.opendatahub.io/v1alpha1
+	exp2 := `apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: test-config-drift

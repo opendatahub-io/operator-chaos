@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -63,9 +63,10 @@ func (o *KubernetesObserver) CheckSteadyState(ctx context.Context, checks []v1al
 
 // checkCondition verifies that a specific condition on a Kubernetes resource has status "True".
 func (o *KubernetesObserver) checkCondition(ctx context.Context, check v1alpha1.SteadyStateCheck, namespace string) (bool, string, error) {
-	ns := namespace
+	// Per-check namespace takes priority; fall back to the function parameter.
+	ns := check.Namespace
 	if ns == "" {
-		ns = check.Namespace
+		ns = namespace
 	}
 
 	obj := &unstructured.Unstructured{}
@@ -105,9 +106,10 @@ func (o *KubernetesObserver) checkCondition(ctx context.Context, check v1alpha1.
 
 // checkResourceExists verifies that a specific Kubernetes resource exists in the cluster.
 func (o *KubernetesObserver) checkResourceExists(ctx context.Context, check v1alpha1.SteadyStateCheck, namespace string) (bool, error) {
-	ns := namespace
+	// Per-check namespace takes priority; fall back to the function parameter.
+	ns := check.Namespace
 	if ns == "" {
-		ns = check.Namespace
+		ns = namespace
 	}
 
 	obj := &unstructured.Unstructured{}

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -192,6 +192,21 @@ func TestEvaluateFromFindings_DegradedNotChangedByCollateralFail(t *testing.T) {
 	}
 	result := e.EvaluateFromFindings(findings, defaultHypothesis())
 	assert.Equal(t, v1alpha1.Degraded, result.Verdict)
+}
+
+func TestEvaluateFromFindings_MultipleReconciliationFindings(t *testing.T) {
+	e := New(10)
+	// Two reconciliation findings: one passed, one failed.
+	// Aggregation should take the worst: allReconciled=false, max cycles, max recovery.
+	findings := []observer.Finding{
+		reconFinding(true, 2, 5*time.Second),
+		reconFinding(false, 8, 30*time.Second),
+		ssFinding(true, 3, 3),
+	}
+	result := e.EvaluateFromFindings(findings, defaultHypothesis())
+	assert.Equal(t, v1alpha1.Degraded, result.Verdict, "should be Degraded because one recon finding failed")
+	assert.Equal(t, 8, result.ReconcileCycles, "should take max cycles across findings")
+	assert.Equal(t, 30*time.Second, result.RecoveryTime, "should take max recovery time across findings")
 }
 
 func TestEvaluateFromFindings_FailedNotChangedByCollateralPass(t *testing.T) {

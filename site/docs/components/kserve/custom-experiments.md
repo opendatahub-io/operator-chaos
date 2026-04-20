@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting kser
 ## kserve-controller-manager
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-controller-manager-custom
@@ -37,7 +37,7 @@ spec:
 ## llmisvc-controller-manager
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: llmisvc-controller-manager-custom
@@ -68,7 +68,7 @@ spec:
 ## kserve-localmodel-controller-manager
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-localmodel-controller-manager-custom
@@ -99,7 +99,7 @@ spec:
 ## kserve-localmodelnode-agent
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-localmodelnode-agent-custom

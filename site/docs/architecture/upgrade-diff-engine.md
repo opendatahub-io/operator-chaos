@@ -303,13 +303,13 @@ The diff engine maps detected changes to targeted chaos injections that test the
 **Generated Experiment:**
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: upgrade-test-storage-field-removed
   annotations:
-    chaos.opendatahub.io/generated-by: diff-engine
-    chaos.opendatahub.io/upgrade-version: v2.20-to-v2.21
+    chaos.operatorchaos.io/generated-by: diff-engine
+    chaos.operatorchaos.io/upgrade-version: v2.20-to-v2.21
 spec:
   target:
     operator: kserve-operator
@@ -359,13 +359,13 @@ spec:
 **Generated Experiment:**
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: upgrade-test-llmisvc-webhook-added
   annotations:
-    chaos.opendatahub.io/generated-by: diff-engine
-    chaos.opendatahub.io/upgrade-version: v2.20-to-v2.21
+    chaos.operatorchaos.io/generated-by: diff-engine
+    chaos.operatorchaos.io/upgrade-version: v2.20-to-v2.21
 spec:
   target:
     operator: kserve-operator
@@ -398,12 +398,12 @@ spec:
 
 The diff engine is exposed via four CLI commands:
 
-### `odh-chaos diff`
+### `operator-chaos diff`
 
 Compares two versioned knowledge model directories and produces a structured diff report.
 
 ```bash
-odh-chaos diff \
+operator-chaos diff \
   --old knowledge/v2.20/ \
   --new knowledge/v2.21/ \
   --output diff-report.json
@@ -438,23 +438,23 @@ odh-chaos diff \
 }
 ```
 
-### `odh-chaos diff-crds`
+### `operator-chaos diff-crds`
 
 CRD-only diff for deep schema analysis without knowledge models.
 
 ```bash
-odh-chaos diff-crds \
+operator-chaos diff-crds \
   --old crds/v2.20/inferenceservice.yaml \
   --new crds/v2.21/inferenceservice.yaml \
   --output schema-diff.json
 ```
 
-### `odh-chaos validate-version`
+### `operator-chaos validate-version`
 
 Validates versioned knowledge model directory structure and metadata.
 
 ```bash
-odh-chaos validate-version knowledge/v2.21/
+operator-chaos validate-version knowledge/v2.21/
 ```
 
 Checks:
@@ -464,19 +464,19 @@ Checks:
 - Directory name matches knowledge model versions
 - No conflicting operator names
 
-### `odh-chaos simulate-upgrade`
+### `operator-chaos simulate-upgrade`
 
 Generates and optionally runs a full upgrade test suite.
 
 ```bash
 # Generate only
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --from knowledge/v2.20/ \
   --to knowledge/v2.21/ \
   --output experiments/upgrade-suite/
 
 # Generate and run
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --from knowledge/v2.20/ \
   --to knowledge/v2.21/ \
   --execute \

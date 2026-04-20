@@ -7,7 +7,7 @@ import (
 
 const (
 	// ChaosConfigMapName is the default name of the ConfigMap holding chaos configuration.
-	ChaosConfigMapName = "odh-chaos-config"
+	ChaosConfigMapName = "operator-chaos-config"
 	// ChaosConfigKey is the key within the ConfigMap's data that holds the JSON config.
 	ChaosConfigKey = "config"
 )

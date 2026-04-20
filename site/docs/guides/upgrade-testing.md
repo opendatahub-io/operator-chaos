@@ -25,12 +25,12 @@ These are the failure modes that surface in production after the upgrade complet
 
 ```mermaid
 flowchart LR
-    A["Create\nKnowledge\nSnapshots"] --> B["odh-chaos\ndiff"]
-    B --> C["odh-chaos\ndiff-crds"]
-    C --> D["odh-chaos\nsimulate-upgrade\n--dry-run"]
+    A["Create\nKnowledge\nSnapshots"] --> B["operator-chaos\ndiff"]
+    B --> C["operator-chaos\ndiff-crds"]
+    C --> D["operator-chaos\nsimulate-upgrade\n--dry-run"]
     D --> E["Review\nExperiments"]
-    E --> F["odh-chaos\nsimulate-upgrade"]
-    F --> G["odh-chaos\nvalidate-version"]
+    E --> F["operator-chaos\nsimulate-upgrade"]
+    F --> G["operator-chaos\nvalidate-version"]
 
     style A fill:#bbdefb,stroke:#1565c0
     style B fill:#ce93d8,stroke:#6a1b9a
@@ -43,9 +43,9 @@ flowchart LR
 
 **Step 1**: Snapshot knowledge models for both versions (source and target)
 
-**Step 2**: Detect architectural differences with `odh-chaos diff`
+**Step 2**: Detect architectural differences with `operator-chaos diff`
 
-**Step 3**: Analyze CRD schema changes with `odh-chaos diff-crds`
+**Step 3**: Analyze CRD schema changes with `operator-chaos diff-crds`
 
 **Step 4**: Preview upgrade experiments with `--dry-run`
 
@@ -118,7 +118,7 @@ operator:
 **3. Validate the snapshot:**
 
 ```bash
-odh-chaos validate --knowledge-dir knowledge/rhoai/v3.3/
+operator-chaos validate --knowledge-dir knowledge/rhoai/v3.3/
 ```
 
 !!! tip "Version snapshots are immutable"
@@ -126,10 +126,10 @@ odh-chaos validate --knowledge-dir knowledge/rhoai/v3.3/
 
 ## Comparing Versions
 
-The `odh-chaos diff` command detects architectural changes between two knowledge snapshots:
+The `operator-chaos diff` command detects architectural changes between two knowledge snapshots:
 
 ```bash
-odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/
+operator-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/
 ```
 
 ### Example Output
@@ -167,7 +167,7 @@ Summary:
 Use `--breaking` to show only breaking changes:
 
 ```bash
-odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --breaking
+operator-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --breaking
 ```
 
 ### Machine-Readable Output
@@ -175,7 +175,7 @@ odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --br
 For CI integration, use JSON format:
 
 ```bash
-odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --format json
+operator-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --format json
 ```
 
 ```json
@@ -214,7 +214,7 @@ odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --fo
 
 ## CRD Schema Diffing
 
-The `odh-chaos diff-crds` command analyzes Custom Resource Definition schema changes between versions:
+The `operator-chaos diff-crds` command analyzes Custom Resource Definition schema changes between versions:
 
 ```bash
 # Extract CRDs from source cluster
@@ -224,7 +224,7 @@ oc get crd inferenceservices.serving.kserve.io -o yaml > crds-source/inferencese
 oc get crd inferenceservices.serving.kserve.io -o yaml > crds-target/inferenceservice.yaml
 
 # Diff the schemas
-odh-chaos diff-crds --source crds-source/ --target crds-target/
+operator-chaos diff-crds --source crds-source/ --target crds-target/
 ```
 
 ### Example Output
@@ -265,17 +265,17 @@ Summary:
 
 ## Simulating Upgrades
 
-The `odh-chaos simulate-upgrade` command generates and executes chaos experiments based on detected architectural differences:
+The `operator-chaos simulate-upgrade` command generates and executes chaos experiments based on detected architectural differences:
 
 ```bash
 # Preview experiments without executing
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/ \
   --dry-run
 
 # Execute upgrade simulation
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/
 ```
@@ -305,7 +305,7 @@ The simulation engine maps architectural changes to chaos injection types that t
 Use `--dry-run` to preview generated experiments without executing them:
 
 ```bash
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/ \
   --dry-run
@@ -348,14 +348,14 @@ Review the experiments for architectural correctness before executing.
 
 ## Validating Cluster Version
 
-The `odh-chaos validate-version` command verifies that a cluster matches a specific knowledge snapshot:
+The `operator-chaos validate-version` command verifies that a cluster matches a specific knowledge snapshot:
 
 ```bash
 # Validate pre-upgrade state (cluster should match source version)
-odh-chaos validate-version --knowledge-dir knowledge/odh/v2.10/
+operator-chaos validate-version --knowledge-dir knowledge/odh/v2.10/
 
 # Validate post-upgrade state (cluster should match target version)
-odh-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
+operator-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
 ```
 
 ### Example Output
@@ -396,31 +396,31 @@ Full workflow for testing an ODH 2.10 → RHOAI 3.3 upgrade:
 
 ```bash
 # Step 1: Compare versions to understand changes
-odh-chaos diff \
+operator-chaos diff \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/
 
 # Step 2: Analyze CRD schema changes
-odh-chaos diff-crds \
+operator-chaos diff-crds \
   --source crds-odh-2.10/ \
   --target crds-rhoai-3.3/
 
 # Step 3: Preview upgrade experiments
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/ \
   --dry-run
 
 # Step 4: Validate pre-upgrade state
-odh-chaos validate-version --knowledge-dir knowledge/odh/v2.10/
+operator-chaos validate-version --knowledge-dir knowledge/odh/v2.10/
 
 # Step 5: Run upgrade simulation
-odh-chaos simulate-upgrade \
+operator-chaos simulate-upgrade \
   --source knowledge/odh/v2.10/ \
   --target knowledge/rhoai/v3.3/
 
 # Step 6: Validate post-upgrade state
-odh-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
+operator-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
 ```
 
 ### Expected Results
@@ -453,7 +453,7 @@ Upgrade playbooks automate multi-step upgrade paths by orchestrating OLM channel
 An upgrade playbook is a YAML file defining the source version, target version, the OLM channel hop path, and a sequence of steps to execute:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: rhoai-2.10-to-3.3
@@ -509,10 +509,10 @@ Playbooks support five step types:
 
 ### Running a Playbook
 
-Execute an upgrade playbook with `odh-chaos upgrade run`:
+Execute an upgrade playbook with `operator-chaos upgrade run`:
 
 ```bash
-odh-chaos upgrade run --playbook knowledge/rhoai/upgrades/v2.10-to-v3.3.yaml
+operator-chaos upgrade run --playbook knowledge/rhoai/upgrades/v2.10-to-v3.3.yaml
 ```
 
 **What happens:**
@@ -531,7 +531,7 @@ odh-chaos upgrade run --playbook knowledge/rhoai/upgrades/v2.10-to-v3.3.yaml
 Before writing a playbook, discover available OLM channels for an operator:
 
 ```bash
-odh-chaos upgrade discover \
+operator-chaos upgrade discover \
   --operator rhods-operator \
   --namespace redhat-ods-operator
 ```
@@ -552,10 +552,10 @@ Use `--format json` for machine-readable output.
 
 ### Triggering Single Hops
 
-For simple upgrades (single channel hop), use `odh-chaos upgrade trigger` instead of writing a full playbook:
+For simple upgrades (single channel hop), use `operator-chaos upgrade trigger` instead of writing a full playbook:
 
 ```bash
-odh-chaos upgrade trigger \
+operator-chaos upgrade trigger \
   --operator rhods-operator \
   --namespace redhat-ods-operator \
   --channel stable-3.3
@@ -568,7 +568,7 @@ This patches the Subscription and monitors the upgrade until the new CSV is inst
 Attach to an already-running upgrade (triggered externally or by another process):
 
 ```bash
-odh-chaos upgrade monitor \
+operator-chaos upgrade monitor \
   --operator rhods-operator \
   --namespace redhat-ods-operator \
   --timeout 30m
@@ -582,10 +582,10 @@ If an upgrade playbook fails mid-execution, resume from the failed step:
 
 ```bash
 # Resume from the last failed step
-odh-chaos upgrade run --playbook playbook.yaml --resume-from migrate-dashboard-configmaps
+operator-chaos upgrade run --playbook playbook.yaml --resume-from migrate-dashboard-configmaps
 
 # Force resume (skip step validation and start from specified step)
-odh-chaos upgrade run --playbook playbook.yaml --force-resume --resume-from trigger-upgrade
+operator-chaos upgrade run --playbook playbook.yaml --force-resume --resume-from trigger-upgrade
 ```
 
 State files are stored in `.upgrade-state/<playbook-name>/` with timestamps. Use `--state-dir` to customize the location.
@@ -595,7 +595,7 @@ State files are stored in `.upgrade-state/<playbook-name>/` with timestamps. Use
 For unattended execution in CI pipelines:
 
 ```bash
-odh-chaos upgrade run \
+operator-chaos upgrade run \
   --playbook playbook.yaml \
   --skip-manual \
   --allow-shell
@@ -615,7 +615,7 @@ If a manual step lacks an `autoCheck` command, it is skipped with a warning in `
 Preview playbook execution without making changes:
 
 ```bash
-odh-chaos upgrade run --playbook playbook.yaml --dry-run
+operator-chaos upgrade run --playbook playbook.yaml --dry-run
 ```
 
 Dry-run mode prints the execution plan and validates all steps, but does not patch Subscriptions, run kubectl commands, or execute chaos experiments.
@@ -625,7 +625,7 @@ Dry-run mode prints the execution plan and validates all steps, but does not pat
 The following playbook upgrades RHOAI from 2.10 to 3.3 with pre-migration and post-validation:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: rhoai-2.10-to-3.3

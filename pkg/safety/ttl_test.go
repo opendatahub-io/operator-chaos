@@ -17,7 +17,7 @@ func TestTTLAnnotation(t *testing.T) {
 }
 
 func TestTTLAnnotationKey(t *testing.T) {
-	assert.Equal(t, "chaos.opendatahub.io/expires", TTLAnnotationKey)
+	assert.Equal(t, "chaos.operatorchaos.io/expires", TTLAnnotationKey)
 }
 
 func TestTTLMalformedExpiry(t *testing.T) {

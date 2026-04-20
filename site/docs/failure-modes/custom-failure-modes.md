@@ -35,7 +35,7 @@ See the [Failure Modes](index.md) reference for full details on each type.
 Every experiment follows this structure:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: my-custom-experiment
@@ -162,12 +162,12 @@ When you specify `--knowledge-paths` to the CLI, later paths override earlier on
 
 ```bash
 # ODH 2.10
-odh-chaos run my-experiment.yaml \
+operator-chaos run my-experiment.yaml \
   --knowledge knowledge/*.yaml \
   --knowledge knowledge/odh/v2.10/*.yaml
 
 # RHOAI 3.3
-odh-chaos run my-experiment.yaml \
+operator-chaos run my-experiment.yaml \
   --knowledge knowledge/*.yaml \
   --knowledge knowledge/rhoai/*.yaml \
   --knowledge knowledge/rhoai/v3.3/*.yaml
@@ -189,20 +189,20 @@ Check the knowledge YAML for your target component to see the correct labels.
 
 ### Chaining Experiments in Suites
 
-The `odh-chaos suite` command runs multiple experiments sequentially or in parallel:
+The `operator-chaos suite` command runs multiple experiments sequentially or in parallel:
 
 ```bash
 # Run all experiments in a directory
-odh-chaos suite experiments/dashboard/ --namespace opendatahub
+operator-chaos suite experiments/dashboard/ --namespace opendatahub
 
 # Dry-run to validate without executing
-odh-chaos suite experiments/dashboard/ --dry-run
+operator-chaos suite experiments/dashboard/ --dry-run
 
 # Run in parallel (max 4 concurrent)
-odh-chaos suite experiments/dashboard/ --parallel 4
+operator-chaos suite experiments/dashboard/ --parallel 4
 
 # Generate JUnit report
-odh-chaos suite experiments/dashboard/ \
+operator-chaos suite experiments/dashboard/ \
   --report-dir reports/ \
   --namespace opendatahub
 ```
@@ -235,7 +235,7 @@ Suite-level features:
 Here's a full example testing ConfigMap corruption handling:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: custom-config-resilience
@@ -294,10 +294,10 @@ Run it:
 
 ```bash
 # Validate first
-odh-chaos run experiments/custom-config-resilience.yaml --dry-run
+operator-chaos run experiments/custom-config-resilience.yaml --dry-run
 
 # Execute
-odh-chaos run experiments/custom-config-resilience.yaml \
+operator-chaos run experiments/custom-config-resilience.yaml \
   --namespace opendatahub \
   --knowledge knowledge/*.yaml \
   --verbose
@@ -394,8 +394,8 @@ PodKill is the safest injection type and provides the fastest feedback loop:
 
 ```bash
 # First experiment for any new component
-odh-chaos run experiments/my-component-podkill.yaml --dry-run
-odh-chaos run experiments/my-component-podkill.yaml --namespace opendatahub
+operator-chaos run experiments/my-component-podkill.yaml --dry-run
+operator-chaos run experiments/my-component-podkill.yaml --namespace opendatahub
 ```
 
 If PodKill passes, move on to more disruptive types (ConfigDrift, NetworkPartition, etc.).
@@ -406,10 +406,10 @@ Dry-run mode validates experiments without executing them:
 
 ```bash
 # Validates YAML syntax, injection parameters, blast radius
-odh-chaos run my-experiment.yaml --dry-run
+operator-chaos run my-experiment.yaml --dry-run
 
 # For suites
-odh-chaos suite experiments/dashboard/ --dry-run
+operator-chaos suite experiments/dashboard/ --dry-run
 ```
 
 Dry-run checks:
@@ -494,7 +494,7 @@ metadata:
 yamllint my-experiment.yaml
 
 # Check experiment structure
-odh-chaos run my-experiment.yaml --dry-run --verbose
+operator-chaos run my-experiment.yaml --dry-run --verbose
 ```
 
 ### Steady-State Check Fails Before Injection
@@ -533,15 +533,15 @@ spec:
 **Fix**:
 ```bash
 # Manual cleanup
-odh-chaos clean --namespace opendatahub
+operator-chaos clean --namespace opendatahub
 
 # Check for resources with chaos metadata
 kubectl get all -n opendatahub \
-  -l "chaos.opendatahub.io/injected=true"
+  -l "chaos.operatorchaos.io/injected=true"
 
 # Remove chaos annotations manually (last resort)
 kubectl annotate deployment my-controller \
-  chaos.opendatahub.io/rollback-data- \
+  chaos.operatorchaos.io/rollback-data- \
   -n opendatahub
 ```
 
@@ -550,7 +550,7 @@ kubectl annotate deployment my-controller \
 **Symptom**: `Error: ... is forbidden: User "..." cannot ...`
 
 **Causes**:
-- Insufficient RBAC permissions for odh-chaos CLI
+- Insufficient RBAC permissions for operator-chaos CLI
 - ServiceAccount missing required roles
 
 **Fix**:
@@ -559,9 +559,9 @@ kubectl annotate deployment my-controller \
 kubectl auth can-i delete pods -n opendatahub
 kubectl auth can-i update configmaps -n opendatahub
 
-# Check odh-chaos ServiceAccount (if running in-cluster)
-kubectl get clusterrole odh-chaos-role -o yaml
-kubectl get clusterrolebinding odh-chaos-binding -o yaml
+# Check operator-chaos ServiceAccount (if running in-cluster)
+kubectl get clusterrole operator-chaos-role -o yaml
+kubectl get clusterrolebinding operator-chaos-binding -o yaml
 ```
 
 ### Blast Radius Violations

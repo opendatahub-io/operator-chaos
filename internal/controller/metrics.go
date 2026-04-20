@@ -8,7 +8,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 

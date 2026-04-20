@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: opendatahub-operator-finalizer-block
+spec:
+  target:
+    operator: opendatahub-operator
+    component: opendatahub-operator
+    resource: DataScienceCluster
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: opendatahub-operator-controller-manager
+        namespace: opendatahub-operator-system
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    # IMPORTANT: "default-dsc" is a placeholder. Replace it with the name
+    # of the actual DataScienceCluster resource deployed in the cluster
+    # before running this experiment.
+    parameters:
+      apiVersion: datasciencecluster.opendatahub.io/v1
+      kind: DataScienceCluster
+      name: default-dsc
+      finalizer: platform.opendatahub.io/finalizer
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents a DataScienceCluster from being
+      deleted, the operator should handle the Terminating state gracefully,
+      report the blocked deletion in its status, and not leak component
+      deployments across managed namespaces. The chaos framework removes
+      the finalizer via TTL-based cleanup after 300s.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 3
+    allowedNamespaces:
+      - opendatahub-operator-system

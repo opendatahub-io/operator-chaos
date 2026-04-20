@@ -3,7 +3,7 @@ package upgrade
 import (
 	"testing"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +23,7 @@ func TestGenerateUpgradePlaybook(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "UpgradePlaybook", pb.Kind)
-	assert.Equal(t, "chaos.opendatahub.io/v1alpha1", pb.APIVersion)
+	assert.Equal(t, "chaos.operatorchaos.io/v1alpha1", pb.APIVersion)
 	assert.Equal(t, "rhods-operator-2.10.0-to-2.11.0", pb.Metadata.Name)
 	assert.Contains(t, pb.Metadata.Description, "# REVIEW:")
 
@@ -114,7 +114,7 @@ func TestGenerateChaosPlaybook(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "ChaosPlaybook", pb.Kind)
-	assert.Equal(t, "chaos.opendatahub.io/v1alpha1", pb.APIVersion)
+	assert.Equal(t, "chaos.operatorchaos.io/v1alpha1", pb.APIVersion)
 	assert.Contains(t, pb.Metadata.Name, "chaos-dashboard")
 
 	require.NotNil(t, pb.Chaos)
@@ -132,7 +132,7 @@ func TestGenerateChaosPlaybook(t *testing.T) {
 
 	assert.Equal(t, "cleanup", pb.Chaos.Steps[2].Name)
 	assert.Equal(t, "kubectl", pb.Chaos.Steps[2].Type)
-	assert.Contains(t, pb.Chaos.Steps[2].Commands[0], "odh-chaos clean")
+	assert.Contains(t, pb.Chaos.Steps[2].Commands[0], "operator-chaos clean")
 	assert.Contains(t, pb.Chaos.Steps[2].Commands[0], "redhat-ods-applications")
 }
 

@@ -3,7 +3,7 @@ package safety
 import (
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 )
 
 // ValidateBlastRadius checks that the affected count, namespace, and resource are within blast radius limits.

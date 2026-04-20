@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/reporter"
+	"github.com/opendatahub-io/operator-chaos/pkg/reporter"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func newReportCommand() *cobra.Command {
 				}
 
 				r := reporter.NewJUnitReporter(output)
-				return r.WriteSuite("odh-chaos-results", reports)
+				return r.WriteSuite("operator-chaos-results", reports)
 			}
 
 			// Default: summary

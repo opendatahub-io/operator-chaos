@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,11 +69,11 @@ func (d *ConfigDriftInjector) injectSecret(ctx context.Context, spec v1alpha1.In
 
 	// Build labels with chaos-experiment for traceability
 	rollbackLabels := safety.ChaosLabels(string(v1alpha1.ConfigDrift))
-	rollbackLabels["chaos.opendatahub.io/experiment"] = key.Name
+	rollbackLabels["chaos.operatorchaos.io/experiment"] = key.Name
 
 	// Build annotations with original secret reference for traceability
 	rollbackAnnotations := map[string]string{
-		"chaos.opendatahub.io/original-secret": key.Name,
+		"chaos.operatorchaos.io/original-secret": key.Name,
 	}
 
 	rollbackSecret := &corev1.Secret{

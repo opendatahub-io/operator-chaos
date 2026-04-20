@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/injection"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/injection"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -852,9 +852,10 @@ func TestStoreResultConfigMap(t *testing.T) {
 	require.Len(t, cmList.Items, 1)
 
 	cm := cmList.Items[0]
-	assert.Equal(t, "chaos-result-test-experiment", cm.Name)
-	assert.Equal(t, "odh-chaos", cm.Labels["app.kubernetes.io/managed-by"])
-	assert.Equal(t, "test-experiment", cm.Labels["chaos.opendatahub.io/experiment"])
+	assert.True(t, strings.HasPrefix(cm.Name, "chaos-result-test-experiment-"),
+		"ConfigMap name should start with chaos-result-<experiment>-, got: %s", cm.Name)
+	assert.Equal(t, "operator-chaos", cm.Labels["app.kubernetes.io/managed-by"])
+	assert.Equal(t, "test-experiment", cm.Labels["chaos.operatorchaos.io/experiment"])
 	assert.Contains(t, cm.Data, "result.json")
 
 	// Test name truncation with a very long experiment name (>253 chars)
@@ -873,7 +874,7 @@ func TestStoreResultConfigMap(t *testing.T) {
 	for _, cm := range cmList2.Items {
 		assert.LessOrEqual(t, len(cm.Name), 253, "ConfigMap name should be truncated to <=253 chars")
 		// Label value should be truncated to 63 chars
-		expLabel := cm.Labels["chaos.opendatahub.io/experiment"]
+		expLabel := cm.Labels["chaos.operatorchaos.io/experiment"]
 		assert.LessOrEqual(t, len(expLabel), 63, "Label value should be truncated to <=63 chars")
 	}
 }

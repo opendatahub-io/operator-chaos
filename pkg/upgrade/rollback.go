@@ -13,7 +13,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/olm"
+	"github.com/opendatahub-io/operator-chaos/pkg/olm"
 )
 
 // RollbackManager handles snapshot and restore of operator state around upgrade hops.

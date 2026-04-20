@@ -23,7 +23,7 @@ When the llamastack serving configuration is corrupted, new LLM deployments rece
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: llamastack-config-drift
@@ -77,7 +77,7 @@ When the llamastack-controller-manager is network-partitioned from the API serve
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: llamastack-network-partition
@@ -127,7 +127,7 @@ When the llamastack-controller-manager pod is killed, existing LlamaStack distri
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: llamastack-pod-kill
@@ -178,7 +178,7 @@ When the llamastack ClusterRoleBinding subjects are revoked, the controller can 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: llamastack-rbac-revoke

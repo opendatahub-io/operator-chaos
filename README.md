@@ -1,14 +1,14 @@
-# ODH Platform Chaos
+# Operator Chaos
 
-Chaos engineering framework for OpenDataHub operators. Tests operator reconciliation semantics, not just that pods restart, but that operators correctly restore all managed resources.
+Chaos engineering framework for Kubernetes operators. Tests operator reconciliation semantics, not just that pods restart, but that operators correctly restore all managed resources.
 
-## Why ODH Platform Chaos?
+## Why Operator Chaos?
 
 Existing chaos tools (Krkn, Litmus, Chaos Mesh) test infrastructure resilience: kill a pod, verify it comes back. But Kubernetes operators manage complex resource graphs (Deployments, Services, ConfigMaps, CRDs) where the real question is:
 
 **"When something breaks, does the operator put everything back the way it should be?"**
 
-ODH Platform Chaos answers this by:
+Operator Chaos answers this by:
 - **Testing reconciliation**: Verifying operators restore resources to their intended state
 - **Operator-semantic faults**: CRD mutation, config drift, RBAC revocation, faults specific to operators
 - **Knowledge-driven**: Understanding what each operator manages via knowledge models
@@ -23,7 +23,7 @@ ODH Platform Chaos answers this by:
 
 ## Four Usage Modes
 
-ODH Platform Chaos provides four distinct ways to test operator resilience, each suited to different stages of the development lifecycle:
+Operator Chaos provides four distinct ways to test operator resilience, each suited to different stages of the development lifecycle:
 
 | Mode | What It Tests | Requires Cluster? | When to Use |
 |------|---------------|-------------------|-------------|
@@ -38,16 +38,16 @@ Run structured chaos experiments against a live cluster. The CLI orchestrates th
 
 ```bash
 # Generate an experiment skeleton
-odh-chaos init --component odh-model-controller --type PodKill > experiment.yaml
+operator-chaos init --component odh-model-controller --type PodKill > experiment.yaml
 
 # Validate the experiment YAML
-odh-chaos validate experiment.yaml
+operator-chaos validate experiment.yaml
 
 # Dry run (validates without injecting)
-odh-chaos run experiment.yaml --dry-run --knowledge knowledge.yaml
+operator-chaos run experiment.yaml --dry-run --knowledge knowledge.yaml
 
 # Execute against a live cluster
-odh-chaos run experiment.yaml --knowledge knowledge.yaml
+operator-chaos run experiment.yaml --knowledge knowledge.yaml
 ```
 
 **Use this when**: You need to verify that a real operator recovers correctly on a real cluster. The definitive resilience test before shipping.
@@ -57,7 +57,7 @@ odh-chaos run experiment.yaml --knowledge knowledge.yaml
 Wrap a controller-runtime `client.Client` with fault injection. The `ChaosClient` intercepts CRUD operations and injects errors, delays, or disconnections based on a `FaultConfig`. No code changes to your reconciler are needed.
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+import "github.com/opendatahub-io/operator-chaos/pkg/sdk"
 
 // Wrap an existing client with chaos fault injection.
 // FaultSpec fields:
@@ -111,7 +111,7 @@ if errors.As(err, &chaosErr) {
 You can also load fault configuration from a Kubernetes ConfigMap at runtime:
 
 ```go
-// ConfigMap "odh-chaos-config" with key "config" containing JSON:
+// ConfigMap "operator-chaos-config" with key "config" containing JSON:
 // {"active": true, "faults": {"get": {"errorRate": 0.5, "error": "not found"}}}
 fc, err := sdk.ParseFaultConfigFromData(configMap.Data)
 chaosClient := sdk.NewChaosClient(realClient, fc)
@@ -154,7 +154,7 @@ import (
     "sigs.k8s.io/controller-runtime/pkg/client"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"
 )
 
 // Step 1: Implement a ReconcilerFactory.
@@ -250,19 +250,19 @@ Compare operator knowledge models between versions to detect breaking changes an
 
 ```bash
 # Compare ODH 2.10 to RHOAI 3.3
-odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/
+operator-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/
 
 # Show only breaking changes
-odh-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --breaking
+operator-chaos diff --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --breaking
 
 # Compare CRD schemas
-odh-chaos diff-crds --source-crds crds/v2.10/ --target-crds crds/v3.3/
+operator-chaos diff-crds --source-crds crds/v2.10/ --target-crds crds/v3.3/
 
 # Generate upgrade simulation experiments (preview)
-odh-chaos simulate-upgrade --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --dry-run
+operator-chaos simulate-upgrade --source knowledge/odh/v2.10/ --target knowledge/rhoai/v3.3/ --dry-run
 
 # Validate cluster matches expected version
-odh-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
+operator-chaos validate-version --knowledge-dir knowledge/rhoai/v3.3/
 ```
 
 The diff engine detects: component renames (odh-dashboard to rhods-dashboard), namespace moves (opendatahub to redhat-ods-applications), webhook changes, dependency ordering shifts, and CRD schema breaking changes (field removals, type changes, enum removals).
@@ -363,7 +363,7 @@ recovery:
 ### Validating Knowledge Models
 
 ```bash
-odh-chaos validate knowledge.yaml --knowledge
+operator-chaos validate knowledge.yaml --knowledge
 ```
 
 Note: `--knowledge` is a boolean flag; the file path is a positional argument.
@@ -590,7 +590,7 @@ These flags apply to all commands:
 ### run
 
 ```bash
-odh-chaos run experiment.yaml [flags]
+operator-chaos run experiment.yaml [flags]
 ```
 
 | Flag | Description | Default |
@@ -606,7 +606,7 @@ odh-chaos run experiment.yaml [flags]
 ### validate
 
 ```bash
-odh-chaos validate <file.yaml> [flags]
+operator-chaos validate <file.yaml> [flags]
 ```
 
 | Flag | Description | Default |
@@ -616,7 +616,7 @@ odh-chaos validate <file.yaml> [flags]
 ### suite
 
 ```bash
-odh-chaos suite <experiments-directory> [flags]
+operator-chaos suite <experiments-directory> [flags]
 ```
 
 | Flag | Description | Default |
@@ -633,7 +633,7 @@ odh-chaos suite <experiments-directory> [flags]
 ### analyze
 
 ```bash
-odh-chaos analyze <directory> [flags]
+operator-chaos analyze <directory> [flags]
 ```
 
 | Flag | Description | Default |
@@ -650,7 +650,7 @@ Scans Go source code for fault injection candidates:
 ### report
 
 ```bash
-odh-chaos report <results-directory> [flags]
+operator-chaos report <results-directory> [flags]
 ```
 
 | Flag | Description | Default |
@@ -663,7 +663,7 @@ Generates summary reports from experiment results. Summary format writes to stdo
 ### preflight
 
 ```bash
-odh-chaos preflight [flags]
+operator-chaos preflight [flags]
 ```
 
 | Flag | Description | Default |
@@ -676,7 +676,7 @@ Pre-flight checks validate a knowledge model before running experiments. In `--l
 ### controller start
 
 ```bash
-odh-chaos controller start [flags]
+operator-chaos controller start [flags]
 ```
 
 | Flag | Description | Default |
@@ -692,7 +692,7 @@ Starts a Kubernetes controller that watches ChaosExperiment CRs and drives them 
 ### init
 
 ```bash
-odh-chaos init [flags]
+operator-chaos init [flags]
 ```
 
 | Flag | Description | Default |
@@ -707,7 +707,7 @@ Generates a skeleton experiment YAML to stdout. Customize the output for your op
 ### types
 
 ```bash
-odh-chaos types
+operator-chaos types
 ```
 
 Lists all available injection types with their descriptions and danger levels.
@@ -715,7 +715,7 @@ Lists all available injection types with their descriptions and danger levels.
 ### clean
 
 ```bash
-odh-chaos clean [flags]
+operator-chaos clean [flags]
 ```
 
 | Flag | Description | Default |
@@ -723,7 +723,7 @@ odh-chaos clean [flags]
 | `--watch` | Continuously scan and clean chaos artifacts | `false` |
 | `--interval` | Scan interval when --watch is set | `60s` |
 
-Emergency stop: removes all chaos artifacts from the cluster. Finds resources with the `app.kubernetes.io/managed-by: odh-chaos` label and cleans them up. Restores original state from rollback annotations.
+Emergency stop: removes all chaos artifacts from the cluster. Finds resources with the `app.kubernetes.io/managed-by: operator-chaos` label and cleans them up. Restores original state from rollback annotations.
 
 ## Safety Mechanisms
 
@@ -734,7 +734,7 @@ Emergency stop: removes all chaos artifacts from the cluster. Finds resources wi
 - **Rollback annotations**: Original resource state is stored in annotations with SHA-256 checksums for integrity verification
 - **Distributed locking**: `--distributed-lock` uses Kubernetes Leases to prevent concurrent experiments on the same cluster
 - **Danger levels**: Injection types have danger levels (low/medium/high); high-danger types require explicit `allowDangerous: true`
-- **Emergency stop**: `odh-chaos clean` removes all chaos artifacts immediately
+- **Emergency stop**: `operator-chaos clean` removes all chaos artifacts immediately
 
 ## Verdicts
 
@@ -747,16 +747,16 @@ Emergency stop: removes all chaos artifacts from the cluster. Finds resources wi
 
 ## Cross-Component Side-Effect Detection
 
-When injecting chaos on a target component (e.g., killing kserve-controller-manager), dependent components (e.g., llmisvc-controller-manager) may silently degrade. ODH Platform Chaos detects this collateral damage automatically.
+When injecting chaos on a target component (e.g., killing kserve-controller-manager), dependent components (e.g., llmisvc-controller-manager) may silently degrade. Operator Chaos detects this collateral damage automatically.
 
 **How it works:** Load multiple knowledge files to build a dependency graph. The framework resolves which components depend on the faulted target and checks their steady-state after recovery.
 
 ```bash
 # Load all knowledge files from a directory — enables collateral detection
-odh-chaos run experiment.yaml --knowledge-dir knowledge/
+operator-chaos run experiment.yaml --knowledge-dir knowledge/
 
 # Or load multiple individual files
-odh-chaos run experiment.yaml --knowledge kserve.yaml --knowledge odh-model-controller.yaml
+operator-chaos run experiment.yaml --knowledge kserve.yaml --knowledge odh-model-controller.yaml
 ```
 
 **Dependencies** are declared in knowledge model `components[].dependencies` arrays. Two resolution modes:
@@ -822,7 +822,7 @@ stateDiagram-v2
 ### Package Structure
 
 ```
-cmd/odh-chaos/          CLI entrypoint
+cmd/operator-chaos/          CLI entrypoint
 internal/cli/           Command implementations
 api/v1alpha1/           ChaosExperiment CRD types
 pkg/
@@ -914,7 +914,7 @@ For full dashboard documentation, see [Dashboard Guide](docs/dashboard-guide.md)
 ### Install
 
 ```bash
-go install github.com/opendatahub-io/odh-platform-chaos/cmd/odh-chaos@latest
+go install github.com/opendatahub-io/operator-chaos/cmd/operator-chaos@latest
 ```
 
 ### Run Your First Experiment
@@ -923,30 +923,30 @@ go install github.com/opendatahub-io/odh-platform-chaos/cmd/odh-chaos@latest
 
 2. Generate an experiment:
 ```bash
-odh-chaos init --component odh-model-controller --type PodKill > experiment.yaml
+operator-chaos init --component odh-model-controller --type PodKill > experiment.yaml
 ```
 
 3. Validate both files:
 ```bash
-odh-chaos validate knowledge.yaml --knowledge
-odh-chaos validate experiment.yaml
+operator-chaos validate knowledge.yaml --knowledge
+operator-chaos validate experiment.yaml
 ```
 
 4. Dry run:
 ```bash
-odh-chaos run experiment.yaml --knowledge knowledge.yaml --dry-run
+operator-chaos run experiment.yaml --knowledge knowledge.yaml --dry-run
 ```
 
 5. Execute (requires cluster access):
 ```bash
-odh-chaos run experiment.yaml --knowledge knowledge.yaml
+operator-chaos run experiment.yaml --knowledge knowledge.yaml
 ```
 
 ### Add Fuzz Testing to Your Operator
 
 1. Add the dependency:
 ```bash
-go get github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz
+go get github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz
 ```
 
 2. Implement a `ReconcilerFactory`:

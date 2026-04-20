@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
 )
 
 // ExperimentReport is the top-level report for a single chaos experiment.

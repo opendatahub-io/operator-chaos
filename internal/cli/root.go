@@ -3,19 +3,19 @@ package cli
 import (
 	"fmt"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/spf13/cobra"
 )
 
 // Version is set at build time via ldflags.
 var Version = "dev"
 
-// NewRootCommand builds the top-level cobra command for the odh-chaos CLI.
+// NewRootCommand builds the top-level cobra command for the operator-chaos CLI.
 func NewRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "odh-chaos",
-		Short: "Chaos engineering framework for OpenDataHub operators",
-		Long: `ODH Platform Chaos tests operator reconciliation semantics.
+		Use:   "operator-chaos",
+		Short: "Chaos engineering framework for Kubernetes operators",
+		Long: `Operator Chaos tests operator reconciliation semantics.
 It validates that operators recover managed resources correctly after
 fault injection, not just that pods restart.`,
 	}
@@ -53,7 +53,7 @@ func newVersionCommand() *cobra.Command {
 		Use:   "version",
 		Short: "Print the version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("odh-chaos version " + Version)
+			fmt.Println("operator-chaos version " + Version)
 		},
 	}
 }

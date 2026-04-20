@@ -3,7 +3,7 @@ package safety
 import "time"
 
 // TTLAnnotationKey is the annotation key used to store the expiration timestamp on chaos-injected resources.
-const TTLAnnotationKey = "chaos.opendatahub.io/expires"
+const TTLAnnotationKey = "chaos.operatorchaos.io/expires"
 
 // TTLExpiry returns the TTL annotation value for the given duration from the provided time.
 func TTLExpiry(now time.Time, d time.Duration) string {

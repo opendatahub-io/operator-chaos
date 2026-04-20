@@ -1,6 +1,6 @@
 # Go SDK Reference
 
-The ODH Platform Chaos Go SDK provides programmatic access to chaos engineering capabilities, enabling developers to build fault-tolerant operators with built-in resilience testing.
+The Operator Chaos Go SDK provides programmatic access to chaos engineering capabilities, enabling developers to build fault-tolerant operators with built-in resilience testing.
 
 ## Overview
 
@@ -333,7 +333,7 @@ func NewReconciler(mgr manager.Manager) *MyReconciler {
     chaosConfig, _ := sdk.LoadChaosConfigFromConfigMap(
         context.Background(),
         innerClient,
-        "odh-chaos-config",
+        "operator-chaos-config",
         "opendatahub",
     )
 

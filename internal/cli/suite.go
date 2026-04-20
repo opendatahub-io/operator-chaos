@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/experiment"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/orchestrator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/reporter"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/experiment"
+	"github.com/opendatahub-io/operator-chaos/pkg/orchestrator"
+	"github.com/opendatahub-io/operator-chaos/pkg/reporter"
 	"github.com/spf13/cobra"
 )
 
@@ -80,7 +80,13 @@ func newSuiteCommand() *cobra.Command {
 				}
 			}
 
-			namespace, _ := cmd.Flags().GetString("namespace")
+			// Only override namespace when the user explicitly passes --namespace.
+			// The persistent flag has a default value ("opendatahub"), so always
+			// reading it would silently override per-check namespaces in YAML.
+			var namespace string
+			if cmd.Flags().Changed("namespace") {
+				namespace, _ = cmd.Flags().GetString("namespace")
+			}
 
 			var results []suiteResult
 

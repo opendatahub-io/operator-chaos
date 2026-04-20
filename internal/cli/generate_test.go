@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

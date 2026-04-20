@@ -4,11 +4,11 @@ hide:
   - toc
 ---
 
-# ODH Platform Chaos
+# Operator Chaos
 
 <div style="text-align: center; padding: 40px 0;">
   <p style="font-size: 1.4em; color: #666;">
-    Chaos engineering for OpenDataHub operators.<br>
+    Chaos engineering for Kubernetes operators.<br>
     Test reconciliation semantics, not just pod restarts.
   </p>
   <p>
@@ -17,13 +17,13 @@ hide:
   </p>
 </div>
 
-## Why ODH Platform Chaos?
+## Why Operator Chaos?
 
 Existing chaos tools (Krkn, Litmus, Chaos Mesh) test infrastructure resilience: kill a pod, verify it comes back. But Kubernetes operators manage complex resource graphs — Deployments, Services, ConfigMaps, CRDs — where the real question is:
 
 **"When something breaks, does the operator put everything back the way it should be?"**
 
-ODH Platform Chaos answers this by testing reconciliation: verifying operators restore resources to their intended state after operator-semantic faults like CRD mutation, config drift, and RBAC revocation.
+Operator Chaos answers this by testing reconciliation: verifying operators restore resources to their intended state after operator-semantic faults like CRD mutation, config drift, and RBAC revocation.
 
 ## How It Works
 
@@ -46,6 +46,36 @@ flowchart LR
     style G fill:#ffcc80,stroke:#e65100
     style F fill:#ef9a9a,stroke:#c62828
 ```
+
+## Testing Fidelity
+
+Operator Chaos is a test harness, not a fixed-fidelity tool. The fidelity of your chaos tests depends on the environment you point it at:
+
+| Environment | Fidelity | What You Learn |
+|-------------|----------|----------------|
+| Fake client (fuzz mode) | Unit-level | Reconciler logic handles faults correctly |
+| `kind` / `minikube` | Integration | Operator recovers resources on a real API server |
+| Staging OpenShift | System | Operator works with real RBAC, webhooks, network policies |
+| Production-like OCP | Production | Operator handles real workloads under real constraints |
+
+The tool itself is lightweight (single static binary, ~20MB container image). What changes is the target: same experiments, same verdicts, different confidence levels. Start with fuzz tests during development, graduate to live cluster tests for release qualification.
+
+## Offline vs Live Capabilities
+
+Many `operator-chaos` commands work without any cluster connection:
+
+| Command | Cluster Required? | What It Does |
+|---------|-------------------|--------------|
+| `operator-chaos validate` | No | Validates experiment and knowledge YAML syntax |
+| `operator-chaos types` | No | Lists all available injection types |
+| `operator-chaos init` | No | Scaffolds new experiment files |
+| `operator-chaos preflight --local` | No | Validates knowledge YAML structure without cluster |
+| `operator-chaos run` | Yes | Executes experiments against a live cluster |
+| `operator-chaos suite` | Yes | Runs experiment suites against a live cluster |
+| `operator-chaos preflight` (no `--local`) | Yes | Checks that declared resources exist on cluster |
+| `operator-chaos clean` | Yes | Removes leftover chaos artifacts from cluster |
+
+This means you can validate experiments, lint knowledge models, and scaffold new tests entirely offline, in CI without a cluster, or during development before you have access to a test environment.
 
 ## Four Usage Modes
 

@@ -1,13 +1,13 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: odh-chaos-overview
+  name: operator-chaos-overview
   labels:
-    app.kubernetes.io/name: odh-chaos-controller
+    app.kubernetes.io/name: operator-chaos-controller
 spec:
   instanceSelector:
     matchLabels:
       dashboards: grafana
   configMapRef:
-    name: odh-chaos-grafana-dashboard
+    name: operator-chaos-grafana-dashboard
     key: dashboard.json

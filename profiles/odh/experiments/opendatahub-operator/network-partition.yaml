@@ -1,0 +1,34 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: opendatahub-operator-network-partition
+spec:
+  target:
+    operator: opendatahub-operator
+    component: opendatahub-operator
+    resource: Deployment/opendatahub-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: opendatahub-operator-controller-manager
+        namespace: opendatahub-operator-system
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: control-plane=controller-manager
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the operator pods are network-partitioned, the leader should
+      lose its lease and stop reconciling DSCInitialization and
+      DataScienceCluster resources. Once connectivity is restored, a new
+      leader election should occur and reconciliation should resume.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 3
+    allowedNamespaces:
+      - opendatahub-operator-system

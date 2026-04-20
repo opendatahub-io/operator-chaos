@@ -1,7 +1,7 @@
 # NOTE: The Secret name 'odh-model-controller-webhook-cert' must be verified
 # against the actual deployment. Controller-runtime webhook cert Secrets may
 # follow different naming conventions depending on cert-manager or OLM setup.
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-webhook-cert-corrupt

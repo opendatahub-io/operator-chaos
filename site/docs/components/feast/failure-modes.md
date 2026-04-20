@@ -22,7 +22,7 @@ When the feast-operator is network-partitioned from the API server, FeatureStore
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: feast-network-partition
@@ -72,7 +72,7 @@ When the feast-operator pod is killed, existing FeatureStore instances continue 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: feast-pod-kill
@@ -123,7 +123,7 @@ When the feast-operator ClusterRoleBinding subjects are revoked, the operator lo
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: feast-rbac-revoke

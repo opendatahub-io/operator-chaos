@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/internal/cli/upgrade"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/olm"
-	pkgupgrade "github.com/opendatahub-io/odh-platform-chaos/pkg/upgrade"
+	"github.com/opendatahub-io/operator-chaos/internal/cli/upgrade"
+	"github.com/opendatahub-io/operator-chaos/pkg/olm"
+	pkgupgrade "github.com/opendatahub-io/operator-chaos/pkg/upgrade"
 	"github.com/spf13/cobra"
 )
 

@@ -7,7 +7,7 @@ import (
 
 var (
 	// GroupVersion is the API group and version for ChaosExperiment resources.
-	GroupVersion = schema.GroupVersion{Group: "chaos.opendatahub.io", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "chaos.operatorchaos.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add Go types to the GroupVersionResource scheme.
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

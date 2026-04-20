@@ -22,7 +22,7 @@ When the trustyai-service-operator is network-partitioned from the API server, e
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: trustyai-network-partition
@@ -72,7 +72,7 @@ When the trustyai-service-operator pod is killed, existing TrustyAI services kee
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: trustyai-pod-kill
@@ -123,7 +123,7 @@ When the trustyai-service-operator ClusterRoleBinding subjects are revoked, the 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: trustyai-rbac-revoke

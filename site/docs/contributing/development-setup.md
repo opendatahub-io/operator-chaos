@@ -1,6 +1,6 @@
 # Development Setup
 
-This guide walks you through setting up a local development environment for ODH Platform Chaos.
+This guide walks you through setting up a local development environment for Operator Chaos.
 
 ## Prerequisites
 
@@ -187,7 +187,7 @@ kubectl apply -f config/crd/
 Verify CRD installation:
 
 ```bash
-kubectl get crd chaosexperiments.chaos.opendatahub.io
+kubectl get crd chaosexperiments.chaos.operatorchaos.io
 ```
 
 ### 3. Run Controller Locally
@@ -347,7 +347,7 @@ kubectl apply -f experiments/odh-controller-resilience.yaml
 
 ```bash
 kubectl get chaosexperiment -A
-kubectl get configmap -l app.kubernetes.io/managed-by=odh-chaos
+kubectl get configmap -l app.kubernetes.io/managed-by=operator-chaos
 ```
 
 ## Debugging
@@ -366,13 +366,13 @@ export CHAOS_LOG_LEVEL=debug
 List all resources managed by chaos:
 
 ```bash
-kubectl get all -A -l chaos.opendatahub.io/managed=true
+kubectl get all -A -l chaos.operatorchaos.io/managed=true
 ```
 
 ### View Rollback Annotations
 
 ```bash
-kubectl get networkpolicy odh-chaos-np-app-redis -o yaml | grep -A 5 annotations
+kubectl get networkpolicy operator-chaos-np-app-redis -o yaml | grep -A 5 annotations
 ```
 
 ### Controller Restart Recovery

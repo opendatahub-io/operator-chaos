@@ -3,7 +3,7 @@ package observer
 import (
 	"context"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 type CollateralContributor struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 )
 
 // JUnitReporter writes experiment reports in JUnit XML format,
@@ -58,11 +58,15 @@ func (r *JUnitReporter) WriteSuite(name string, reports []ExperimentReport) erro
 		Tests: len(reports),
 	}
 
+	var totalSeconds float64
 	for _, report := range reports {
+		caseSeconds := report.Evaluation.RecoveryTime.Seconds()
+		totalSeconds += caseSeconds
+
 		tc := junitTestCase{
 			Name:      report.Experiment,
 			ClassName: fmt.Sprintf("chaos.%s", report.Target.Component),
-			Time:      fmt.Sprintf("%.3f", report.Evaluation.RecoveryTime.Seconds()),
+			Time:      fmt.Sprintf("%.3f", caseSeconds),
 		}
 
 		switch report.Evaluation.Verdict {
@@ -93,6 +97,7 @@ func (r *JUnitReporter) WriteSuite(name string, reports []ExperimentReport) erro
 		suite.Cases = append(suite.Cases, tc)
 	}
 
+	suite.Time = fmt.Sprintf("%.3f", totalSeconds)
 	suites := junitTestSuites{Suites: []junitTestSuite{suite}}
 
 	output, err := xml.MarshalIndent(suites, "", "  ")

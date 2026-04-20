@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting odh-
 ## odh-model-controller
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-custom

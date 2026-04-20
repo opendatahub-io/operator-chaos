@@ -1,0 +1,48 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-crd-mutation
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: InferenceService
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    # NOTE: InferenceService has no scalar top-level spec fields that can be
+    # trivially patched. Instead we inject an unknown field ("chaosTest") into
+    # spec to trigger reconciliation. The controller should treat the unknown
+    # field gracefully and not propagate it to downstream resources.
+    #
+    # IMPORTANT: Replace "test-isvc" with the name of an actual InferenceService
+    # resource deployed in the target namespace before running this experiment.
+    parameters:
+      apiVersion: "serving.kserve.io/v1beta1"
+      kind: "InferenceService"
+      name: "test-isvc"
+      field: "chaosTest"
+      value: "injected"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      InferenceService has no scalar top-level spec fields, so this
+      experiment injects an unknown field ("chaosTest") via merge patch.
+      The controller should reconcile without error and not propagate
+      the unknown field to downstream resources. The expected verdict is
+      Resilient — the controller ignores unknown fields gracefully.
+      The chaos framework removes the injected field via TTL-based cleanup
+      after 300s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub

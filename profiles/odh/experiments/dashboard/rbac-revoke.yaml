@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-rbac-revoke
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+    resource: ClusterRoleBinding/odh-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-dashboard
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: odh-dashboard
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the odh-dashboard ClusterRoleBinding subjects are revoked, the
+      dashboard should lose access to cluster-scoped resources like storage
+      classes, nodes, and namespaces. API calls from the UI should return
+      403 errors. Once permissions are restored, normal operation should
+      resume without restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

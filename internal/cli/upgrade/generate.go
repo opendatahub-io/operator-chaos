@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 // GenerateUpgradeOpts contains options for generating an upgrade playbook.
@@ -69,7 +69,7 @@ func GenerateUpgradePlaybook(opts GenerateUpgradeOpts) (*PlaybookSpec, error) {
 	}
 
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "UpgradePlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        fmt.Sprintf("%s-%s-to-%s", opts.Operator, opts.SourceVersion, opts.TargetVersion),
@@ -187,7 +187,7 @@ func GenerateChaosPlaybook(models []*model.OperatorKnowledge, experiments map[st
 	steps = append(steps, PlaybookStep{
 		Name:     "cleanup",
 		Type:     "kubectl",
-		Commands: []string{fmt.Sprintf("odh-chaos clean --namespace %s", namespace)},
+		Commands: []string{fmt.Sprintf("operator-chaos clean --namespace %s", namespace)},
 		DependsOn: []string{prevStep},
 	})
 
@@ -199,7 +199,7 @@ func GenerateChaosPlaybook(models []*model.OperatorKnowledge, experiments map[st
 	name := fmt.Sprintf("chaos-%s", strings.Join(operatorNames, "-"))
 
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "ChaosPlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        name,

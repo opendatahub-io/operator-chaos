@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-config-drift
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+    resource: ConfigMap/kube-rbac-proxy-config
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: v1
+        kind: ConfigMap
+        name: kube-rbac-proxy-config
+        namespace: opendatahub
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: kube-rbac-proxy-config
+      key: config-file.yaml
+      value: '{"authorization":{"static":[{"verb":"*","resource":"invalid"}]}}'
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the kube-rbac-proxy configuration is corrupted, the RBAC proxy
+      sidecar should reject or misconfigure authorization decisions. The
+      dashboard pods may need to be restarted to pick up the restored
+      config. The operator should detect the drift and reconcile.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true

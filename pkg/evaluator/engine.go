@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
 )
 
 // Evaluator classifies experiment outcomes into verdicts based on
@@ -64,15 +64,26 @@ func (e *Evaluator) EvaluateFromFindings(
 	allReconciled := true
 	reconcileCycles := 0
 	recoveryTime := time.Duration(0)
+	reconFound := false
 
+	// Aggregate all reconciliation findings: if any contributor reports
+	// not-reconciled, the overall result is not-reconciled. Take the worst
+	// (highest) cycle count and recovery time across contributors.
 	for _, f := range findings {
 		if f.Source == observer.SourceReconciliation && f.ReconciliationResult != nil {
-			allReconciled = f.ReconciliationResult.AllReconciled
-			reconcileCycles = f.ReconciliationResult.ReconcileCycles
-			recoveryTime = f.ReconciliationResult.RecoveryTime
-			break
+			reconFound = true
+			if !f.ReconciliationResult.AllReconciled {
+				allReconciled = false
+			}
+			if f.ReconciliationResult.ReconcileCycles > reconcileCycles {
+				reconcileCycles = f.ReconciliationResult.ReconcileCycles
+			}
+			if f.ReconciliationResult.RecoveryTime > recoveryTime {
+				recoveryTime = f.ReconciliationResult.RecoveryTime
+			}
 		}
 	}
+	_ = reconFound
 
 	var postCheck *v1alpha1.CheckResult
 	for _, f := range findings {

@@ -2,17 +2,20 @@
 
 ## Prerequisites
 
-Before using ODH Platform Chaos, ensure you have the following:
+Before using Operator Chaos, ensure you have the following:
 
 ### Required for All Modes
 
 - **Go 1.25+** - Check `go.mod` in the repository for the exact version required
 - **controller-runtime v0.23+** - Required for SDK and Fuzz modes
 
+!!! tip "No cluster? You can still use operator-chaos"
+    Several commands work entirely offline: `validate`, `types`, `init`, and `preflight --local`. You can validate experiment YAML, scaffold new experiments, and lint knowledge models without any cluster access. See the [Offline vs Live Capabilities](../index.md#offline-vs-live-capabilities) table for the full list.
+
 ### Required for CLI and SDK Modes
 
-- **Kubernetes/OpenShift cluster** - A live cluster is needed for CLI experiments and SDK middleware
-  - Not required for fuzz testing, which uses a fake client
+- **Kubernetes/OpenShift cluster** - Required for running live experiments (`run`, `suite`, `preflight` without `--local`, `clean`)
+  - Not required for fuzz testing (uses a fake client) or offline commands listed above
 - **cluster-admin RBAC** - CLI experiments perform destructive operations including:
   - Pod deletion
   - RBAC revocation
@@ -27,17 +30,17 @@ Before using ODH Platform Chaos, ensure you have the following:
 Install the CLI using Go:
 
 ```bash
-go install github.com/opendatahub-io/odh-platform-chaos/cmd/odh-chaos@latest
+go install github.com/opendatahub-io/operator-chaos/cmd/operator-chaos@latest
 ```
 
-This will install the `odh-chaos` binary to your `$GOPATH/bin` directory.
+This will install the `operator-chaos` binary to your `$GOPATH/bin` directory.
 
 ## Container Images
 
 Pre-built container images are available at:
 
 ```
-quay.io/opendatahub/odh-chaos:latest
+quay.io/opendatahub/operator-chaos:latest
 ```
 
 Use these images for running the chaos controller in Kubernetes or for CI/CD pipelines.
@@ -47,7 +50,7 @@ Use these images for running the chaos controller in Kubernetes or for CI/CD pip
 Check that the installation was successful:
 
 ```bash
-odh-chaos version
+operator-chaos version
 ```
 
 You should see the version information for the installed CLI.

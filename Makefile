@@ -1,6 +1,6 @@
-BINARY := odh-chaos
-PKG := github.com/opendatahub-io/odh-platform-chaos
-CMD := ./cmd/odh-chaos
+BINARY := operator-chaos
+PKG := github.com/opendatahub-io/operator-chaos
+CMD := ./cmd/operator-chaos
 
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS := -X $(PKG)/internal/cli.Version=$(VERSION)
@@ -8,12 +8,12 @@ LDFLAGS := -X $(PKG)/internal/cli.Version=$(VERSION)
 # Container image settings
 CONTAINER_TOOL ?= podman
 IMAGE_REGISTRY ?= quay.io/opendatahub
-IMAGE_NAME ?= odh-chaos
+IMAGE_NAME ?= operator-chaos
 IMAGE_TAG ?= $(VERSION)
 IMAGE ?= $(IMAGE_REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 # Dashboard image settings
-DASHBOARD_IMAGE_NAME ?= chaos-dashboard
+DASHBOARD_IMAGE_NAME ?= operator-chaos-dashboard
 DASHBOARD_IMAGE ?= $(IMAGE_REGISTRY)/$(DASHBOARD_IMAGE_NAME):$(IMAGE_TAG)
 
 # Code generation tools

@@ -16,7 +16,7 @@ Run structured chaos experiments against a live cluster. The CLI orchestrates th
 ```mermaid
 sequenceDiagram
     participant User
-    participant CLI as odh-chaos CLI
+    participant CLI as operator-chaos CLI
     participant K8s as Kubernetes Cluster
 
     rect rgb(227, 242, 253)
@@ -54,7 +54,7 @@ sequenceDiagram
 Create a basic experiment configuration:
 
 ```bash
-odh-chaos init --component odh-model-controller --type PodKill > experiment.yaml
+operator-chaos init --component odh-model-controller --type PodKill > experiment.yaml
 ```
 
 This generates a skeleton experiment YAML that you can customize.
@@ -64,7 +64,7 @@ This generates a skeleton experiment YAML that you can customize.
 Validate your experiment configuration:
 
 ```bash
-odh-chaos validate experiment.yaml
+operator-chaos validate experiment.yaml
 ```
 
 ### 3. Dry Run
@@ -72,7 +72,7 @@ odh-chaos validate experiment.yaml
 Test the experiment without injecting faults:
 
 ```bash
-odh-chaos run experiment.yaml --dry-run --knowledge knowledge.yaml
+operator-chaos run experiment.yaml --dry-run --knowledge knowledge.yaml
 ```
 
 The dry run validates the full experiment lifecycle without performing destructive operations.
@@ -82,7 +82,7 @@ The dry run validates the full experiment lifecycle without performing destructi
 Run the experiment against your live cluster:
 
 ```bash
-odh-chaos run experiment.yaml --knowledge knowledge.yaml
+operator-chaos run experiment.yaml --knowledge knowledge.yaml
 ```
 
 The framework will:
@@ -98,7 +98,7 @@ The framework will:
 Experiment YAML files default to the `opendatahub` namespace. When running on RHOAI clusters (which use `redhat-ods-applications`), use the `--namespace` flag to override all namespace references in the experiment:
 
 ```bash
-odh-chaos run experiment.yaml \
+operator-chaos run experiment.yaml \
   --knowledge knowledge.yaml \
   --namespace redhat-ods-applications
 ```
@@ -110,7 +110,7 @@ The `--namespace` flag overrides the experiment's metadata namespace, steady-sta
 Here's a complete example of a PodKill experiment:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: podkill-odh-model-controller
@@ -207,7 +207,7 @@ The CLI supports multiple fault injection types:
 List all types with:
 
 ```bash
-odh-chaos types
+operator-chaos types
 ```
 
 ## Next Steps

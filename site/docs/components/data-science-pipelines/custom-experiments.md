@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting data
 ## data-science-pipelines-operator
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-operator-custom
@@ -37,7 +37,7 @@ spec:
 ## ds-pipelines-webhook
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: ds-pipelines-webhook-custom

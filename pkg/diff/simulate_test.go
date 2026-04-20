@@ -6,8 +6,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 func TestGenerateExperimentsRename(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGenerateExperimentsRename(t *testing.T) {
 			if exp.Labels == nil {
 				t.Fatal("expected labels on experiment")
 			}
-			if exp.Labels["chaos.opendatahub.io/upgrade-simulation"] != "true" {
+			if exp.Labels["chaos.operatorchaos.io/upgrade-simulation"] != "true" {
 				t.Error("expected upgrade-simulation label to be 'true'")
 			}
 

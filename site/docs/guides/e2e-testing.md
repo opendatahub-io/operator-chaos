@@ -6,10 +6,10 @@ Step-by-step guide for running chaos experiments against **odh-model-controller*
 
 - OpenShift/Kubernetes cluster with OpenDataHub installed
 - `cluster-admin` RBAC (experiments perform destructive operations)
-- `odh-chaos` CLI built and in your PATH:
+- `operator-chaos` CLI built and in your PATH:
 
 ```bash
-go install github.com/opendatahub-io/odh-platform-chaos/cmd/odh-chaos@latest
+go install github.com/opendatahub-io/odh-platform-chaos/cmd/operator-chaos@latest
 ```
 
 - Verify the target component is running:
@@ -77,13 +77,13 @@ recovery:
 Validate it:
 
 ```bash
-odh-chaos validate knowledge/odh-model-controller.yaml --knowledge
+operator-chaos validate knowledge/odh-model-controller.yaml --knowledge
 ```
 
 Run pre-flight checks against the live cluster:
 
 ```bash
-odh-chaos preflight --knowledge knowledge/odh-model-controller.yaml
+operator-chaos preflight --knowledge knowledge/odh-model-controller.yaml
 ```
 
 ## Step 2: Create Experiment Suite
@@ -136,13 +136,13 @@ Create a directory `experiments/odh-model-controller/` with one YAML per injecti
 Save as `experiments/odh-model-controller/01-podkill.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-podkill
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -180,13 +180,13 @@ spec:
 Save as `experiments/odh-model-controller/02-configdrift.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-configdrift
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -230,13 +230,13 @@ spec:
 Save as `experiments/odh-model-controller/03-networkpartition.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-networkpartition
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -274,13 +274,13 @@ spec:
 Save as `experiments/odh-model-controller/04-crdmutation.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-crdmutation
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -326,13 +326,13 @@ spec:
 Save as `experiments/odh-model-controller/05-finalizerblock.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-finalizerblock
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -370,13 +370,13 @@ spec:
 Save as `experiments/odh-model-controller/06-webhookdisrupt.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-webhookdisrupt
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -417,13 +417,13 @@ spec:
 Save as `experiments/odh-model-controller/07-rbacrevoke.yaml`:
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: omc-rbacrevoke
   labels:
-    chaos.opendatahub.io/component: odh-model-controller
-    chaos.opendatahub.io/suite: e2e
+    chaos.operatorchaos.io/component: odh-model-controller
+    chaos.operatorchaos.io/suite: e2e
 spec:
   target:
     operator: opendatahub-operator
@@ -463,7 +463,7 @@ spec:
 # Validate each experiment
 for f in experiments/odh-model-controller/*.yaml; do
   echo "Validating $f..."
-  odh-chaos validate "$f"
+  operator-chaos validate "$f"
 done
 ```
 
@@ -472,7 +472,7 @@ done
 Test the full experiment lifecycle without injecting any faults:
 
 ```bash
-odh-chaos suite experiments/odh-model-controller/ \
+operator-chaos suite experiments/odh-model-controller/ \
   --knowledge knowledge/odh-model-controller.yaml \
   --dry-run \
   --report-dir results/dry-run/
@@ -485,7 +485,7 @@ Review the dry-run results to ensure all experiments load correctly and steady-s
 Run all experiments sequentially (recommended for first run):
 
 ```bash
-odh-chaos suite experiments/odh-model-controller/ \
+operator-chaos suite experiments/odh-model-controller/ \
   --knowledge knowledge/odh-model-controller.yaml \
   --report-dir results/live/ \
   --timeout 10m
@@ -494,7 +494,7 @@ odh-chaos suite experiments/odh-model-controller/ \
 Or run with distributed locking (for shared clusters):
 
 ```bash
-odh-chaos suite experiments/odh-model-controller/ \
+operator-chaos suite experiments/odh-model-controller/ \
   --knowledge knowledge/odh-model-controller.yaml \
   --report-dir results/live/ \
   --timeout 10m \
@@ -506,13 +506,13 @@ odh-chaos suite experiments/odh-model-controller/ \
 Generate a summary report:
 
 ```bash
-odh-chaos report results/live/ --format summary
+operator-chaos report results/live/ --format summary
 ```
 
 Generate JUnit XML for CI/CD integration:
 
 ```bash
-odh-chaos report results/live/ --format junit --output results/junit/
+operator-chaos report results/live/ --format junit --output results/junit/
 ```
 
 ### Interpreting Verdicts
@@ -536,7 +536,7 @@ A **Failed** verdict means the operator did not restore the resource to its expe
 If any experiment left artifacts behind (e.g., due to a crash or timeout):
 
 ```bash
-odh-chaos clean --namespace opendatahub
+operator-chaos clean --namespace opendatahub
 ```
 
 > **Note**: The `--namespace` flag scopes cleanup to namespace-scoped resources (NetworkPolicies, Leases, ConfigMaps, Secrets, Deployments) in the specified namespace, but also cleans cluster-scoped resources (ClusterRoles, ClusterRoleBindings, ValidatingWebhookConfigurations) with chaos metadata regardless of namespace.
@@ -544,7 +544,7 @@ odh-chaos clean --namespace opendatahub
 To continuously watch for and clean stale artifacts:
 
 ```bash
-odh-chaos clean --namespace opendatahub --watch --interval 30s
+operator-chaos clean --namespace opendatahub --watch --interval 30s
 ```
 
 ## Running Individual Experiments
@@ -553,11 +553,11 @@ You can run any single experiment instead of the full suite:
 
 ```bash
 # Run just the PodKill experiment
-odh-chaos run experiments/odh-model-controller/01-podkill.yaml \
+operator-chaos run experiments/odh-model-controller/01-podkill.yaml \
   --knowledge knowledge/odh-model-controller.yaml
 
 # Run with verbose output for debugging
-odh-chaos run experiments/odh-model-controller/01-podkill.yaml \
+operator-chaos run experiments/odh-model-controller/01-podkill.yaml \
   --knowledge knowledge/odh-model-controller.yaml \
   --verbose
 ```
@@ -574,7 +574,7 @@ ls knowledge/
   kserve.yaml
 
 # Run with --knowledge-dir to enable dependency graph
-odh-chaos run experiments/odh-model-controller/01-podkill.yaml \
+operator-chaos run experiments/odh-model-controller/01-podkill.yaml \
   --knowledge-dir knowledge/
 ```
 

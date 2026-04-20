@@ -3,7 +3,7 @@ package injection
 import (
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -561,7 +561,7 @@ func TestValidateInjectionParams_ClientFault_ConfigMapNameMissingPrefix(t *testi
 	}
 	err := ValidateInjectionParams(spec, blast)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "odh-chaos-")
+	assert.Contains(t, err.Error(), "operator-chaos-")
 }
 
 func TestValidateInjectionParams_ClientFault_ValidDelay(t *testing.T) {

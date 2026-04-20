@@ -1,18 +1,72 @@
 # CI Integration Guide
 
-This guide describes how to integrate `odh-chaos` into continuous integration pipelines. It covers GitHub Actions and Tekton, including JUnit report generation, exit code conventions, and patterns for gating deployments on chaos experiment results.
+This guide describes how to integrate `operator-chaos` into continuous integration pipelines. It covers GitHub Actions and Tekton, including JUnit report generation, exit code conventions, and patterns for gating deployments on chaos experiment results.
+
+## Footprint
+
+`operator-chaos` is designed to be lightweight in CI:
+
+- **Single static binary** (~20MB), compiled from Go with no runtime dependencies
+- **Distroless container image** (`quay.io/opendatahub/operator-chaos`), runs as non-root user `65532`
+- **No sidecar processes**, no daemon, no operator installation required for CLI mode
+- **Offline commands** (`validate`, `types`, `init`, `preflight --local`) need zero infrastructure, not even a cluster
+
+For live experiments you need a Kubernetes cluster. The simplest CI setup uses `kind` to spin up a throwaway cluster in the same GitHub Actions job. For higher-fidelity tests, point `operator-chaos` at a staging OpenShift cluster via kubeconfig.
+
+## Offline Validation in CI
+
+You can gate PRs on experiment and knowledge model correctness without a cluster. These checks run in seconds and catch YAML errors, schema violations, and cross-reference issues before code reaches a test environment.
+
+```yaml
+name: Validate Chaos Experiments
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/**'
+      - 'knowledge/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install operator-chaos
+        run: go install ./cmd/operator-chaos/
+
+      - name: Validate all experiments
+        run: |
+          for f in experiments/**/*.yaml; do
+            operator-chaos validate "$f"
+          done
+
+      - name: Validate all knowledge models
+        run: |
+          for f in knowledge/*.yaml; do
+            operator-chaos validate "$f"
+          done
+
+      - name: Local preflight (no cluster)
+        run: |
+          for f in knowledge/*.yaml; do
+            operator-chaos preflight --knowledge "$f" --local
+          done
+```
+
+This workflow needs no cluster, no container image, and completes in under 30 seconds. Use it alongside the live experiment workflows below.
 
 ## Exit Code Conventions
 
-`odh-chaos` uses standard Unix exit codes. Any non-zero exit causes the CI step to fail.
+`operator-chaos` uses standard Unix exit codes. Any non-zero exit causes the CI step to fail.
 
 | Command | Exit 0 | Non-zero exit |
 |---------|--------|---------------|
-| `odh-chaos preflight --knowledge <path>` | All declared resources found and healthy | Resources missing or unreachable (`%d resources missing, %d resources could not be checked`) |
-| `odh-chaos preflight --knowledge <path> --local` | Knowledge YAML is structurally valid | Validation or cross-reference errors |
-| `odh-chaos run <experiment.yaml>` | Experiment verdict is `Resilient` | Non-Resilient verdict (`experiment verdict: Degraded\|Failed\|Inconclusive`) or infrastructure error |
-| `odh-chaos suite <dir>` | All experiments pass | One or more experiments failed (`%d experiment(s) failed`) |
-| `odh-chaos validate <file.yaml>` | YAML is valid | Validation errors found |
+| `operator-chaos preflight --knowledge <path>` | All declared resources found and healthy | Resources missing or unreachable (`%d resources missing, %d resources could not be checked`) |
+| `operator-chaos preflight --knowledge <path> --local` | Knowledge YAML is structurally valid | Validation or cross-reference errors |
+| `operator-chaos run <experiment.yaml>` | Experiment verdict is `Resilient` | Non-Resilient verdict (`experiment verdict: Degraded\|Failed\|Inconclusive`) or infrastructure error |
+| `operator-chaos suite <dir>` | All experiments pass | One or more experiments failed (`%d experiment(s) failed`) |
+| `operator-chaos validate <file.yaml>` | YAML is valid | Validation errors found |
 
 Because the main entrypoint calls `os.Exit(1)` on any error, CI tools that check process exit codes will correctly detect failures without additional scripting.
 
@@ -20,7 +74,7 @@ Because the main entrypoint calls `os.Exit(1)` on any error, CI tools that check
 
 ### Basic Chaos Suite Workflow
 
-The following workflow runs the full chaos suite on every push to `main` and on pull requests. It uses the `quay.io/opendatahub/odh-chaos` container image.
+The following workflow runs the full chaos suite on every push to `main` and on pull requests. It uses the `quay.io/opendatahub/operator-chaos` container image.
 
 ```yaml
 name: Chaos Suite
@@ -38,7 +92,7 @@ jobs:
   chaos-suite:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/opendatahub/odh-chaos:latest
+      image: quay.io/opendatahub/operator-chaos:latest
       options: --user 65532:65532
 
     steps:
@@ -47,12 +101,12 @@ jobs:
 
       - name: Preflight check
         run: |
-          /odh-chaos preflight \
+          /operator-chaos preflight \
             --knowledge knowledge/operator-knowledge.yaml
 
       - name: Run chaos suite
         run: |
-          /odh-chaos suite experiments/ \
+          /operator-chaos suite experiments/ \
             --knowledge knowledge/operator-knowledge.yaml \
             --report-dir /tmp/chaos-reports \
             --timeout 10m
@@ -87,13 +141,13 @@ To run a single experiment instead of a full suite:
 ```yaml
       - name: Run single experiment
         run: |
-          /odh-chaos run experiments/pod-kill-controller.yaml \
+          /operator-chaos run experiments/pod-kill-controller.yaml \
             --knowledge knowledge/operator-knowledge.yaml \
             --report-dir /tmp/chaos-reports \
             --timeout 5m
 ```
 
-> **Note:** The `run` command's `--report-dir` produces JSON result files, not JUnit XML. To convert to JUnit, run `odh-chaos report --format junit --output /tmp/chaos-reports /tmp/chaos-reports` afterward. The `suite` command generates JUnit XML automatically when `--report-dir` is specified.
+> **Note:** The `run` command's `--report-dir` produces JSON result files, not JUnit XML. To convert to JUnit, run `operator-chaos report --format junit --output /tmp/chaos-reports /tmp/chaos-reports` afterward. The `suite` command generates JUnit XML automatically when `--report-dir` is specified.
 
 ### Dry-run validation in PRs
 
@@ -102,7 +156,7 @@ Use `--dry-run` to validate experiment definitions without executing them:
 ```yaml
       - name: Validate experiments (dry-run)
         run: |
-          /odh-chaos suite experiments/ \
+          /operator-chaos suite experiments/ \
             --knowledge knowledge/operator-knowledge.yaml \
             --dry-run
 ```
@@ -158,12 +212,12 @@ jobs:
           kubectl rollout status deployment/my-operator -n opendatahub --timeout=300s
 
       - name: Preflight
-        uses: docker://quay.io/opendatahub/odh-chaos:latest
+        uses: docker://quay.io/opendatahub/operator-chaos:latest
         with:
           args: preflight --knowledge knowledge/operator-knowledge.yaml
 
       - name: Run chaos gate suite
-        uses: docker://quay.io/opendatahub/odh-chaos:latest
+        uses: docker://quay.io/opendatahub/operator-chaos:latest
         with:
           args: >-
             suite experiments/
@@ -190,7 +244,7 @@ jobs:
           kubectl apply -k deploy/overlays/production/
 ```
 
-The `deploy-production` job has `needs: chaos-gate`, so it will only execute if every chaos experiment passed. A single failed experiment causes a non-zero exit from `odh-chaos suite`, which fails the `chaos-gate` job and blocks the production deployment.
+The `deploy-production` job has `needs: chaos-gate`, so it will only execute if every chaos experiment passed. A single failed experiment causes a non-zero exit from `operator-chaos suite`, which fails the `chaos-gate` job and blocks the production deployment.
 
 ## Tekton
 
@@ -202,12 +256,12 @@ A reusable Tekton Task that runs a chaos experiment suite and produces JUnit out
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: odh-chaos-suite
+  name: operator-chaos-suite
   labels:
     app.kubernetes.io/component: chaos-testing
 spec:
   description: >
-    Run odh-chaos experiments against a target cluster and produce
+    Run operator-chaos experiments against a target cluster and produce
     JUnit XML reports.
   params:
     - name: knowledge-path
@@ -227,7 +281,7 @@ spec:
     - name: image-tag
       type: string
       default: "latest"
-      description: Tag for the odh-chaos container image
+      description: Tag for the operator-chaos container image
   workspaces:
     - name: source
       description: Workspace containing experiments and knowledge files
@@ -235,7 +289,7 @@ spec:
       description: Workspace for JUnit report output
   steps:
     - name: preflight
-      image: quay.io/opendatahub/odh-chaos:$(params.image-tag)
+      image: quay.io/opendatahub/operator-chaos:$(params.image-tag)
       workingDir: $(workspaces.source.path)
       args:
         - preflight
@@ -247,7 +301,7 @@ spec:
         runAsNonRoot: true
 
     - name: run-suite
-      image: quay.io/opendatahub/odh-chaos:$(params.image-tag)
+      image: quay.io/opendatahub/operator-chaos:$(params.image-tag)
       workingDir: $(workspaces.source.path)
       args:
         - suite
@@ -274,7 +328,7 @@ A lightweight task for validating operator readiness before running experiments:
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: odh-chaos-preflight
+  name: operator-chaos-preflight
 spec:
   description: Validate operator knowledge YAML and check cluster readiness.
   params:
@@ -288,7 +342,7 @@ spec:
     - name: source
   steps:
     - name: preflight
-      image: quay.io/opendatahub/odh-chaos:$(params.image-tag)
+      image: quay.io/opendatahub/operator-chaos:$(params.image-tag)
       workingDir: $(workspaces.source.path)
       args:
         - preflight
@@ -308,7 +362,7 @@ A Pipeline that combines preflight, suite execution, and report generation:
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: odh-chaos-pipeline
+  name: operator-chaos-pipeline
   labels:
     app.kubernetes.io/component: chaos-testing
 spec:
@@ -359,7 +413,7 @@ spec:
       runAfter:
         - fetch-source
       taskRef:
-        name: odh-chaos-preflight
+        name: operator-chaos-preflight
       params:
         - name: knowledge-path
           value: $(params.knowledge-path)
@@ -373,7 +427,7 @@ spec:
       runAfter:
         - preflight
       taskRef:
-        name: odh-chaos-suite
+        name: operator-chaos-suite
       params:
         - name: knowledge-path
           value: $(params.knowledge-path)
@@ -394,7 +448,7 @@ spec:
   finally:
     - name: publish-report
       taskRef:
-        name: odh-chaos-report
+        name: operator-chaos-report
       params:
         - name: image-tag
           value: $(params.image-tag)
@@ -413,7 +467,7 @@ A standalone task for converting JSON results to JUnit XML (useful when the suit
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: odh-chaos-report
+  name: operator-chaos-report
 spec:
   description: Generate JUnit XML from chaos experiment JSON results.
   params:
@@ -429,7 +483,7 @@ spec:
       description: Workspace containing JSON result files
   steps:
     - name: generate-report
-      image: quay.io/opendatahub/odh-chaos:$(params.image-tag)
+      image: quay.io/opendatahub/operator-chaos:$(params.image-tag)
       args:
         - report
         - --format
@@ -445,7 +499,7 @@ spec:
 
 ### Gating with Tekton
 
-To gate a deployment on chaos results in Tekton, place a deployment task after `run-suite` in the pipeline using `runAfter`. Because Tekton will not execute downstream tasks when an upstream task fails, a non-zero exit from `odh-chaos suite` automatically blocks the deployment:
+To gate a deployment on chaos results in Tekton, place a deployment task after `run-suite` in the pipeline using `runAfter`. Because Tekton will not execute downstream tasks when an upstream task fails, a non-zero exit from `operator-chaos suite` automatically blocks the deployment:
 
 ```yaml
     - name: deploy-production
@@ -460,11 +514,11 @@ To gate a deployment on chaos results in Tekton, place a deployment task after `
 
 ## JUnit Report Integration
 
-`odh-chaos` produces JUnit XML in two ways:
+`operator-chaos` produces JUnit XML in two ways:
 
-1. **Suite command** -- Use `--report-dir <dir>` to automatically generate `<dir>/suite-results.xml` at the end of a suite run.
+1. **Suite command**: Use `--report-dir <dir>` to automatically generate `<dir>/suite-results.xml` at the end of a suite run.
 
-2. **Report command** -- Use `odh-chaos report --format junit --output <dir> <results-dir>` to generate `<dir>/chaos-results.xml` from previously saved JSON result files.
+2. **Report command**: Use `operator-chaos report --format junit --output <dir> <results-dir>` to generate `<dir>/chaos-results.xml` from previously saved JSON result files.
 
 ### JUnit output structure
 
@@ -477,9 +531,9 @@ The generated XML follows the standard JUnit schema:
 
 ### Integration with CI report tools
 
-**GitHub Actions** -- Use the `mikepenz/action-junit-report` action (shown in the GitHub Actions section above) or the built-in test reporting in GitHub Actions to render results.
+**GitHub Actions**: Use the `mikepenz/action-junit-report` action (shown in the GitHub Actions section above) or the built-in test reporting in GitHub Actions to render results.
 
-**Jenkins** -- Use the JUnit post-build action:
+**Jenkins**: Use the JUnit post-build action:
 ```groovy
 post {
     always {
@@ -488,9 +542,9 @@ post {
 }
 ```
 
-**Tekton with OpenShift** -- The JUnit XML file in the report workspace can be collected by the OpenShift CI system or retrieved from the PVC after the pipeline run completes.
+**Tekton with OpenShift**: The JUnit XML file in the report workspace can be collected by the OpenShift CI system or retrieved from the PVC after the pipeline run completes.
 
-**GitLab CI** -- Declare the report as a JUnit artifact:
+**GitLab CI**: Declare the report as a JUnit artifact:
 ```yaml
 chaos-suite:
   artifacts:
@@ -519,7 +573,7 @@ Only experiments with a `fail` status contribute to the non-zero exit.
 
 ### Container permission denied errors
 
-The `odh-chaos` image runs as non-root user `65532:65532` (distroless/static:nonroot). Ensure:
+The `operator-chaos` image runs as non-root user `65532:65532` (distroless/static:nonroot). Ensure:
 
 - Workspaces and volumes are writable by this UID/GID.
 - The `--report-dir` path is writable.
@@ -530,7 +584,7 @@ The `odh-chaos` image runs as non-root user `65532:65532` (distroless/static:non
 The default timeout per experiment is 10 minutes. For experiments that involve slow recovery (such as operator redeployment), increase the timeout:
 
 ```
-/odh-chaos suite experiments/ --timeout 20m
+/operator-chaos suite experiments/ --timeout 20m
 ```
 
 In Tekton, pass the timeout as a parameter to the task.
@@ -540,7 +594,7 @@ In Tekton, pass the timeout as a parameter to the task.
 When running multiple chaos suites concurrently against the same cluster, use `--distributed-lock` to enable Kubernetes Lease-based locking. This prevents concurrent experiments from interfering with each other:
 
 ```
-/odh-chaos suite experiments/ --distributed-lock --lock-namespace opendatahub
+/operator-chaos suite experiments/ --distributed-lock --lock-namespace opendatahub
 ```
 
 ### JUnit report not generated

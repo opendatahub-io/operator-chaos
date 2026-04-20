@@ -12,9 +12,9 @@ import (
 	"text/template"
 	"unicode"
 
-	upgrade "github.com/opendatahub-io/odh-platform-chaos/internal/cli/upgrade"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/olm"
+	upgrade "github.com/opendatahub-io/operator-chaos/internal/cli/upgrade"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/olm"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -216,7 +216,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"
 )
 
 // reconcilerFactory creates a reconciler wired to the given client.

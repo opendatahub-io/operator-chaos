@@ -3,7 +3,7 @@ package evaluator
 import (
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 )
 
 // EvaluationResult contains the outcome of evaluating a chaos experiment.

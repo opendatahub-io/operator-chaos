@@ -32,7 +32,7 @@ When the inferenceservice-config ConfigMap is corrupted with an invalid deployme
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-config-drift
@@ -86,7 +86,7 @@ InferenceService has no scalar top-level spec fields, so this experiment injects
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-crd-mutation
@@ -150,7 +150,7 @@ When a stuck finalizer prevents an InferenceService from being deleted, the odh-
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-finalizer-block
@@ -207,7 +207,7 @@ When the ingress key in inferenceservice-config is emptied, the odh-model-contro
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-ingress-config-corruption
@@ -263,7 +263,7 @@ Controller detects corrupted leader lease holderIdentity and re-elects leader wi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-leader-lease-corrupt
@@ -320,7 +320,7 @@ When the odh-model-controller pod is network-partitioned from the API server, it
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-network-partition
@@ -370,7 +370,7 @@ When the odh-model-controller pod is killed, Kubernetes should recreate it withi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-pod-kill
@@ -420,7 +420,7 @@ When the odh-model-controller ClusterRoleBinding subjects are revoked, the contr
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-rbac-revoke
@@ -472,7 +472,7 @@ When 30% of Get and 20% of List operations are throttled with 500ms-1s delays, t
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-sdk-api-throttle
@@ -522,7 +522,7 @@ When 70% of Update and 50% of Patch operations fail with conflict errors, the co
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-sdk-conflict-storm
@@ -574,7 +574,7 @@ When 40% of reconcile operations encounter watch channel closures, the controlle
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-sdk-watch-disconnect
@@ -627,7 +627,7 @@ All 7 webhooks fail after TLS cert corruption; cert-manager or operator restores
 # NOTE: The Secret name 'odh-model-controller-webhook-cert' must be verified
 # against the actual deployment. Controller-runtime webhook cert Secrets may
 # follow different naming conventions depending on cert-manager or OLM setup.
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-webhook-cert-corrupt
@@ -679,7 +679,7 @@ When the validating webhook failurePolicy is weakened from Fail to Ignore, inval
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-webhook-disrupt

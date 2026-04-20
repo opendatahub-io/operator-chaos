@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/experiment"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/experiment"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/yaml"
@@ -145,7 +145,7 @@ func TestInit_SharedStructure(t *testing.T) {
 	out := executeInit(t, "--component", "dashboard", "--operator", "my-operator", "--namespace", "my-ns")
 	exp := parseExperiment(t, out)
 
-	assert.Equal(t, "chaos.opendatahub.io/v1alpha1", exp.APIVersion)
+	assert.Equal(t, "chaos.operatorchaos.io/v1alpha1", exp.APIVersion)
 	assert.Equal(t, "ChaosExperiment", exp.Kind)
 	assert.Contains(t, exp.Name, "dashboard")
 	assert.Equal(t, "dashboard", exp.Spec.Target.Component)

@@ -3,7 +3,7 @@ package diff
 import (
 	"testing"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,6 +49,6 @@ func TestIntegrationRealKnowledgeModels(t *testing.T) {
 
 	// All experiments should have upgrade-simulation label
 	for _, exp := range experiments {
-		assert.Equal(t, "true", exp.Labels["chaos.opendatahub.io/upgrade-simulation"])
+		assert.Equal(t, "true", exp.Labels["chaos.operatorchaos.io/upgrade-simulation"])
 	}
 }

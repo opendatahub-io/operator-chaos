@@ -24,7 +24,7 @@ When a stuck finalizer prevents a DataSciencePipelinesApplication from being del
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-finalizer-block
@@ -81,7 +81,7 @@ When the DSPO pod is network-partitioned from the API server, it should lose its
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-network-partition
@@ -131,7 +131,7 @@ When the data-science-pipelines-operator pod is killed, Kubernetes should recrea
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-pod-kill
@@ -182,7 +182,7 @@ When the DSPO ClusterRoleBinding subjects are revoked, the operator should lose 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-rbac-revoke
@@ -233,7 +233,7 @@ When the pipeline version validating webhook failurePolicy is weakened from Fail
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: data-science-pipelines-webhook-disrupt

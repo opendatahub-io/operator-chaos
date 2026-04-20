@@ -16,12 +16,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	dashboard "github.com/opendatahub-io/odh-platform-chaos/dashboard"
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/api"
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/store"
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/watcher"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	dashboard "github.com/opendatahub-io/operator-chaos/dashboard"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/api"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/store"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/watcher"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 func main() {

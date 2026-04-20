@@ -1,7 +1,7 @@
-site_name: ODH Platform Chaos
-site_url: https://ugiordan.github.io/odh-platform-chaos
-repo_url: https://github.com/ugiordan/odh-platform-chaos
-repo_name: ugiordan/odh-platform-chaos
+site_name: Operator Chaos
+site_url: https://ugiordan.github.io/operator-chaos
+repo_url: https://github.com/ugiordan/operator-chaos
+repo_name: ugiordan/operator-chaos
 edit_uri: edit/main/site/docs/
 
 theme:

@@ -18,7 +18,7 @@ func TestIntegrationFullPlaybookExecution(t *testing.T) {
 	// Create a temporary playbook
 	dir := t.TempDir()
 	playbookContent := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: integration-test
@@ -82,7 +82,7 @@ upgrade:
 func TestIntegrationResumeAfterFailure(t *testing.T) {
 	dir := t.TempDir()
 	playbookContent := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: resume-test
@@ -166,7 +166,7 @@ func TestChaosPlaybookIntegration(t *testing.T) {
 
 	// 2. Write a ChaosPlaybook YAML with preflight, chaos steps, and cleanup
 	playbookContent := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosPlaybook
 metadata:
   name: chaos-lifecycle
@@ -189,7 +189,7 @@ chaos:
     - name: cleanup
       type: kubectl
       commands:
-        - "odh-chaos clean"
+        - "operator-chaos clean"
 `
 	playbookPath := filepath.Join(dir, "chaos-playbook.yaml")
 	require.NoError(t, os.WriteFile(playbookPath, []byte(playbookContent), 0644))
@@ -234,7 +234,7 @@ chaos:
 	assert.Contains(t, output, "version validated")
 	assert.Contains(t, output, "chaos experiments: [exp1.yaml]")
 	assert.Contains(t, output, "chaos experiments: [exp2.yaml]")
-	assert.Contains(t, output, "kubectl commands: [odh-chaos clean]")
+	assert.Contains(t, output, "kubectl commands: [operator-chaos clean]")
 
 	// 7. Verify all steps executed in dependency order
 	assert.Equal(t, []string{"preflight", "chaos-kserve", "chaos-dashboard", "cleanup"}, executedSteps)
@@ -245,7 +245,7 @@ func TestUpgradePlaybookMultiPathIntegration(t *testing.T) {
 
 	// 1. Write an UpgradePlaybook YAML with two operators
 	playbookContent := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: multi-path-test

@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: workbenches-webhook-disrupt
+spec:
+  target:
+    operator: workbenches
+    component: odh-notebook-controller
+    resource: MutatingWebhookConfiguration/notebooks.opendatahub.io
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-notebook-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: notebooks.opendatahub.io
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the notebook mutating webhook failurePolicy is weakened from
+      Fail to Ignore, new notebooks may be created without the required
+      sidecar injection and OAuth proxy configuration. The chaos framework
+      restores the original failurePolicy via TTL-based cleanup after 60s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

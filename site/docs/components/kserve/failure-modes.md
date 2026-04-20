@@ -23,7 +23,7 @@ When the deploy key in the inferenceservice-config ConfigMap is overwritten with
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-isvc-config-corruption
@@ -80,7 +80,7 @@ When the ValidatingWebhookConfiguration for InferenceService has its failurePoli
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-isvc-validator-disrupt
@@ -135,7 +135,7 @@ When the llmisvc-controller-manager is network-partitioned from the API server, 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-llm-controller-isolation
@@ -187,7 +187,7 @@ When the kserve-controller-manager pod is killed, the Deployment controller recr
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kserve-main-controller-kill

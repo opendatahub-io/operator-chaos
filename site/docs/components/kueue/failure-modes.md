@@ -24,7 +24,7 @@ When a stuck finalizer prevents a Workload from being deleted, the controller sh
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kueue-finalizer-block
@@ -77,7 +77,7 @@ When kueue-controller-manager pods are network-partitioned from the API server, 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kueue-network-partition
@@ -127,7 +127,7 @@ When the kueue-controller-manager pod is killed, pending workloads should queue 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kueue-pod-kill
@@ -178,7 +178,7 @@ When the kueue ClusterRoleBinding subjects are revoked, the controller can no lo
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kueue-rbac-revoke
@@ -229,7 +229,7 @@ When the kueue validating webhook failurePolicy is weakened from Fail to Ignore,
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kueue-webhook-disrupt

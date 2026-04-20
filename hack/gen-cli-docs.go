@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/opendatahub-io/odh-platform-chaos/internal/cli"
+	"github.com/opendatahub-io/operator-chaos/internal/cli"
 	"github.com/spf13/cobra/doc"
 )
 

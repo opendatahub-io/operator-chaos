@@ -23,7 +23,7 @@ When a stuck finalizer prevents a PyTorchJob from being deleted, the controller 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: training-operator-finalizer-block
@@ -76,7 +76,7 @@ When the training-operator is network-partitioned from the API server, job statu
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: training-operator-network-partition
@@ -126,7 +126,7 @@ When the training-operator pod is killed, running training jobs continue via wor
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: training-operator-pod-kill
@@ -176,7 +176,7 @@ When the training-operator ClusterRoleBinding subjects are revoked, the controll
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: training-operator-rbac-revoke

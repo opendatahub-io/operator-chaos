@@ -15,9 +15,9 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"
 )
 
 // SeedObjects creates minimal K8s objects from an OperatorKnowledge model.

@@ -21,8 +21,8 @@ RUN mkdir -p /workspace/knowledge /workspace/experiments
 ARG VERSION=dev
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
-    -ldflags "-X github.com/opendatahub-io/odh-platform-chaos/internal/cli.Version=${VERSION}" \
-    -o /odh-chaos ./cmd/odh-chaos
+    -ldflags "-X github.com/opendatahub-io/operator-chaos/internal/cli.Version=${VERSION}" \
+    -o /operator-chaos ./cmd/operator-chaos
 
 # NOTE: For production deployments, pin base images by digest
 # e.g., gcr.io/distroless/static:nonroot@sha256:<digest>
@@ -30,10 +30,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
 # Stage 2: Runtime
 FROM gcr.io/distroless/static:nonroot
 
-COPY --from=builder /odh-chaos /odh-chaos
+COPY --from=builder /operator-chaos /operator-chaos
 COPY --from=builder /workspace/knowledge/ /knowledge/
 COPY --from=builder /workspace/experiments/ /experiments/
 
 USER 65532:65532
 
-ENTRYPOINT ["/odh-chaos"]
+ENTRYPOINT ["/operator-chaos"]

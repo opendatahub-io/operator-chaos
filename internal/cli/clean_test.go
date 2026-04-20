@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionregv1 "k8s.io/api/admissionregistration/v1"
@@ -57,7 +57,7 @@ func TestCleanFinalizerFromResource_WithFinalizerRollback(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 
 	cm := &corev1.ConfigMap{
@@ -68,7 +68,7 @@ func TestCleanFinalizerFromResource_WithFinalizerRollback(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     chaosLabelsFor(v1alpha1.FinalizerBlock),
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -81,7 +81,7 @@ func TestCleanFinalizerFromResource_WithFinalizerRollback(t *testing.T) {
 	updated := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "my-config", Namespace: "default"}, updated))
 
-	assert.NotContains(t, updated.Finalizers, "chaos.opendatahub.io/block",
+	assert.NotContains(t, updated.Finalizers, "chaos.operatorchaos.io/block",
 		"chaos finalizer should be removed")
 	_, hasRollback := updated.Annotations[safety.RollbackAnnotationKey]
 	assert.False(t, hasRollback, "rollback annotation should be removed")
@@ -139,7 +139,7 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	labels := chaosLabelsFor(v1alpha1.FinalizerBlock)
 
@@ -151,7 +151,7 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -163,7 +163,7 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -175,7 +175,7 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -187,7 +187,7 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{Port: 80}},
@@ -205,21 +205,21 @@ func TestCleanOrphanedFinalizers_MultipleResourceTypes(t *testing.T) {
 	// Verify each resource was actually cleaned
 	updatedDep := &appsv1.Deployment{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-deploy", Namespace: "test-ns"}, updatedDep))
-	assert.NotContains(t, updatedDep.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updatedDep.Finalizers, "chaos.operatorchaos.io/block")
 	_, hasRollback := updatedDep.Annotations[safety.RollbackAnnotationKey]
 	assert.False(t, hasRollback)
 
 	updatedCM := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-cm", Namespace: "test-ns"}, updatedCM))
-	assert.NotContains(t, updatedCM.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updatedCM.Finalizers, "chaos.operatorchaos.io/block")
 
 	updatedSecret := &corev1.Secret{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-secret", Namespace: "test-ns"}, updatedSecret))
-	assert.NotContains(t, updatedSecret.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updatedSecret.Finalizers, "chaos.operatorchaos.io/block")
 
 	updatedSvc := &corev1.Service{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-svc", Namespace: "test-ns"}, updatedSvc))
-	assert.NotContains(t, updatedSvc.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updatedSvc.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestCleanOrphanedFinalizers_NamespaceWithNoOrphans(t *testing.T) {
@@ -918,7 +918,7 @@ func TestRunClean_FullIntegration(t *testing.T) {
 
 	// 8. ConfigMap with finalizer rollback (for cleanOrphanedFinalizers)
 	finalizerRollback := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	cmFinalizer := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -928,7 +928,7 @@ func TestRunClean_FullIntegration(t *testing.T) {
 				safety.RollbackAnnotationKey: finalizerRollback,
 			},
 			Labels:     chaosLabelsFor(v1alpha1.FinalizerBlock),
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1264,7 +1264,7 @@ func TestCleanOrphanedFinalizers_StatefulSets(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	labels := chaosLabelsFor(v1alpha1.FinalizerBlock)
 
@@ -1276,7 +1276,7 @@ func TestCleanOrphanedFinalizers_StatefulSets(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1287,7 +1287,7 @@ func TestCleanOrphanedFinalizers_StatefulSets(t *testing.T) {
 
 	updated := &appsv1.StatefulSet{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-statefulset", Namespace: "test-ns"}, updated))
-	assert.NotContains(t, updated.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updated.Finalizers, "chaos.operatorchaos.io/block")
 	_, hasRollback := updated.Annotations[safety.RollbackAnnotationKey]
 	assert.False(t, hasRollback, "rollback annotation should be removed")
 	_, hasManagedBy := updated.Labels[safety.ManagedByLabel]
@@ -1299,7 +1299,7 @@ func TestCleanOrphanedFinalizers_DaemonSets(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	labels := chaosLabelsFor(v1alpha1.FinalizerBlock)
 
@@ -1311,7 +1311,7 @@ func TestCleanOrphanedFinalizers_DaemonSets(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1322,7 +1322,7 @@ func TestCleanOrphanedFinalizers_DaemonSets(t *testing.T) {
 
 	updated := &appsv1.DaemonSet{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-daemonset", Namespace: "test-ns"}, updated))
-	assert.NotContains(t, updated.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updated.Finalizers, "chaos.operatorchaos.io/block")
 	_, hasRollback := updated.Annotations[safety.RollbackAnnotationKey]
 	assert.False(t, hasRollback, "rollback annotation should be removed")
 }
@@ -1332,7 +1332,7 @@ func TestCleanOrphanedFinalizers_Jobs(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	labels := chaosLabelsFor(v1alpha1.FinalizerBlock)
 
@@ -1344,7 +1344,7 @@ func TestCleanOrphanedFinalizers_Jobs(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackData,
 			},
 			Labels:     labels,
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1355,7 +1355,7 @@ func TestCleanOrphanedFinalizers_Jobs(t *testing.T) {
 
 	updated := &batchv1.Job{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "test-job", Namespace: "test-ns"}, updated))
-	assert.NotContains(t, updated.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updated.Finalizers, "chaos.operatorchaos.io/block")
 	_, hasRollback := updated.Annotations[safety.RollbackAnnotationKey]
 	assert.False(t, hasRollback, "rollback annotation should be removed")
 }
@@ -1365,7 +1365,7 @@ func TestCleanOrphanedFinalizers_AllSevenResourceTypes(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	labels := chaosLabelsFor(v1alpha1.FinalizerBlock)
 
@@ -1373,28 +1373,28 @@ func TestCleanOrphanedFinalizers_AllSevenResourceTypes(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-deploy", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-cm", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-secret", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-svc", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 		Spec: corev1.ServiceSpec{Ports: []corev1.ServicePort{{Port: 80}}},
 	}
@@ -1402,21 +1402,21 @@ func TestCleanOrphanedFinalizers_AllSevenResourceTypes(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-ss", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 	ds := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-ds", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-job", Namespace: "test-ns",
 			Annotations: map[string]string{safety.RollbackAnnotationKey: rollbackData},
-			Labels: labels, Finalizers: []string{"chaos.opendatahub.io/block"},
+			Labels: labels, Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1477,7 +1477,7 @@ func TestCleanCRDMutationFromResource_WithFinalizerRollback(t *testing.T) {
 
 	// Finalizer rollback does NOT have "apiVersion" and "kind" keys
 	rollbackData := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 
 	cm := &corev1.ConfigMap{
@@ -1668,7 +1668,7 @@ func TestCleanCRDMutations_SkipsNonCRDMutationRollback(t *testing.T) {
 
 	// Finalizer rollback on a Deployment — should NOT be cleaned by CRD mutation scan
 	finalizerRollback := mustMarshal(t, map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 
 	dep := &appsv1.Deployment{
@@ -1747,7 +1747,7 @@ func TestCleanFinalizerFromResource_WithEnvelopeFormat(t *testing.T) {
 	ctx := context.Background()
 
 	rollbackStr, err := safety.WrapRollbackData(map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	})
 	require.NoError(t, err)
 
@@ -1759,7 +1759,7 @@ func TestCleanFinalizerFromResource_WithEnvelopeFormat(t *testing.T) {
 				safety.RollbackAnnotationKey: rollbackStr,
 			},
 			Labels:     chaosLabelsFor(v1alpha1.FinalizerBlock),
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -1769,7 +1769,7 @@ func TestCleanFinalizerFromResource_WithEnvelopeFormat(t *testing.T) {
 
 	updated := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "envelope-finalizer-cm", Namespace: "default"}, updated))
-	assert.NotContains(t, updated.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, updated.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestCleanCRDMutationFromResource_WithEnvelopeFormat(t *testing.T) {

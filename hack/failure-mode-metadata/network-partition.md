@@ -17,7 +17,7 @@ spec_fields:
 
 ## How It Works
 
-NetworkPartition creates a Kubernetes NetworkPolicy that blocks all ingress and egress traffic for pods matching the label selector. The policy name is sanitized (truncated to 63 chars with a hash suffix for uniqueness) and labeled with `app.kubernetes.io/managed-by: odh-chaos` for cleanup.
+NetworkPartition creates a Kubernetes NetworkPolicy that blocks all ingress and egress traffic for pods matching the label selector. The policy name is sanitized (truncated to 63 chars with a hash suffix for uniqueness) and labeled with `app.kubernetes.io/managed-by: operator-chaos` for cleanup.
 
 **API calls:**
 1. Parse `labelSelector` into `metav1.LabelSelector`
@@ -26,7 +26,7 @@ NetworkPartition creates a Kubernetes NetworkPolicy that blocks all ingress and 
 
 **Cleanup:** Deletes the created NetworkPolicy. Traffic resumes immediately after deletion (no pod restart needed).
 
-**Crash safety:** If the chaos tool crashes, the NetworkPolicy persists. Use `odh-chaos clean` to find and remove orphaned policies by the `managed-by` label.
+**Crash safety:** If the chaos tool crashes, the NetworkPolicy persists. Use `operator-chaos clean` to find and remove orphaned policies by the `managed-by` label.
 
 ## Disruption Rubric
 

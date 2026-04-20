@@ -19,7 +19,7 @@ func writeTestPlaybook(t *testing.T, content string) string {
 }
 
 const validPlaybook = `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: test-upgrade
@@ -65,7 +65,7 @@ func TestLoadPlaybookValid(t *testing.T) {
 
 func TestLoadPlaybookAllStepTypes(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: full-test
@@ -121,7 +121,7 @@ upgrade:
 
 func TestValidatePlaybookMissingName(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   description: "No name"
@@ -152,7 +152,7 @@ upgrade:
 
 func TestValidatePlaybookDuplicateStepNames(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: test
@@ -186,7 +186,7 @@ upgrade:
 
 func TestValidatePlaybookUnknownStepType(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: test
@@ -218,7 +218,7 @@ upgrade:
 
 func TestValidatePlaybookMissingPath(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: test
@@ -244,7 +244,7 @@ upgrade:
 
 func TestHasShellCommands(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: test
@@ -352,7 +352,7 @@ func TestResolveKnowledgeDirNoOLMStep(t *testing.T) {
 
 func TestLoadChaosPlaybook(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosPlaybook
 metadata:
   name: chaos-test
@@ -395,7 +395,7 @@ func TestLoadUpgradePlaybookSinglePathBackwardCompat(t *testing.T) {
 
 func TestLoadUpgradePlaybookMultiPath(t *testing.T) {
 	content := `
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: UpgradePlaybook
 metadata:
   name: multi-path-test
@@ -448,7 +448,7 @@ upgrade:
 
 func TestValidateChaosPlaybookValid(t *testing.T) {
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "ChaosPlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        "chaos-test",
@@ -467,7 +467,7 @@ func TestValidateChaosPlaybookValid(t *testing.T) {
 
 func TestValidateChaosPlaybookMissingKnowledgeDir(t *testing.T) {
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "ChaosPlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        "chaos-test",
@@ -508,7 +508,7 @@ func TestValidateUnknownKind(t *testing.T) {
 
 func TestValidateUpgradePlaybookMultiPathMissingPathRef(t *testing.T) {
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "UpgradePlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        "multi-path",
@@ -540,7 +540,7 @@ func TestValidateUpgradePlaybookMultiPathMissingPathRef(t *testing.T) {
 
 func TestValidateDependsOnReferencesExistingStep(t *testing.T) {
 	pb := &PlaybookSpec{
-		APIVersion: "chaos.opendatahub.io/v1alpha1",
+		APIVersion: "chaos.operatorchaos.io/v1alpha1",
 		Kind:       "ChaosPlaybook",
 		Metadata: PlaybookMetadata{
 			Name:        "deps-test",

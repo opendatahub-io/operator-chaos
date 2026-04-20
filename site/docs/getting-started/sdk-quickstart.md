@@ -120,7 +120,7 @@ This is important for test assertions — you may want to verify that your recon
 You can load fault configuration from a Kubernetes ConfigMap at runtime:
 
 ```go
-// ConfigMap "odh-chaos-config" with key "config" containing JSON:
+// ConfigMap "operator-chaos-config" with key "config" containing JSON:
 // {"active": true, "faults": {"get": {"errorRate": 0.5, "error": "not found"}}}
 fc, err := sdk.ParseFaultConfigFromData(configMap.Data)
 chaosClient := sdk.NewChaosClient(realClient, fc)

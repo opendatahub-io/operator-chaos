@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -18,12 +18,12 @@ const maxNameLength = 253
 const maxParameterValueLength = 65536 // 64KB
 
 // chaosConfigMapPrefix is the required prefix for ClientFault ConfigMap names.
-const chaosConfigMapPrefix = "odh-chaos-"
+const chaosConfigMapPrefix = "operator-chaos-"
 
 // chaosManagedPrefixes are resource name prefixes used by the chaos framework.
 // Targeting these resources with chaos experiments is forbidden to prevent
 // self-destruction or rollback corruption.
-var chaosManagedPrefixes = []string{"chaos-rollback-", "chaos-result-", "odh-chaos-", "chaos-controller-"}
+var chaosManagedPrefixes = []string{"chaos-rollback-", "chaos-result-", "operator-chaos-", "chaos-controller-"}
 
 var validNamePattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9.\-]*[a-z0-9])?$`)
 var validFieldPattern = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_\-]*$`)
@@ -122,7 +122,7 @@ func validateCRDMutationParams(spec v1alpha1.InjectionSpec) error {
 	if kind == "" {
 		return fmt.Errorf("CRDMutation requires non-empty 'kind' parameter")
 	}
-	if kind == "ChaosExperiment" && strings.Contains(apiVersion, "chaos.opendatahub.io") {
+	if kind == "ChaosExperiment" && strings.Contains(apiVersion, "chaos.operatorchaos.io") {
 		return fmt.Errorf("CRDMutation cannot target ChaosExperiment CRs (self-modification is forbidden)")
 	}
 	if _, ok := spec.Parameters["name"]; !ok {
@@ -436,7 +436,7 @@ func validateFinalizerBlockParams(spec v1alpha1.InjectionSpec) error {
 	// Reject self-targeting of ChaosExperiment CRs to prevent deadlock:
 	// a stuck finalizer on a ChaosExperiment would block its own deletion/cleanup.
 	apiVersion := spec.Parameters["apiVersion"]
-	if kind == "ChaosExperiment" && (apiVersion == "" || strings.Contains(apiVersion, "chaos.opendatahub.io")) {
+	if kind == "ChaosExperiment" && (apiVersion == "" || strings.Contains(apiVersion, "chaos.operatorchaos.io")) {
 		return fmt.Errorf("FinalizerBlock cannot target ChaosExperiment CRs (self-sabotage is forbidden)")
 	}
 
@@ -451,7 +451,7 @@ func validateFinalizerBlockParams(spec v1alpha1.InjectionSpec) error {
 	}
 
 	// Reject targeting resources with the controller's cleanup finalizer name
-	if spec.Parameters["finalizerName"] == "chaos.opendatahub.io/cleanup" {
+	if spec.Parameters["finalizerName"] == "chaos.operatorchaos.io/cleanup" {
 		return fmt.Errorf("FinalizerBlock cannot use finalizer name %q (conflicts with controller cleanup finalizer)", spec.Parameters["finalizerName"])
 	}
 

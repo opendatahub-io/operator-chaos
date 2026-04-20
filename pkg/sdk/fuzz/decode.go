@@ -1,7 +1,7 @@
 package fuzz
 
 import (
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
 )
 
 // allOperations is the ordered list of operations (bit position = index).

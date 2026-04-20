@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/clock"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/evaluator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/injection"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/observer"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/orchestrator"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/clock"
+	"github.com/opendatahub-io/operator-chaos/pkg/evaluator"
+	"github.com/opendatahub-io/operator-chaos/pkg/injection"
+	"github.com/opendatahub-io/operator-chaos/pkg/observer"
+	"github.com/opendatahub-io/operator-chaos/pkg/orchestrator"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	cleanupFinalizer      = "chaos.opendatahub.io/cleanup"
+	cleanupFinalizer      = "chaos.operatorchaos.io/cleanup"
 	immediateRequeue      = 100 * time.Millisecond
 	lockContentionRequeue = 30 * time.Second
 	maxObserveRequeue     = 30 * time.Second
@@ -55,9 +55,9 @@ type PhaseOrchestrator interface {
 // using deny-lists for system-critical resources. Cluster admins should review
 // ChaosExperiment CRs before approval.
 //
-//+kubebuilder:rbac:groups=chaos.opendatahub.io,resources=chaosexperiments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=chaos.opendatahub.io,resources=chaosexperiments/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=chaos.opendatahub.io,resources=chaosexperiments/finalizers,verbs=update
+//+kubebuilder:rbac:groups=chaos.operatorchaos.io,resources=chaosexperiments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=chaos.operatorchaos.io,resources=chaosexperiments/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=chaos.operatorchaos.io,resources=chaosexperiments/finalizers,verbs=update
 //+kubebuilder:rbac:groups=coordination.k8s.io,resources=leases,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch;update
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;delete

@@ -52,8 +52,8 @@ func LoadPlaybook(path string) (*PlaybookSpec, error) {
 func ValidatePlaybook(pb *PlaybookSpec) []string {
 	var errs []string
 
-	if pb.APIVersion != "" && pb.APIVersion != "chaos.opendatahub.io/v1alpha1" {
-		errs = append(errs, fmt.Sprintf("unsupported apiVersion %q (expected chaos.opendatahub.io/v1alpha1)", pb.APIVersion))
+	if pb.APIVersion != "" && pb.APIVersion != "chaos.operatorchaos.io/v1alpha1" {
+		errs = append(errs, fmt.Sprintf("unsupported apiVersion %q (expected chaos.operatorchaos.io/v1alpha1)", pb.APIVersion))
 	}
 
 	// Common metadata validation

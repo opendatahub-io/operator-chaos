@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting mode
 ## modelmesh-controller
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: modelmesh-controller-custom

@@ -8,7 +8,7 @@ Injects errors, latency, or throttling into operator API calls via SDK integrati
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `configMapName` | `string` | No | `odh-chaos-config` | Name of the ConfigMap to store fault configuration |
+| `configMapName` | `string` | No | `operator-chaos-config` | Name of the ConfigMap to store fault configuration |
 | `faults` | `JSON` | Yes | - | JSON object mapping operation names to fault rules |
 | `ttl` | `duration` | No | `300s` | Auto-cleanup duration |
 

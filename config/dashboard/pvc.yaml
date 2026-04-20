@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: odh-chaos-dashboard-data
+  name: operator-chaos-dashboard-data
   labels:
-    app.kubernetes.io/name: odh-chaos-dashboard
-    app.kubernetes.io/part-of: odh-platform-chaos
+    app.kubernetes.io/name: operator-chaos-dashboard
+    app.kubernetes.io/part-of: operator-chaos
 spec:
   accessModes:
     - ReadWriteOnce

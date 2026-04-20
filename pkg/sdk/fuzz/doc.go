@@ -34,10 +34,10 @@
 //
 // # Knowledge-Driven Generation
 //
-// The odh-chaos CLI can automatically generate fuzz test scaffolding from
+// The operator-chaos CLI can automatically generate fuzz test scaffolding from
 // operator knowledge models:
 //
-//	odh-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml
+//	operator-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml
 //
 // This generates a compilable Go file with per-component Fuzz* functions,
 // seed objects, invariants, and seed corpus entries derived from the knowledge

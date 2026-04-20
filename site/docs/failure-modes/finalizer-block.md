@@ -11,7 +11,7 @@ Adds a stuck finalizer to a resource to test deletion handling and cleanup logic
 | `apiVersion` | `string` | No | `v1` | API version of the target resource |
 | `kind` | `string` | Yes | - | Kind of the target resource |
 | `name` | `string` | Yes | - | Name of the target resource |
-| `finalizer` | `string` | No | `chaos.opendatahub.io/block` | Finalizer string to add |
+| `finalizer` | `string` | No | `chaos.operatorchaos.io/block` | Finalizer string to add |
 | `ttl` | `duration` | No | `300s` | Auto-cleanup duration |
 
 ## How It Works
@@ -26,7 +26,7 @@ FinalizerBlock adds a finalizer to the target resource using an Unstructured cli
 
 **Cleanup:** Removes the added finalizer. If the resource is in Terminating state, this unblocks deletion.
 
-**Crash safety:** The finalizer persists on the resource. `Revert` removes it. Use `odh-chaos clean` for orphaned finalizers.
+**Crash safety:** The finalizer persists on the resource. `Revert` removes it. Use `operator-chaos clean` for orphaned finalizers.
 
 ## Disruption Rubric
 

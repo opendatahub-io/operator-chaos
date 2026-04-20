@@ -3,7 +3,7 @@ package faults
 import (
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
 )
 
 // DeadlockInjectConfig creates a fault that simulates a deadlock condition.

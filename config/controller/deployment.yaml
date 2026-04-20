@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odh-chaos-controller
+  name: operator-chaos-controller
   labels:
-    app.kubernetes.io/name: odh-chaos-controller
-    app.kubernetes.io/part-of: odh-platform-chaos
+    app.kubernetes.io/name: operator-chaos-controller
+    app.kubernetes.io/part-of: operator-chaos
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: odh-chaos-controller
+      app.kubernetes.io/name: operator-chaos-controller
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: odh-chaos-controller
-        app.kubernetes.io/part-of: odh-platform-chaos
+        app.kubernetes.io/name: operator-chaos-controller
+        app.kubernetes.io/part-of: operator-chaos
     spec:
-      serviceAccountName: odh-chaos-controller
+      serviceAccountName: operator-chaos-controller
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: controller
-          image: quay.io/opendatahub/odh-chaos:latest
+          image: quay.io/opendatahub/operator-chaos:latest
           args:
             - controller
             - start

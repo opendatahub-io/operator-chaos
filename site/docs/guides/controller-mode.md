@@ -4,7 +4,7 @@ Controller mode runs chaos experiments as Kubernetes Custom Resources (CRs), man
 
 ## Why Controller Mode?
 
-**CLI mode** (via `odh-chaos run`) is great for:
+**CLI mode** (via `operator-chaos run`) is great for:
 
 - Local development and testing
 - CI/CD pipelines with ephemeral clusters
@@ -119,22 +119,22 @@ kubectl apply -k config/default
 
 This creates:
 
-- Namespace: `odh-chaos-system`
-- CRD: `chaosexperiments.chaos.opendatahub.io`
-- ServiceAccount: `odh-chaos-controller`
+- Namespace: `operator-chaos-system`
+- CRD: `chaosexperiments.chaos.operatorchaos.io`
+- ServiceAccount: `operator-chaos-controller`
 - ClusterRole/ClusterRoleBinding: RBAC for controller
-- Deployment: `odh-chaos-controller` (1 replica)
+- Deployment: `operator-chaos-controller` (1 replica)
 
 **Verify deployment:**
 
 ```bash
-kubectl get deployment -n odh-chaos-system
+kubectl get deployment -n operator-chaos-system
 # NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
-# odh-chaos-controller   1/1     1            1           30s
+# operator-chaos-controller   1/1     1            1           30s
 
-kubectl get crd chaosexperiments.chaos.opendatahub.io
+kubectl get crd chaosexperiments.chaos.operatorchaos.io
 # NAME                                    CREATED AT
-# chaosexperiments.chaos.opendatahub.io   2024-03-30T12:00:00Z
+# chaosexperiments.chaos.operatorchaos.io   2024-03-30T12:00:00Z
 ```
 
 ### Load Knowledge Models
@@ -146,11 +146,11 @@ The controller needs knowledge models to validate experiments and perform steady
 ```bash
 # Create ConfigMap from knowledge/ directory
 kubectl create configmap operator-knowledge \
-  -n odh-chaos-system \
+  -n operator-chaos-system \
   --from-file=knowledge/
 
 # Update controller deployment to mount ConfigMap
-kubectl patch deployment odh-chaos-controller -n odh-chaos-system --type=json -p='[
+kubectl patch deployment operator-chaos-controller -n operator-chaos-system --type=json -p='[
   {
     "op": "add",
     "path": "/spec/template/spec/containers/0/args/-",
@@ -176,7 +176,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: knowledge-pvc
-  namespace: odh-chaos-system
+  namespace: operator-chaos-system
 spec:
   accessModes: [ReadOnlyMany]
   resources:
@@ -190,7 +190,7 @@ spec:
 **Verify knowledge models loaded:**
 
 ```bash
-kubectl logs -n odh-chaos-system deployment/odh-chaos-controller | grep "Loaded knowledge"
+kubectl logs -n operator-chaos-system deployment/operator-chaos-controller | grep "Loaded knowledge"
 # Loaded knowledge models: kserve, odh-model-controller, dashboard
 ```
 
@@ -199,7 +199,7 @@ kubectl logs -n odh-chaos-system deployment/odh-chaos-controller | grep "Loaded 
 ### ChaosExperiment CR Structure
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: my-experiment
@@ -248,11 +248,11 @@ spec:
 ### Example: PodKill Experiment
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-model-controller-pod-kill
-  namespace: odh-chaos-experiments
+  namespace: operator-chaos-experiments
 spec:
   target:
     operator: odh-model-controller
@@ -310,11 +310,11 @@ kubectl get chaosexperiment odh-model-controller-pod-kill -w
 ### Example: ConfigDrift Experiment
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: inferenceservice-config-drift
-  namespace: odh-chaos-experiments
+  namespace: operator-chaos-experiments
 spec:
   target:
     operator: odh-model-controller
@@ -354,11 +354,11 @@ spec:
 ### Example: RBACRevoke Experiment (High Danger)
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: rbac-revoke-test
-  namespace: odh-chaos-experiments
+  namespace: operator-chaos-experiments
 spec:
   target:
     operator: odh-model-controller
@@ -534,13 +534,13 @@ The controller uses Kubernetes Leases to prevent concurrent experiments on the s
 
 1. Before injecting, controller acquires a lease for the target operator
 2. Lease name: `chaos-lock-<operator-name>`
-3. Lease namespace: `odh-chaos-system` (configurable via `--lock-namespace`)
+3. Lease namespace: `operator-chaos-system` (configurable via `--lock-namespace`)
 4. If another experiment holds the lease, the controller requeues with backoff
 
 **View active locks:**
 
 ```bash
-kubectl get leases -n odh-chaos-system
+kubectl get leases -n operator-chaos-system
 # NAME                              HOLDER                          AGE
 # chaos-lock-odh-model-controller   my-experiment                   45s
 ```
@@ -549,7 +549,7 @@ The lock is released when the experiment reaches `Complete` or `Aborted`.
 
 ### Finalizers
 
-The controller adds a finalizer (`chaos.opendatahub.io/cleanup`) during the `Injecting` phase. This ensures:
+The controller adds a finalizer (`chaos.operatorchaos.io/cleanup`) during the `Injecting` phase. This ensures:
 
 - If the CR is deleted mid-experiment, the controller reverts the fault before deleting
 - If the controller crashes, the finalizer prevents orphaned faults
@@ -586,7 +586,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: nightly-chaos
-  namespace: odh-chaos-experiments
+  namespace: operator-chaos-experiments
 spec:
   schedule: "0 2 * * *"  # 2 AM daily
   jobTemplate:
@@ -602,11 +602,11 @@ spec:
                 - -c
                 - |
                   cat <<EOF | kubectl apply -f -
-                  apiVersion: chaos.opendatahub.io/v1alpha1
+                  apiVersion: chaos.operatorchaos.io/v1alpha1
                   kind: ChaosExperiment
                   metadata:
                     generateName: nightly-podkill-
-                    namespace: odh-chaos-experiments
+                    namespace: operator-chaos-experiments
                   spec:
                     target:
                       operator: odh-model-controller
@@ -656,7 +656,7 @@ spec:
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: odh-chaos-experiments
+    namespace: operator-chaos-experiments
   syncPolicy:
     automated:
       prune: true
@@ -691,10 +691,10 @@ If experiments are stuck or the controller is misbehaving:
 
 ```bash
 # Delete the controller deployment (stops new experiments)
-kubectl delete deployment odh-chaos-controller -n odh-chaos-system
+kubectl delete deployment operator-chaos-controller -n operator-chaos-system
 
 # Use the CLI to clean up faults manually
-odh-chaos clean --namespace <namespace>
+operator-chaos clean --namespace <namespace>
 ```
 
 ## Troubleshooting
@@ -704,7 +704,7 @@ odh-chaos clean --namespace <namespace>
 **Check controller logs:**
 
 ```bash
-kubectl logs -n odh-chaos-system deployment/odh-chaos-controller
+kubectl logs -n operator-chaos-system deployment/operator-chaos-controller
 ```
 
 **Common causes:**

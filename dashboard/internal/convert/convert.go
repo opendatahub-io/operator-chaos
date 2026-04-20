@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/store"
+	"github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/store"
 )
 
 const (
-	labelSuiteName       = "chaos.opendatahub.io/suite-name"
-	labelSuiteRunID      = "chaos.opendatahub.io/suite-run-id"
-	labelOperatorVersion = "chaos.opendatahub.io/operator-version"
+	labelSuiteName       = "chaos.operatorchaos.io/suite-name"
+	labelSuiteRunID      = "chaos.operatorchaos.io/suite-run-id"
+	labelOperatorVersion = "chaos.operatorchaos.io/operator-version"
 )
 
 func FromCR(cr *v1alpha1.ChaosExperiment) (*store.Experiment, error) {

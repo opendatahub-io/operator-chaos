@@ -50,7 +50,7 @@ func TestParseFaultConfigInvalidJSON(t *testing.T) {
 }
 
 func TestConfigMapConstants(t *testing.T) {
-	assert.Equal(t, "odh-chaos-config", ChaosConfigMapName)
+	assert.Equal(t, "operator-chaos-config", ChaosConfigMapName)
 	assert.Equal(t, "config", ChaosConfigKey)
 }
 

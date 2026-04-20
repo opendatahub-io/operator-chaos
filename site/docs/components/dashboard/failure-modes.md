@@ -23,7 +23,7 @@ When the kube-rbac-proxy configuration is corrupted, the RBAC proxy sidecar shou
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: dashboard-config-drift
@@ -77,7 +77,7 @@ When odh-dashboard pods are network-partitioned from the API server, the dashboa
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: dashboard-network-partition
@@ -127,7 +127,7 @@ When one odh-dashboard pod is killed, the remaining replica should continue serv
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: dashboard-pod-kill
@@ -178,7 +178,7 @@ When the odh-dashboard ClusterRoleBinding subjects are revoked, the dashboard sh
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: dashboard-rbac-revoke

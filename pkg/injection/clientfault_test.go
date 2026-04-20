@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -46,7 +46,7 @@ func TestClientFaultValidate(t *testing.T) {
 				Type: v1alpha1.ClientFault,
 				Parameters: map[string]string{
 					"faults":        `{"update":{"errorRate":0.5,"error":"conflict"}}`,
-					"configMapName": "odh-chaos-custom",
+					"configMapName": "operator-chaos-custom",
 				},
 			},
 			wantErr: false,
@@ -225,7 +225,7 @@ func TestClientFaultInjectWithCustomConfigMapName(t *testing.T) {
 		Type: v1alpha1.ClientFault,
 		Parameters: map[string]string{
 			"faults":        `{"list":{"errorRate":1.0,"error":"timeout"}}`,
-			"configMapName": "odh-chaos-custom",
+			"configMapName": "operator-chaos-custom",
 		},
 	}
 
@@ -235,7 +235,7 @@ func TestClientFaultInjectWithCustomConfigMapName(t *testing.T) {
 	// Verify it used the custom ConfigMap name
 	cm := &corev1.ConfigMap{}
 	require.NoError(t, fakeClient.Get(ctx, client.ObjectKey{
-		Name:      "odh-chaos-custom",
+		Name:      "operator-chaos-custom",
 		Namespace: "opendatahub",
 	}, cm))
 	assert.Contains(t, cm.Data[sdk.ChaosConfigKey], "timeout")

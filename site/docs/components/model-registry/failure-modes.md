@@ -24,7 +24,7 @@ When a stuck finalizer prevents a ModelRegistry from being deleted, the operator
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: model-registry-finalizer-block
@@ -81,7 +81,7 @@ When the model-registry-operator pod is network-partitioned from the API server,
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: model-registry-network-partition
@@ -131,7 +131,7 @@ When the model-registry-operator pod is killed, Kubernetes should recreate it wi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: model-registry-pod-kill
@@ -182,7 +182,7 @@ When the model-registry-operator ClusterRoleBinding subjects are revoked, the op
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: model-registry-rbac-revoke
@@ -233,7 +233,7 @@ When the ModelRegistry validating webhook failurePolicy is weakened from Fail to
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: model-registry-webhook-disrupt

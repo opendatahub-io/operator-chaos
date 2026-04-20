@@ -7,7 +7,7 @@ spec_fields:
   - name: configMapName
     type: string
     required: false
-    default: "odh-chaos-config"
+    default: "operator-chaos-config"
     description: Name of the ConfigMap to store fault configuration
   - name: faults
     type: JSON

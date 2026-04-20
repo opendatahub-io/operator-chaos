@@ -1,6 +1,6 @@
 package faults
 
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+import "github.com/opendatahub-io/operator-chaos/pkg/sdk"
 
 // ForceErrorConfig creates a fault that forces an error return.
 func ForceErrorConfig(errMsg string, rate float64) sdk.FaultSpec {

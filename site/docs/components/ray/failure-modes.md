@@ -23,7 +23,7 @@ When a stuck finalizer prevents a RayCluster from being deleted, the controller 
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: ray-finalizer-block
@@ -76,7 +76,7 @@ When the ray-operator is network-partitioned from the API server, cluster scalin
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: ray-network-partition
@@ -126,7 +126,7 @@ When the ray-operator pod is killed, existing RayClusters keep running and servi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: ray-pod-kill
@@ -176,7 +176,7 @@ When the ray-operator ClusterRoleBinding subjects are revoked, the controller ca
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: ray-rbac-revoke

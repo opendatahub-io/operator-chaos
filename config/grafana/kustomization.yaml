@@ -5,7 +5,7 @@ resources:
   - grafanadashboard.yaml
 
 configMapGenerator:
-  - name: odh-chaos-grafana-dashboard
+  - name: operator-chaos-grafana-dashboard
     files:
       - dashboard.json
     options:

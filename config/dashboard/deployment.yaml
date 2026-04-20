@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odh-chaos-dashboard
+  name: operator-chaos-dashboard
   labels:
-    app.kubernetes.io/name: odh-chaos-dashboard
-    app.kubernetes.io/part-of: odh-platform-chaos
+    app.kubernetes.io/name: operator-chaos-dashboard
+    app.kubernetes.io/part-of: operator-chaos
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: odh-chaos-dashboard
+      app.kubernetes.io/name: operator-chaos-dashboard
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: odh-chaos-dashboard
-        app.kubernetes.io/part-of: odh-platform-chaos
+        app.kubernetes.io/name: operator-chaos-dashboard
+        app.kubernetes.io/part-of: operator-chaos
     spec:
-      serviceAccountName: odh-chaos-dashboard
+      serviceAccountName: operator-chaos-dashboard
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: dashboard
-          image: quay.io/opendatahub/chaos-dashboard:latest
+          image: quay.io/opendatahub/operator-chaos-dashboard:latest
           args:
             - -addr=:8080
             - -db=/data/dashboard.db
@@ -64,8 +64,8 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: odh-chaos-dashboard-data
+            claimName: operator-chaos-dashboard-data
         - name: knowledge
           configMap:
-            name: odh-chaos-knowledge
+            name: operator-chaos-knowledge
             optional: true

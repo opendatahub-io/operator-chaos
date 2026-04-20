@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 )
 
 func TestFromCR(t *testing.T) {
@@ -21,9 +21,9 @@ func TestFromCR(t *testing.T) {
 			Namespace:         "opendatahub",
 			CreationTimestamp: now,
 			Labels: map[string]string{
-				"chaos.opendatahub.io/suite-name":        "omc-full-suite",
-				"chaos.opendatahub.io/suite-run-id":      "run-123",
-				"chaos.opendatahub.io/operator-version":  "v2.10.0",
+				"chaos.operatorchaos.io/suite-name":        "omc-full-suite",
+				"chaos.operatorchaos.io/suite-run-id":      "run-123",
+				"chaos.operatorchaos.io/operator-version":  "v2.10.0",
 			},
 		},
 		Spec: v1alpha1.ChaosExperimentSpec{

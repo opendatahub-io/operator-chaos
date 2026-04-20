@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -34,7 +34,7 @@ func TestFinalizerBlockValidate(t *testing.T) {
 					"apiVersion": "v1",
 					"kind":       "ConfigMap",
 					"name":       "my-config",
-					"finalizer":  "chaos.opendatahub.io/block",
+					"finalizer":  "chaos.operatorchaos.io/block",
 				},
 			},
 			wantErr: false,
@@ -123,7 +123,7 @@ func TestFinalizerBlockInjectAndCleanup(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "ConfigMap",
 			"name":       "my-config",
-			"finalizer":  "chaos.opendatahub.io/block",
+			"finalizer":  "chaos.operatorchaos.io/block",
 		},
 	}
 
@@ -135,14 +135,14 @@ func TestFinalizerBlockInjectAndCleanup(t *testing.T) {
 	modified := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "my-config", Namespace: "default"}, modified))
-	assert.Contains(t, modified.Finalizers, "chaos.opendatahub.io/block")
+	assert.Contains(t, modified.Finalizers, "chaos.operatorchaos.io/block")
 
 	// Cleanup should remove the finalizer
 	require.NoError(t, cleanup(context.Background()))
 	restored := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "my-config", Namespace: "default"}, restored))
-	assert.NotContains(t, restored.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, restored.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestFinalizerBlockInjectDefaultFinalizer(t *testing.T) {
@@ -174,14 +174,14 @@ func TestFinalizerBlockInjectDefaultFinalizer(t *testing.T) {
 	modified := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "test-cm", Namespace: "default"}, modified))
-	assert.Contains(t, modified.Finalizers, "chaos.opendatahub.io/block")
+	assert.Contains(t, modified.Finalizers, "chaos.operatorchaos.io/block")
 
 	// Cleanup should remove it
 	require.NoError(t, cleanup(context.Background()))
 	restored := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "test-cm", Namespace: "default"}, restored))
-	assert.NotContains(t, restored.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, restored.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestFinalizerBlockNotFound(t *testing.T) {
@@ -226,7 +226,7 @@ func TestFinalizerBlockPreservesExistingFinalizers(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "ConfigMap",
 			"name":       "existing-finalizers",
-			"finalizer":  "chaos.opendatahub.io/block",
+			"finalizer":  "chaos.operatorchaos.io/block",
 		},
 	}
 
@@ -238,7 +238,7 @@ func TestFinalizerBlockPreservesExistingFinalizers(t *testing.T) {
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "existing-finalizers", Namespace: "default"}, modified))
 	assert.Contains(t, modified.Finalizers, "existing.io/finalizer")
-	assert.Contains(t, modified.Finalizers, "chaos.opendatahub.io/block")
+	assert.Contains(t, modified.Finalizers, "chaos.operatorchaos.io/block")
 
 	// Cleanup should only remove the chaos finalizer
 	require.NoError(t, cleanup(context.Background()))
@@ -246,7 +246,7 @@ func TestFinalizerBlockPreservesExistingFinalizers(t *testing.T) {
 	require.NoError(t, k8sClient.Get(context.Background(),
 		client.ObjectKey{Name: "existing-finalizers", Namespace: "default"}, restored))
 	assert.Contains(t, restored.Finalizers, "existing.io/finalizer")
-	assert.NotContains(t, restored.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, restored.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestFinalizerBlockInjectStoresRollbackAnnotation(t *testing.T) {
@@ -266,7 +266,7 @@ func TestFinalizerBlockInjectStoresRollbackAnnotation(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "ConfigMap",
 			"name":       "rollback-test",
-			"finalizer":  "chaos.opendatahub.io/block",
+			"finalizer":  "chaos.operatorchaos.io/block",
 		},
 	}
 
@@ -286,7 +286,7 @@ func TestFinalizerBlockInjectStoresRollbackAnnotation(t *testing.T) {
 
 	var rollbackData map[string]string
 	require.NoError(t, safety.UnwrapRollbackData(rollbackJSON, &rollbackData))
-	assert.Equal(t, "chaos.opendatahub.io/block", rollbackData["finalizer"],
+	assert.Equal(t, "chaos.operatorchaos.io/block", rollbackData["finalizer"],
 		"rollback data should contain the finalizer name")
 
 	// Verify chaos labels are present
@@ -310,7 +310,7 @@ func TestFinalizerBlockInjectStoresRollbackAnnotation(t *testing.T) {
 	assert.False(t, hasChaosType, "chaos-type label should be removed after cleanup")
 
 	// Verify finalizer was also removed
-	assert.NotContains(t, restored.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, restored.Finalizers, "chaos.operatorchaos.io/block")
 }
 
 func TestFinalizerBlockRevert(t *testing.T) {
@@ -331,7 +331,7 @@ func TestFinalizerBlockRevert(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "ConfigMap",
 			"name":       "revert-finalized",
-			"finalizer":  "chaos.opendatahub.io/block",
+			"finalizer":  "chaos.operatorchaos.io/block",
 		},
 	}
 
@@ -342,7 +342,7 @@ func TestFinalizerBlockRevert(t *testing.T) {
 	// Verify finalizer was added
 	modified := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "revert-finalized", Namespace: "default"}, modified))
-	assert.Contains(t, modified.Finalizers, "chaos.opendatahub.io/block")
+	assert.Contains(t, modified.Finalizers, "chaos.operatorchaos.io/block")
 
 	// Revert
 	err = injector.Revert(ctx, spec, "default")
@@ -351,7 +351,7 @@ func TestFinalizerBlockRevert(t *testing.T) {
 	// Verify finalizer removed
 	restored := &corev1.ConfigMap{}
 	require.NoError(t, k8sClient.Get(ctx, client.ObjectKey{Name: "revert-finalized", Namespace: "default"}, restored))
-	assert.NotContains(t, restored.Finalizers, "chaos.opendatahub.io/block")
+	assert.NotContains(t, restored.Finalizers, "chaos.operatorchaos.io/block")
 
 	// Idempotent
 	err = injector.Revert(ctx, spec, "default")
@@ -367,7 +367,7 @@ func TestFinalizerBlockRejectsDuplicateFinalizer(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:       "already-finalized",
 			Namespace:  "default",
-			Finalizers: []string{"chaos.opendatahub.io/block"},
+			Finalizers: []string{"chaos.operatorchaos.io/block"},
 		},
 	}
 
@@ -380,7 +380,7 @@ func TestFinalizerBlockRejectsDuplicateFinalizer(t *testing.T) {
 			"apiVersion": "v1",
 			"kind":       "ConfigMap",
 			"name":       "already-finalized",
-			"finalizer":  "chaos.opendatahub.io/block",
+			"finalizer":  "chaos.operatorchaos.io/block",
 		},
 	}
 

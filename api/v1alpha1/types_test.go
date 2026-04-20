@@ -222,7 +222,7 @@ func TestExistingExperimentYAMLCompatibility(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, exp.Name)
-	assert.Equal(t, "chaos.opendatahub.io/v1alpha1", exp.APIVersion)
+	assert.Equal(t, "chaos.operatorchaos.io/v1alpha1", exp.APIVersion)
 	assert.Equal(t, "ChaosExperiment", exp.Kind)
 	assert.NotEmpty(t, exp.Spec.Target.Operator)
 	assert.NotEmpty(t, exp.Spec.Injection.Type)

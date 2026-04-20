@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/store"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/store"
 )
 
 func (s *Server) handleListExperiments(w http.ResponseWriter, r *http.Request) {

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/dashboard/internal/store"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/dashboard/internal/store"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 type Server struct {

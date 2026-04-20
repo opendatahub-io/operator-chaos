@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting work
 ## odh-notebook-controller
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: odh-notebook-controller-custom
@@ -37,7 +37,7 @@ spec:
 ## kf-notebook-controller
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: kf-notebook-controller-custom

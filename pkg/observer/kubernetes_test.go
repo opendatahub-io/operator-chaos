@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -374,6 +374,50 @@ func TestCheckSteadyState_AllChecksPassed(t *testing.T) {
 	assert.True(t, result.Passed)
 	assert.Equal(t, int32(2), result.ChecksRun)
 	assert.Equal(t, int32(2), result.ChecksPassed)
+}
+
+func TestCheckSteadyState_PerCheckNamespaceTakesPriority(t *testing.T) {
+	// Resource exists in "check-ns" but NOT in "function-ns".
+	// The check has Namespace="check-ns", the function parameter is "function-ns".
+	// Per-check namespace should take priority, so the check should pass.
+	deploy := newDeploymentWithCondition("test-deploy", "check-ns", "Available", "True")
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:          v1alpha1.CheckConditionTrue,
+			APIVersion:    "apps/v1",
+			Kind:          "Deployment",
+			Name:          "test-deploy",
+			Namespace:     "check-ns",
+			ConditionType: "Available",
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "function-ns")
+	require.NoError(t, err)
+	assert.True(t, result.Passed, "per-check namespace should override function parameter")
+	assert.Equal(t, int32(1), result.ChecksPassed)
+}
+
+func TestCheckSteadyState_PerCheckNamespaceTakesPriority_ResourceExists(t *testing.T) {
+	// Same test for resourceExists check type
+	cm := newConfigMap("my-cm", "check-ns")
+	obs := buildFakeClient(cm)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:       v1alpha1.CheckResourceExists,
+			APIVersion: "v1",
+			Kind:       "ConfigMap",
+			Name:       "my-cm",
+			Namespace:  "check-ns",
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "function-ns")
+	require.NoError(t, err)
+	assert.True(t, result.Passed, "per-check namespace should override function parameter")
 }
 
 func TestCheckSteadyState_ResourceExists_NonNotFoundError(t *testing.T) {

@@ -292,9 +292,9 @@ Suite runs are identified by well-known labels on ChaosExperiment CRs:
 
 | Label | Description |
 |-------|-------------|
-| `chaos.opendatahub.io/suite-name` | Suite definition name |
-| `chaos.opendatahub.io/suite-run-id` | Unique run ID |
-| `chaos.opendatahub.io/operator-version` | Operator version under test |
+| `chaos.operatorchaos.io/suite-name` | Suite definition name |
+| `chaos.operatorchaos.io/suite-run-id` | Unique run ID |
+| `chaos.operatorchaos.io/operator-version` | Operator version under test |
 
 #### `GET /api/v1/suites`
 
@@ -382,7 +382,7 @@ spec:
       targetPort: 8080
 ```
 
-The service account needs `get`, `list`, and `watch` permissions on `chaosexperiments.chaos.opendatahub.io` resources.
+The service account needs `get`, `list`, and `watch` permissions on `chaosexperiments.chaos.operatorchaos.io` resources.
 
 ### Local Development
 

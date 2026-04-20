@@ -6,8 +6,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/olm"
-	pkgupgrade "github.com/opendatahub-io/odh-platform-chaos/pkg/upgrade"
+	"github.com/opendatahub-io/operator-chaos/pkg/olm"
+	pkgupgrade "github.com/opendatahub-io/operator-chaos/pkg/upgrade"
 )
 
 // StateSaver persists playbook state to disk. Called after each hop completes.

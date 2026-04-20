@@ -20,7 +20,7 @@ spec_fields:
   - name: finalizer
     type: string
     required: false
-    default: "chaos.opendatahub.io/block"
+    default: "chaos.operatorchaos.io/block"
     description: Finalizer string to add
   - name: ttl
     type: duration
@@ -41,7 +41,7 @@ FinalizerBlock adds a finalizer to the target resource using an Unstructured cli
 
 **Cleanup:** Removes the added finalizer. If the resource is in Terminating state, this unblocks deletion.
 
-**Crash safety:** The finalizer persists on the resource. `Revert` removes it. Use `odh-chaos clean` for orphaned finalizers.
+**Crash safety:** The finalizer persists on the resource. `Revert` removes it. Use `operator-chaos clean` for orphaned finalizers.
 
 ## Disruption Rubric
 

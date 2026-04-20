@@ -3,7 +3,7 @@ package diff
 import (
 	"testing"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 )
 
 // makeSourceKnowledge returns ODH v2.10 style knowledge:

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -380,7 +380,7 @@ func TestValidateCRDMutationSelfModificationBlocked(t *testing.T) {
 		Type:        v1alpha1.CRDMutation,
 		DangerLevel: v1alpha1.DangerLevelHigh,
 		Parameters: map[string]string{
-			"apiVersion": "chaos.opendatahub.io/v1alpha1",
+			"apiVersion": "chaos.operatorchaos.io/v1alpha1",
 			"kind":       "ChaosExperiment",
 			"name":       "my-experiment",
 			"field":      "config",
@@ -425,7 +425,7 @@ func TestValidateConfigDriftOversizedValue(t *testing.T) {
 }
 
 func TestValidateCRDMutationRejectsChaosManagedResource(t *testing.T) {
-	prefixes := []string{"chaos-rollback-my-cr", "chaos-result-my-cr", "odh-chaos-my-cr"}
+	prefixes := []string{"chaos-rollback-my-cr", "chaos-result-my-cr", "operator-chaos-my-cr"}
 	for _, name := range prefixes {
 		t.Run(name, func(t *testing.T) {
 			spec := v1alpha1.InjectionSpec{
@@ -447,7 +447,7 @@ func TestValidateCRDMutationRejectsChaosManagedResource(t *testing.T) {
 }
 
 func TestValidateConfigDriftRejectsChaosManagedResource(t *testing.T) {
-	prefixes := []string{"chaos-rollback-my-cm", "chaos-result-my-cm", "odh-chaos-my-cm"}
+	prefixes := []string{"chaos-rollback-my-cm", "chaos-result-my-cm", "operator-chaos-my-cm"}
 	for _, name := range prefixes {
 		t.Run(name, func(t *testing.T) {
 			spec := v1alpha1.InjectionSpec{
@@ -618,7 +618,7 @@ func TestValidateFinalizerBlockRejectsChaosExperimentCR(t *testing.T) {
 		apiVersion string
 		wantErr    bool
 	}{
-		{"chaos apiVersion", "chaos.opendatahub.io/v1alpha1", true},
+		{"chaos apiVersion", "chaos.operatorchaos.io/v1alpha1", true},
 		{"empty apiVersion", "", true},
 		{"non-chaos apiVersion", "apps/v1", false},
 	}
@@ -650,7 +650,7 @@ func TestValidateFinalizerBlockRejectsCleanupFinalizerName(t *testing.T) {
 			"kind":          "Deployment",
 			"apiVersion":    "apps/v1",
 			"name":          "my-deploy",
-			"finalizerName": "chaos.opendatahub.io/cleanup",
+			"finalizerName": "chaos.operatorchaos.io/cleanup",
 		},
 	}
 	err := validateFinalizerBlockParams(spec)

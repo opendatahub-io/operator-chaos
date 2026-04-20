@@ -2,20 +2,20 @@
 
 Auto-generated from cobra command definitions.
 
-## odh-chaos
+## operator-chaos
 
 Chaos engineering framework for OpenDataHub operators
 
 ### Synopsis
 
-ODH Platform Chaos tests operator reconciliation semantics.
+Operator Chaos tests operator reconciliation semantics.
 It validates that operators recover managed resources correctly after
 fault injection, not just that pods restart.
 
 ### Options
 
 ```
-  -h, --help                help for odh-chaos
+  -h, --help                help for operator-chaos
       --kubeconfig string   path to kubeconfig file
       --namespace string    target namespace (default "opendatahub")
   -v, --verbose             verbose output
@@ -25,12 +25,12 @@ fault injection, not just that pods restart.
 
 ---
 
-## odh-chaos analyze
+## operator-chaos analyze
 
 Analyze Go source code for fault injection candidates
 
 ```
-odh-chaos analyze <directory> [flags]
+operator-chaos analyze <directory> [flags]
 ```
 
 ### Options
@@ -52,12 +52,12 @@ odh-chaos analyze <directory> [flags]
 
 ---
 
-## odh-chaos clean
+## operator-chaos clean
 
 Remove all chaos artifacts from the cluster (emergency stop)
 
 ```
-odh-chaos clean [flags]
+operator-chaos clean [flags]
 ```
 
 ### Options
@@ -80,7 +80,7 @@ odh-chaos clean [flags]
 
 ---
 
-## odh-chaos controller
+## operator-chaos controller
 
 Controller mode commands
 
@@ -102,7 +102,7 @@ Controller mode commands
 
 ---
 
-## odh-chaos controller start
+## operator-chaos controller start
 
 Start the ChaosExperiment controller
 
@@ -111,7 +111,7 @@ Start the ChaosExperiment controller
 Starts a Kubernetes controller that watches ChaosExperiment CRs and drives them through the experiment lifecycle.
 
 ```
-odh-chaos controller start [flags]
+operator-chaos controller start [flags]
 ```
 
 ### Options
@@ -136,7 +136,7 @@ odh-chaos controller start [flags]
 
 ---
 
-## odh-chaos diff-crds
+## operator-chaos diff-crds
 
 Compare CRD schemas between versions
 
@@ -145,7 +145,7 @@ Compare CRD schemas between versions
 Compare OpenAPI v3 schemas embedded in CRD YAML files. Detects field removals, type changes, enum value changes, defaulting shifts, and API version removals.
 
 ```
-odh-chaos diff-crds [flags]
+operator-chaos diff-crds [flags]
 ```
 
 ### Options
@@ -169,7 +169,7 @@ odh-chaos diff-crds [flags]
 
 ---
 
-## odh-chaos diff
+## operator-chaos diff
 
 Compare two versioned knowledge model directories
 
@@ -178,7 +178,7 @@ Compare two versioned knowledge model directories
 Structural comparison of operator knowledge models between two versions. Detects renames, namespace moves, webhook changes, and dependency shifts. No cluster access required.
 
 ```
-odh-chaos diff [flags]
+operator-chaos diff [flags]
 ```
 
 ### Options
@@ -203,7 +203,7 @@ odh-chaos diff [flags]
 
 ---
 
-## odh-chaos generate
+## operator-chaos generate
 
 Generate code from knowledge models
 
@@ -225,12 +225,12 @@ Generate code from knowledge models
 
 ---
 
-## odh-chaos generate chaos
+## operator-chaos generate chaos
 
 Generate a chaos playbook from knowledge models and experiments
 
 ```
-odh-chaos generate chaos [flags]
+operator-chaos generate chaos [flags]
 ```
 
 ### Options
@@ -255,12 +255,12 @@ odh-chaos generate chaos [flags]
 
 ---
 
-## odh-chaos generate fuzz-targets
+## operator-chaos generate fuzz-targets
 
 Generate fuzz test targets from a knowledge model
 
 ```
-odh-chaos generate fuzz-targets [flags]
+operator-chaos generate fuzz-targets [flags]
 ```
 
 ### Options
@@ -283,12 +283,12 @@ odh-chaos generate fuzz-targets [flags]
 
 ---
 
-## odh-chaos generate upgrade
+## operator-chaos generate upgrade
 
 Generate an upgrade playbook from knowledge directories
 
 ```
-odh-chaos generate upgrade [flags]
+operator-chaos generate upgrade [flags]
 ```
 
 ### Options
@@ -314,12 +314,12 @@ odh-chaos generate upgrade [flags]
 
 ---
 
-## odh-chaos init
+## operator-chaos init
 
 Generate a skeleton experiment YAML
 
 ```
-odh-chaos init [flags]
+operator-chaos init [flags]
 ```
 
 ### Options
@@ -343,7 +343,7 @@ odh-chaos init [flags]
 
 ---
 
-## odh-chaos playbook
+## operator-chaos playbook
 
 Execute upgrade and chaos playbooks
 
@@ -370,12 +370,12 @@ and validation steps. Supports both UpgradePlaybook and ChaosPlaybook kinds.
 
 ---
 
-## odh-chaos playbook run
+## operator-chaos playbook run
 
 Execute a playbook (UpgradePlaybook or ChaosPlaybook)
 
 ```
-odh-chaos playbook run [flags]
+operator-chaos playbook run [flags]
 ```
 
 ### Options
@@ -405,7 +405,7 @@ odh-chaos playbook run [flags]
 
 ---
 
-## odh-chaos preflight
+## operator-chaos preflight
 
 Check cluster readiness before running chaos experiments
 
@@ -416,7 +416,7 @@ file exist and are healthy on the cluster. Use --local to validate the
 knowledge file structure without connecting to a cluster.
 
 ```
-odh-chaos preflight [flags]
+operator-chaos preflight [flags]
 ```
 
 ### Options
@@ -439,12 +439,12 @@ odh-chaos preflight [flags]
 
 ---
 
-## odh-chaos report
+## operator-chaos report
 
 Generate summary reports from experiment results
 
 ```
-odh-chaos report <results-directory> [flags]
+operator-chaos report <results-directory> [flags]
 ```
 
 ### Options
@@ -467,12 +467,12 @@ odh-chaos report <results-directory> [flags]
 
 ---
 
-## odh-chaos run
+## operator-chaos run
 
 Run a chaos experiment
 
 ```
-odh-chaos run <experiment.yaml> [flags]
+operator-chaos run <experiment.yaml> [flags]
 ```
 
 ### Options
@@ -501,7 +501,7 @@ odh-chaos run <experiment.yaml> [flags]
 
     ```bash
     # Run an experiment written for ODH on a RHOAI cluster
-    odh-chaos run experiments/odh-model-controller/pod-kill.yaml \
+    operator-chaos run experiments/odh-model-controller/pod-kill.yaml \
       --knowledge knowledge/odh-model-controller.yaml \
       --namespace redhat-ods-applications
     ```
@@ -510,7 +510,7 @@ odh-chaos run <experiment.yaml> [flags]
 
 ---
 
-## odh-chaos simulate-upgrade
+## operator-chaos simulate-upgrade
 
 Simulate an upgrade by computing diff and generating experiments
 
@@ -522,7 +522,7 @@ effects of each detected change. Use --dry-run to preview the generated
 experiments without executing them.
 
 ```
-odh-chaos simulate-upgrade [flags]
+operator-chaos simulate-upgrade [flags]
 ```
 
 ### Options
@@ -548,12 +548,12 @@ odh-chaos simulate-upgrade [flags]
 
 ---
 
-## odh-chaos suite
+## operator-chaos suite
 
 Run all experiments in a directory
 
 ```
-odh-chaos suite <experiments-directory> [flags]
+operator-chaos suite <experiments-directory> [flags]
 ```
 
 ### Options
@@ -582,12 +582,12 @@ odh-chaos suite <experiments-directory> [flags]
 
 ---
 
-## odh-chaos types
+## operator-chaos types
 
 List available injection types
 
 ```
-odh-chaos types [flags]
+operator-chaos types [flags]
 ```
 
 ### Options
@@ -608,7 +608,7 @@ odh-chaos types [flags]
 
 ---
 
-## odh-chaos upgrade
+## operator-chaos upgrade
 
 OLM upgrade management and playbook execution
 
@@ -636,12 +636,12 @@ upgrades, and execute multi-step upgrade playbooks.
 
 ---
 
-## odh-chaos upgrade discover
+## operator-chaos upgrade discover
 
 Show available OLM channels and versions for an operator
 
 ```
-odh-chaos upgrade discover [flags]
+operator-chaos upgrade discover [flags]
 ```
 
 ### Options
@@ -664,12 +664,12 @@ odh-chaos upgrade discover [flags]
 
 ---
 
-## odh-chaos upgrade monitor
+## operator-chaos upgrade monitor
 
 Watch an in-progress OLM upgrade
 
 ```
-odh-chaos upgrade monitor [flags]
+operator-chaos upgrade monitor [flags]
 ```
 
 ### Options
@@ -692,12 +692,12 @@ odh-chaos upgrade monitor [flags]
 
 ---
 
-## odh-chaos upgrade run
+## operator-chaos upgrade run
 
 Execute an upgrade playbook
 
 ```
-odh-chaos upgrade run [flags]
+operator-chaos upgrade run [flags]
 ```
 
 ### Options
@@ -727,12 +727,12 @@ odh-chaos upgrade run [flags]
 
 ---
 
-## odh-chaos upgrade trigger
+## operator-chaos upgrade trigger
 
 Trigger a single OLM channel hop
 
 ```
-odh-chaos upgrade trigger [flags]
+operator-chaos upgrade trigger [flags]
 ```
 
 ### Options
@@ -756,7 +756,7 @@ odh-chaos upgrade trigger [flags]
 
 ---
 
-## odh-chaos validate-version
+## operator-chaos validate-version
 
 Validate versioned knowledge models against a live cluster
 
@@ -767,7 +767,7 @@ the expected managed resources exist on the cluster. Useful for verifying
 that a knowledge directory accurately describes the current cluster state.
 
 ```
-odh-chaos validate-version [flags]
+operator-chaos validate-version [flags]
 ```
 
 ### Options
@@ -790,12 +790,12 @@ odh-chaos validate-version [flags]
 
 ---
 
-## odh-chaos validate
+## operator-chaos validate
 
 Validate experiment or knowledge YAML without running
 
 ```
-odh-chaos validate <file.yaml> [flags]
+operator-chaos validate <file.yaml> [flags]
 ```
 
 ### Options
@@ -817,12 +817,12 @@ odh-chaos validate <file.yaml> [flags]
 
 ---
 
-## odh-chaos version
+## operator-chaos version
 
 Print the version
 
 ```
-odh-chaos version [flags]
+operator-chaos version [flags]
 ```
 
 ### Options

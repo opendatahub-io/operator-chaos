@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	networkingv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +43,7 @@ func (n *NetworkPartitionInjector) Inject(ctx context.Context, spec v1alpha1.Inj
 		return nil, nil, fmt.Errorf("parsing label selector: %w", err)
 	}
 
-	policyName := sanitizeK8sName("odh-chaos-np-", spec.Parameters["labelSelector"])
+	policyName := sanitizeK8sName("operator-chaos-np-", spec.Parameters["labelSelector"])
 
 	matchLabels := map[string]string{}
 	reqs, selectable := selector.Requirements()
@@ -113,7 +113,7 @@ func (n *NetworkPartitionInjector) Inject(ctx context.Context, spec v1alpha1.Inj
 // Revert deletes the NetworkPolicy created during injection. The policy name is
 // deterministic so it can be reconstructed from the injection spec.
 func (n *NetworkPartitionInjector) Revert(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) error {
-	policyName := sanitizeK8sName("odh-chaos-np-", spec.Parameters["labelSelector"])
+	policyName := sanitizeK8sName("operator-chaos-np-", spec.Parameters["labelSelector"])
 
 	policy := &networkingv1.NetworkPolicy{}
 	if err := n.client.Get(ctx, client.ObjectKey{Name: policyName, Namespace: namespace}, policy); err != nil {

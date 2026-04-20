@@ -6,7 +6,7 @@ This page provides templates for writing custom chaos experiments targeting code
 ## codeflare-operator-manager
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: codeflare-operator-manager-custom

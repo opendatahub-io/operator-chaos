@@ -17,10 +17,10 @@ If you have an [operator knowledge model](../guides/knowledge-models.md), you ca
 
 ```bash
 # Generate to stdout
-odh-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml
+operator-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml
 
 # Generate to a file
-odh-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml --output fuzz_kserve_test.go
+operator-chaos generate fuzz-targets --knowledge knowledge/kserve.yaml --output fuzz_kserve_test.go
 ```
 
 The generated file contains:

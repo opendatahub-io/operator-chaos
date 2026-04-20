@@ -1,16 +1,16 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: odh-chaos-controller
+  name: operator-chaos-controller
 rules:
   # ChaosExperiment CRD
-  - apiGroups: ["chaos.opendatahub.io"]
+  - apiGroups: ["chaos.operatorchaos.io"]
     resources: ["chaosexperiments"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["chaos.opendatahub.io"]
+  - apiGroups: ["chaos.operatorchaos.io"]
     resources: ["chaosexperiments/status"]
     verbs: ["get", "update", "patch"]
-  - apiGroups: ["chaos.opendatahub.io"]
+  - apiGroups: ["chaos.operatorchaos.io"]
     resources: ["chaosexperiments/finalizers"]
     verbs: ["update"]
   # Leader election

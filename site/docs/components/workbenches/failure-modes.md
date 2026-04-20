@@ -23,7 +23,7 @@ When the odh-notebook-controller pod is network-partitioned from the API server,
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: workbenches-network-partition
@@ -73,7 +73,7 @@ When the odh-notebook-controller pod is killed, Kubernetes should recreate it wi
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: workbenches-pod-kill
@@ -124,7 +124,7 @@ When the odh-notebook-controller ClusterRoleBinding subjects are revoked, the co
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: workbenches-rbac-revoke
@@ -175,7 +175,7 @@ When the notebook mutating webhook failurePolicy is weakened from Fail to Ignore
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: workbenches-webhook-disrupt

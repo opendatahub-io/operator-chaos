@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/safety"
+	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ClientFaultInjector manages the odh-chaos-config ConfigMap lifecycle
+// ClientFaultInjector manages the operator-chaos-config ConfigMap lifecycle
 // to inject in-process faults via the SDK ChaosClient.
 type ClientFaultInjector struct {
 	client client.Client
@@ -95,7 +95,7 @@ func (s *ClientFaultInjector) Inject(ctx context.Context, spec v1alpha1.Injectio
 				sdk.ChaosConfigKey: string(configJSON),
 			},
 		}
-		createdByChaosMarker, err := safety.WrapRollbackData(map[string]string{"chaos.opendatahub.io/created": "true"})
+		createdByChaosMarker, err := safety.WrapRollbackData(map[string]string{"chaos.operatorchaos.io/created": "true"})
 		if err != nil {
 			return nil, nil, fmt.Errorf("serializing chaos marker: %w", err)
 		}
@@ -182,7 +182,7 @@ func (s *ClientFaultInjector) Revert(ctx context.Context, spec v1alpha1.Injectio
 	}
 
 	// If the marker indicates the CM was created by chaos, delete it
-	if rollbackMap["chaos.opendatahub.io/created"] == "true" {
+	if rollbackMap["chaos.operatorchaos.io/created"] == "true" {
 		if err := s.client.Delete(ctx, cm); err != nil && !apierrors.IsNotFound(err) {
 			return fmt.Errorf("deleting ConfigMap %s during revert: %w", key, err)
 		}

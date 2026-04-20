@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: odh-chaos-upgrade-gate
+  name: operator-chaos-upgrade-gate
 spec:
   params:
     - name: playbook
@@ -9,7 +9,7 @@ spec:
       description: "Path to playbook YAML"
     - name: image
       type: string
-      default: quay.io/opendatahub/odh-chaos:latest
+      default: quay.io/opendatahub/operator-chaos:latest
     - name: allow-shell
       type: string
       default: "true"
@@ -28,7 +28,7 @@ spec:
         if [ "$(params.skip-manual)" = "true" ]; then
           FLAGS="$FLAGS --skip-manual"
         fi
-        if odh-chaos playbook run \
+        if operator-chaos playbook run \
           --playbook $(params.playbook) \
           $FLAGS \
           --report-dir $(workspaces.results.path)/; then

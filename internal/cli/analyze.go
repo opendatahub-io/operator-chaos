@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/analyzer"
+	"github.com/opendatahub-io/operator-chaos/pkg/analyzer"
 	"github.com/spf13/cobra"
 )
 

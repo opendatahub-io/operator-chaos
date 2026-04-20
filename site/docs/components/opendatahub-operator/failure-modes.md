@@ -24,7 +24,7 @@ When a stuck finalizer prevents a DataScienceCluster from being deleted, the ope
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: opendatahub-operator-finalizer-block
@@ -81,7 +81,7 @@ When the operator pods are network-partitioned, the leader should lose its lease
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: opendatahub-operator-network-partition
@@ -131,7 +131,7 @@ When one operator pod is killed, the remaining replicas should maintain the lead
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: opendatahub-operator-pod-kill
@@ -182,7 +182,7 @@ When the operator ClusterRoleBinding subjects are revoked, the controller should
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: opendatahub-operator-rbac-revoke
@@ -234,7 +234,7 @@ When the validating webhook failurePolicy is weakened from Fail to Ignore, inval
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: opendatahub-operator-webhook-disrupt

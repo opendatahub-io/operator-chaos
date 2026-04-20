@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/experiment"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
+	"github.com/opendatahub-io/operator-chaos/pkg/experiment"
 	"github.com/spf13/cobra"
 )
 
@@ -45,9 +45,12 @@ func newRunCommand() *cobra.Command {
 				return fmt.Errorf("%d validation errors", len(errs))
 			}
 
-			// Override namespace from CLI flag
-			namespace, _ := cmd.Flags().GetString("namespace")
-			if namespace != "" {
+			// Override namespace only when explicitly set by the user.
+			// The persistent --namespace flag has a default value, so
+			// checking for non-empty would always override per-check
+			// namespaces embedded in experiment YAML.
+			if cmd.Flags().Changed("namespace") {
+				namespace, _ := cmd.Flags().GetString("namespace")
 				overrideExperimentNamespace(exp, namespace)
 			}
 

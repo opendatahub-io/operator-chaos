@@ -23,7 +23,7 @@ When the codeflare operator configuration is corrupted, new cluster configuratio
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: codeflare-config-drift
@@ -77,7 +77,7 @@ When the codeflare-operator is network-partitioned from the API server, AppWrapp
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: codeflare-network-partition
@@ -127,7 +127,7 @@ When the codeflare-operator pod is killed, existing Ray clusters remain unaffect
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: codeflare-pod-kill
@@ -177,7 +177,7 @@ When the codeflare-operator ClusterRoleBinding subjects are revoked, the operato
 <summary>Experiment YAML</summary>
 
 ```yaml
-apiVersion: chaos.opendatahub.io/v1alpha1
+apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
   name: codeflare-rbac-revoke

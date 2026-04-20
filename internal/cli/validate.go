@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/experiment"
-	"github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+	"github.com/opendatahub-io/operator-chaos/pkg/experiment"
+	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"github.com/spf13/cobra"
 )
 

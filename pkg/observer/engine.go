@@ -3,7 +3,7 @@ package observer
 import (
 	"context"
 
-	v1alpha1 "github.com/opendatahub-io/odh-platform-chaos/api/v1alpha1"
+	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 )
 
 // Observer watches Kubernetes state and checks steady-state conditions.

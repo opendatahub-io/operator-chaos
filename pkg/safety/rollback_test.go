@@ -16,16 +16,16 @@ import (
 )
 
 func TestRollbackAnnotationKey(t *testing.T) {
-	assert.Equal(t, "chaos.opendatahub.io/rollback-data", RollbackAnnotationKey)
+	assert.Equal(t, "chaos.operatorchaos.io/rollback-data", RollbackAnnotationKey)
 }
 
 func TestManagedByLabel(t *testing.T) {
-	assert.Equal(t, "odh-chaos", ManagedByValue)
+	assert.Equal(t, "operator-chaos", ManagedByValue)
 }
 
 func TestChaosLabels(t *testing.T) {
 	labels := ChaosLabels("PodKill")
-	assert.Equal(t, "odh-chaos", labels[ManagedByLabel])
+	assert.Equal(t, "operator-chaos", labels[ManagedByLabel])
 	assert.Equal(t, "PodKill", labels[ChaosTypeLabel])
 }
 
@@ -82,7 +82,7 @@ func TestWrapRollbackData_ProducesValidEnvelope(t *testing.T) {
 
 func TestUnwrapRollbackData_NewEnvelopeFormat(t *testing.T) {
 	input := map[string]string{
-		"finalizer": "chaos.opendatahub.io/block",
+		"finalizer": "chaos.operatorchaos.io/block",
 	}
 
 	wrapped, err := WrapRollbackData(input)
@@ -90,7 +90,7 @@ func TestUnwrapRollbackData_NewEnvelopeFormat(t *testing.T) {
 
 	var result map[string]string
 	require.NoError(t, UnwrapRollbackData(wrapped, &result))
-	assert.Equal(t, "chaos.opendatahub.io/block", result["finalizer"])
+	assert.Equal(t, "chaos.operatorchaos.io/block", result["finalizer"])
 }
 
 func TestUnwrapRollbackData_LegacyFormat_Rejected(t *testing.T) {
