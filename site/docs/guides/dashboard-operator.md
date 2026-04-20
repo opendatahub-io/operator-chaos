@@ -170,7 +170,7 @@ Per-operator resilience insights:
 
 - **Operator cards**: Health bar showing Resilient/Degraded/Failed proportions
 - **Component accordion**: Expandable list of components per operator
-- **Coverage matrix**: 8-column grid (one per injection type) showing best verdict per type (green=all Resilient, yellow=any Degraded, red=any Failed, gray=untested)
+- **Coverage matrix**: 11-column grid (one per injection type) showing best verdict per type (green=all Resilient, yellow=any Degraded, red=any Failed, gray=untested)
 - **Recent experiments**: Latest 5 experiments per component with links to detail
 
 ![Operators](../assets/screenshots/dashboard-operators.svg){: .glightbox }

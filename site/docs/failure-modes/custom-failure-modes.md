@@ -11,11 +11,11 @@ Most users will use YAML composition. Go plugins are only needed when the fault 
 
 ## Path A: YAML Composition (No Code Required)
 
-This is the primary extensibility path. You can create complex, custom chaos experiments by composing the 8 built-in injection types with different parameters, targets, and steady-state checks.
+This is the primary extensibility path. You can create complex, custom chaos experiments by composing the 11 built-in injection types with different parameters, targets, and steady-state checks.
 
 ### Built-in Injection Types
 
-The framework provides 8 injection types out of the box:
+The framework provides 11 injection types out of the box:
 
 | Type | What It Does | Danger Level |
 |------|--------------|--------------|
@@ -27,6 +27,9 @@ The framework provides 8 injection types out of the box:
 | `RBACRevoke` | Remove RBAC permissions | Medium |
 | `FinalizerBlock` | Add blocking finalizers to resources | Medium |
 | `ClientFault` | Inject API server request failures | High |
+| `OwnerRefOrphan` | Remove ownerReferences to test re-adoption | Medium |
+| `QuotaExhaustion` | Create restrictive ResourceQuota | Medium |
+| `WebhookLatency` | Deploy slow admission webhook | High |
 
 See the [Failure Modes](index.md) reference for full details on each type.
 
@@ -323,7 +326,7 @@ vi experiments/custom/my-kserve-test.yaml
 
 ## Path B: Go Plugin (New Injection Types)
 
-Use this path only when you need to inject a fault that's not expressible through the 8 built-in types.
+Use this path only when you need to inject a fault that's not expressible through the 11 built-in types.
 
 ### When to Write a New Injector
 

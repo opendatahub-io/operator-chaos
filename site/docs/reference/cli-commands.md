@@ -4,7 +4,7 @@ Auto-generated from cobra command definitions.
 
 ## operator-chaos
 
-Chaos engineering framework for OpenDataHub operators
+Chaos engineering framework for Kubernetes operators
 
 ### Synopsis
 
@@ -329,7 +329,7 @@ operator-chaos init [flags]
   -h, --help               help for init
       --namespace string   target namespace (default "opendatahub")
       --operator string    target operator (default "opendatahub-operator")
-      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault) (default "PodKill")
+      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency) (default "PodKill")
 ```
 
 ### Options inherited from parent commands
@@ -496,16 +496,6 @@ operator-chaos run <experiment.yaml> [flags]
   -v, --verbose             verbose output
 ```
 
-!!! note "Full namespace override"
-    The `--namespace` flag performs a comprehensive override when used with `run` or `suite` commands. It updates: (1) the experiment's metadata namespace, (2) all steady-state check namespaces, (3) the blast radius `allowedNamespaces` list, and (4) the reconciliation checker namespace. This allows the same experiment YAML files to work on both ODH (`opendatahub`) and RHOAI (`redhat-ods-applications`) clusters without modification.
-
-    ```bash
-    # Run an experiment written for ODH on a RHOAI cluster
-    operator-chaos run experiments/odh-model-controller/pod-kill.yaml \
-      --knowledge knowledge/odh-model-controller.yaml \
-      --namespace redhat-ods-applications
-    ```
-
 #
 
 ---
@@ -528,12 +518,17 @@ operator-chaos simulate-upgrade [flags]
 ### Options
 
 ```
-      --component string    limit to a specific component
-      --dry-run             output generated experiments without executing
-  -h, --help                help for simulate-upgrade
-      --report-dir string   directory for reports
-      --source string       path to source version knowledge directory (required)
-      --target string       path to target version knowledge directory (required)
+      --component string        limit to a specific component
+      --distributed-lock        use Kubernetes Lease-based distributed locking
+      --dry-run                 output generated experiments without executing
+  -h, --help                    help for simulate-upgrade
+      --knowledge stringArray   path to operator knowledge YAML (for live execution)
+      --knowledge-dir string    directory of operator knowledge YAMLs (for live execution)
+      --lock-namespace string   namespace for distributed lock leases (default "opendatahub")
+      --report-dir string       directory for reports
+      --source string           path to source version knowledge directory (required)
+      --target string           path to target version knowledge directory (required)
+      --timeout duration        timeout per experiment (default 10m0s)
 ```
 
 ### Options inherited from parent commands

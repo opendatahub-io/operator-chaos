@@ -139,7 +139,7 @@ spec:
 	}
 
 	cmd.Flags().StringVar(&component, "component", "", "target component name (required)")
-	cmd.Flags().StringVar(&injectionType, "type", "PodKill", "injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault)")
+	cmd.Flags().StringVar(&injectionType, "type", "PodKill", "injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency)")
 	cmd.Flags().StringVar(&operator, "operator", "opendatahub-operator", "target operator")
 	cmd.Flags().StringVar(&namespace, "namespace", v1alpha1.DefaultNamespace, "target namespace")
 

@@ -177,7 +177,7 @@ type Injector interface {
 registry := injection.NewRegistry()
 registry.Register(v1alpha1.PodKill, injection.NewPodKillInjector(client))
 registry.Register(v1alpha1.NetworkPartition, injection.NewNetworkPartitionInjector(client))
-// ... register all 8 injection types
+// ... register all 11 injection types
 ```
 
 **Crash-Safe Cleanup:**
