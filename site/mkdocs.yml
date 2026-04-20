@@ -157,6 +157,9 @@ nav:
     - RBACRevoke: failure-modes/rbac-revoke.md
     - FinalizerBlock: failure-modes/finalizer-block.md
     - ClientFault: failure-modes/client-fault.md
+    - OwnerRefOrphan: failure-modes/ownerref-orphan.md
+    - QuotaExhaustion: failure-modes/quota-exhaustion.md
+    - WebhookLatency: failure-modes/webhook-latency.md
     - Creating Custom Failure Modes: failure-modes/custom-failure-modes.md
   - Guides:
     - E2E Testing: guides/e2e-testing.md

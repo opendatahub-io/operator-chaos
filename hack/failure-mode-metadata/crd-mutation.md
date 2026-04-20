@@ -16,10 +16,14 @@ spec_fields:
     type: string
     required: true
     description: Name of the target resource instance
+  - name: path
+    type: string
+    required: false
+    description: "Dot-notation JSON path to mutate (e.g., spec.predictor.minReplicas, metadata.labels.app). Use this or field, not both."
   - name: field
     type: string
-    required: true
-    description: "JSON path to the spec field to mutate (e.g., spec.predictor.minReplicas)"
+    required: false
+    description: "Legacy: spec field name (auto-prefixed with 'spec.'). Use path instead for new experiments."
   - name: value
     type: string
     required: true

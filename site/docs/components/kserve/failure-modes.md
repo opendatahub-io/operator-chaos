@@ -4,12 +4,62 @@
 
 | Injection Type | Danger | Experiment | Description |
 |----------------|--------|------------|-------------|
+| PodKill | low | dependency-odh-model-controller-kill.yaml | Killing odh-model-controller (which kserve depends on for model serving routing)... |
 | ConfigDrift | high | isvc-config-corruption.yaml | When the deploy key in the inferenceservice-config ConfigMap is overwritten with... |
 | WebhookDisrupt | high | isvc-validator-disrupt.yaml | When the ValidatingWebhookConfiguration for InferenceService has its failurePoli... |
 | NetworkPartition | medium | llm-controller-isolation.yaml | When the llmisvc-controller-manager is network-partitioned from the API server, ... |
 | PodKill | low | main-controller-kill.yaml | When the kserve-controller-manager pod is killed, the Deployment controller recr... |
+| OwnerRefOrphan | medium | ownerref-orphan.yaml | Removing ownerReferences from the kserve-controller-manager Deployment should tr... |
 
 ## Experiment Details
+
+### kserve-dependency-odh-model-controller-kill
+
+- **Type:** PodKill
+- **Danger Level:** low
+- **Component:** kserve-controller
+
+Killing odh-model-controller (which kserve depends on for model serving routing) should not crash kserve. Kserve should continue operating in degraded mode and recover when the dependency is restored.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kserve-dependency-odh-model-controller-kill
+spec:
+  target:
+    operator: kserve
+    component: kserve-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kserve-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: "app=odh-model-controller"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing odh-model-controller (which kserve depends on for model serving
+      routing) should not crash kserve. Kserve should continue operating in
+      degraded mode and recover when the dependency is restored.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
 
 ### kserve-isvc-config-corruption
 
@@ -223,6 +273,55 @@ spec:
     maxPodsAffected: 1
     allowedNamespaces:
       - kserve
+```
+
+</details>
+
+### kserve-ownerref-orphan
+
+- **Type:** OwnerRefOrphan
+- **Danger Level:** medium
+- **Component:** kserve-controller
+
+Removing ownerReferences from the kserve-controller-manager Deployment should trigger the operator to re-adopt it within the recovery timeout.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kserve-ownerref-orphan
+spec:
+  target:
+    operator: kserve
+    component: kserve-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kserve-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    parameters:
+      apiVersion: "apps/v1"
+      kind: "Deployment"
+      name: "kserve-controller-manager"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing ownerReferences from the kserve-controller-manager Deployment
+      should trigger the operator to re-adopt it within the recovery timeout.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
 ```
 
 </details>

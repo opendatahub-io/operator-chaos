@@ -11,7 +11,8 @@ Mutates a spec field on a custom resource instance to test reconciliation of CR 
 | `apiVersion` | `string` | Yes | - | API version of the target resource (e.g., serving.kserve.io/v1beta1) |
 | `kind` | `string` | Yes | - | Kind of the target resource (e.g., InferenceService) |
 | `name` | `string` | Yes | - | Name of the target resource instance |
-| `field` | `string` | Yes | - | JSON path to the spec field to mutate (e.g., spec.predictor.minReplicas) |
+| `path` | `string` | No | - | Dot-notation JSON path to mutate (e.g., spec.predictor.minReplicas, metadata.labels.app). Use this or field, not both. |
+| `field` | `string` | No | - | Legacy: spec field name (auto-prefixed with 'spec.'). Use path instead for new experiments. |
 | `value` | `string` | Yes | - | New value (JSON-typed: "999" becomes int, "true" becomes bool, '"text"' becomes string) |
 | `ttl` | `duration` | No | `300s` | Auto-cleanup duration |
 

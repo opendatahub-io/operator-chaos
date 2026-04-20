@@ -4,12 +4,62 @@
 
 | Injection Type | Danger | Experiment | Description |
 |----------------|--------|------------|-------------|
+| PodKill | low | dependency-dashboard-kill.yaml | Killing the dashboard (which workbenches integrates with for notebook management... |
 | NetworkPartition | medium | network-partition.yaml | When the odh-notebook-controller pod is network-partitioned from the API server,... |
 | PodKill | low | pod-kill.yaml | When the odh-notebook-controller pod is killed, Kubernetes should recreate it wi... |
 | RBACRevoke | high | rbac-revoke.yaml | When the odh-notebook-controller ClusterRoleBinding subjects are revoked, the co... |
 | WebhookDisrupt | high | webhook-disrupt.yaml | When the notebook mutating webhook failurePolicy is weakened from Fail to Ignore... |
 
 ## Experiment Details
+
+### workbenches-dependency-dashboard-kill
+
+- **Type:** PodKill
+- **Danger Level:** low
+- **Component:** notebook-controller
+
+Killing the dashboard (which workbenches integrates with for notebook management UI) should not crash the notebook controller. Workbenches should continue managing existing notebooks and recover when dashboard is restored.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: workbenches-dependency-dashboard-kill
+spec:
+  target:
+    operator: workbenches
+    component: notebook-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: notebook-controller-deployment
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: "app=odh-dashboard"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the dashboard (which workbenches integrates with for notebook
+      management UI) should not crash the notebook controller. Workbenches
+      should continue managing existing notebooks and recover when dashboard
+      is restored.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
 
 ### workbenches-network-partition
 

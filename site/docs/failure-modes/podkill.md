@@ -53,16 +53,19 @@ The operator's Deployment controller recreates the pod within seconds. The new p
 | dashboard | dashboard-pod-kill | low | When one odh-dashboard pod is killed, the remaining replica should continue serv... |
 | data-science-pipelines | data-science-pipelines-pod-kill | low | When the data-science-pipelines-operator pod is killed, Kubernetes should recrea... |
 | feast | feast-pod-kill | low | When the feast-operator pod is killed, existing FeatureStore instances continue ... |
+| kserve | kserve-dependency-odh-model-controller-kill | low | Killing odh-model-controller (which kserve depends on for model serving routing)... |
 | kserve | kserve-main-controller-kill | low | When the kserve-controller-manager pod is killed, the Deployment controller recr... |
 | kueue | kueue-pod-kill | low | When the kueue-controller-manager pod is killed, pending workloads should queue ... |
 | llamastack | llamastack-pod-kill | low | When the llamastack-controller-manager pod is killed, existing LlamaStack distri... |
 | model-registry | model-registry-pod-kill | low | When the model-registry-operator pod is killed, Kubernetes should recreate it wi... |
 | modelmesh | modelmesh-pod-kill | low | When the modelmesh-controller pod is killed, existing model endpoints keep servi... |
+| odh-model-controller | odh-model-controller-dependency-kserve-kill | low | Killing the kserve-controller-manager (a dependency of odh-model-controller) sho... |
 | odh-model-controller | odh-model-controller-pod-kill | low | When the odh-model-controller pod is killed, Kubernetes should recreate it withi... |
 | opendatahub-operator | opendatahub-operator-pod-kill | low | When one operator pod is killed, the remaining replicas should maintain the lead... |
 | ray | ray-pod-kill | low | When the ray-operator pod is killed, existing RayClusters keep running and servi... |
 | training-operator | training-operator-pod-kill | low | When the training-operator pod is killed, running training jobs continue via wor... |
 | trustyai | trustyai-pod-kill | low | When the trustyai-service-operator pod is killed, existing TrustyAI services kee... |
+| workbenches | workbenches-dependency-dashboard-kill | low | Killing the dashboard (which workbenches integrates with for notebook management... |
 | workbenches | workbenches-pod-kill | low | When the odh-notebook-controller pod is killed, Kubernetes should recreate it wi... |
 
 <!-- custom-start: notes -->

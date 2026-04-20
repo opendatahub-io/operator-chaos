@@ -7,6 +7,7 @@
 | ConfigDrift | high | config-drift.yaml | When the kube-rbac-proxy configuration is corrupted, the RBAC proxy sidecar shou... |
 | NetworkPartition | medium | network-partition.yaml | When odh-dashboard pods are network-partitioned from the API server, the dashboa... |
 | PodKill | low | pod-kill.yaml | When one odh-dashboard pod is killed, the remaining replica should continue serv... |
+| QuotaExhaustion | medium | quota-exhaustion.yaml | Exhausting pod quota in the dashboard namespace should prevent new pods from bei... |
 | RBACRevoke | high | rbac-revoke.yaml | When the odh-dashboard ClusterRoleBinding subjects are revoked, the dashboard sh... |
 
 ## Experiment Details
@@ -158,6 +159,55 @@ spec:
       within the recovery timeout and the deployment should return to 2/2
       ready replicas.
     recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
+
+### dashboard-quota-exhaustion
+
+- **Type:** QuotaExhaustion
+- **Danger Level:** medium
+- **Component:** odh-dashboard
+
+Exhausting pod quota in the dashboard namespace should prevent new pods from being created. The operator should handle quota errors gracefully and recover when the quota is removed.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-quota-exhaustion
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-dashboard
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    parameters:
+      quotaName: "chaos-quota-dashboard"
+      pods: "0"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Exhausting pod quota in the dashboard namespace should prevent new pods
+      from being created. The operator should handle quota errors gracefully
+      and recover when the quota is removed.
+    recoveryTimeout: 60s
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:

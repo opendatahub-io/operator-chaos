@@ -5,18 +5,23 @@
 | Injection Type | Danger | Experiment | Description |
 |----------------|--------|------------|-------------|
 | ConfigDrift | high | config-drift.yaml | When the inferenceservice-config ConfigMap is corrupted with an invalid deployme... |
+| ClientFault | low | cr-deletion-mid-reconcile.yaml | Injecting intermittent "not found" errors with 2s delay on GET operations simula... |
 | CRDMutation | medium | crd-mutation.yaml | InferenceService has no scalar top-level spec fields, so this experiment injects... |
+| PodKill | low | dependency-kserve-kill.yaml | Killing the kserve-controller-manager (a dependency of odh-model-controller) sho... |
 | FinalizerBlock | low | finalizer-block.yaml | When a stuck finalizer prevents an InferenceService from being deleted, the odh-... |
 | ConfigDrift | high | ingress-config-corruption.yaml | When the ingress key in inferenceservice-config is emptied, the odh-model-contro... |
 | CRDMutation | high | leader-lease-corrupt.yaml | Controller detects corrupted leader lease holderIdentity and re-elects leader wi... |
 | NetworkPartition | medium | network-partition.yaml | When the odh-model-controller pod is network-partitioned from the API server, it... |
+| OwnerRefOrphan | medium | ownerref-orphan.yaml | Removing ownerReferences from the odh-model-controller Deployment should trigger... |
 | PodKill | low | pod-kill.yaml | When the odh-model-controller pod is killed, Kubernetes should recreate it withi... |
+| QuotaExhaustion | medium | quota-exhaustion.yaml | Creating a restrictive ResourceQuota that prevents pod creation should cause the... |
 | RBACRevoke | high | rbac-revoke.yaml | When the odh-model-controller ClusterRoleBinding subjects are revoked, the contr... |
 | ClientFault | low | sdk-api-throttle.yaml | When 30% of Get and 20% of List operations are throttled with 500ms-1s delays, t... |
 | ClientFault | high | sdk-conflict-storm.yaml | When 70% of Update and 50% of Patch operations fail with conflict errors, the co... |
 | ClientFault | low | sdk-watch-disconnect.yaml | When 40% of reconcile operations encounter watch channel closures, the controlle... |
 | ConfigDrift | high | webhook-cert-corrupt.yaml | All 7 webhooks fail after TLS cert corruption; cert-manager or operator restores... |
 | WebhookDisrupt | high | webhook-disrupt.yaml | When the validating webhook failurePolicy is weakened from Fail to Ignore, inval... |
+| WebhookLatency | high | webhook-latency.yaml | Deploying a slow admission webhook (25s delay, just under the 30s API server tim... |
 
 ## Experiment Details
 
@@ -70,6 +75,57 @@ spec:
     allowedNamespaces:
       - opendatahub
     allowDangerous: true
+```
+
+</details>
+
+### odh-model-controller-cr-deletion-mid-reconcile
+
+- **Type:** ClientFault
+- **Danger Level:** low
+- **Component:** odh-model-controller
+
+Injecting intermittent "not found" errors with 2s delay on GET operations simulates CR deletion during active reconciliation. The controller should handle nil-pointer scenarios gracefully without panicking or crash-looping. This is a common source of bugs in poorly written controllers. Requires ChaosClient SDK integration in the target operator.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-cr-deletion-mid-reconcile
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ClientFault
+    parameters:
+      faults: '{"get":{"errorRate":0.5,"error":"not found","delay":"2s"}}'
+      configMapName: "operator-chaos-cr-deletion"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Injecting intermittent "not found" errors with 2s delay on GET operations
+      simulates CR deletion during active reconciliation. The controller should
+      handle nil-pointer scenarios gracefully without panicking or crash-looping.
+      This is a common source of bugs in poorly written controllers. Requires
+      ChaosClient SDK integration in the target operator.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
 ```
 
 </details>
@@ -129,6 +185,55 @@ spec:
       Resilient — the controller ignores unknown fields gracefully.
       The chaos framework removes the injected field via TTL-based cleanup
       after 300s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
+
+### odh-model-controller-dependency-kserve-kill
+
+- **Type:** PodKill
+- **Danger Level:** low
+- **Component:** odh-model-controller
+
+Killing the kserve-controller-manager (a dependency of odh-model-controller) should cause odh-model-controller to degrade gracefully instead of crash-looping. The controller should report appropriate status conditions and recover once kserve is restored.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-dependency-kserve-kill
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: "control-plane=kserve-controller-manager"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the kserve-controller-manager (a dependency of odh-model-controller)
+      should cause odh-model-controller to degrade gracefully instead of
+      crash-looping. The controller should report appropriate status conditions
+      and recover once kserve is restored.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
@@ -358,6 +463,56 @@ spec:
 
 </details>
 
+### odh-model-controller-ownerref-orphan
+
+- **Type:** OwnerRefOrphan
+- **Danger Level:** medium
+- **Component:** odh-model-controller
+
+Removing ownerReferences from the odh-model-controller Deployment should trigger the operator to re-adopt it within the recovery timeout. Verifies the controller's ownership reconciliation logic.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-ownerref-orphan
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    parameters:
+      apiVersion: "apps/v1"
+      kind: "Deployment"
+      name: "odh-model-controller"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing ownerReferences from the odh-model-controller Deployment
+      should trigger the operator to re-adopt it within the recovery timeout.
+      Verifies the controller's ownership reconciliation logic.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
+
 ### odh-model-controller-pod-kill
 
 - **Type:** PodKill
@@ -400,6 +555,58 @@ spec:
       recreate it within the recovery timeout and the controller should
       resume reconciling InferenceService resources without data loss.
     recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+```
+
+</details>
+
+### odh-model-controller-quota-exhaustion
+
+- **Type:** QuotaExhaustion
+- **Danger Level:** medium
+- **Component:** odh-model-controller
+
+Creating a restrictive ResourceQuota that prevents pod creation should cause the operator to report quota-related errors and retry gracefully instead of crash-looping. When the quota is removed, the operator should resume normal operation.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-quota-exhaustion
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    parameters:
+      quotaName: "chaos-quota-odh-model-controller"
+      pods: "0"
+      cpu: "1m"
+      memory: "1Mi"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Creating a restrictive ResourceQuota that prevents pod creation should
+      cause the operator to report quota-related errors and retry gracefully
+      instead of crash-looping. When the quota is removed, the operator
+      should resume normal operation.
+    recoveryTimeout: 90s
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
@@ -715,6 +922,59 @@ spec:
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
+    allowDangerous: true
+```
+
+</details>
+
+### odh-model-controller-webhook-latency
+
+- **Type:** WebhookLatency
+- **Danger Level:** high
+- **Component:** odh-model-controller
+
+Deploying a slow admission webhook (25s delay, just under the 30s API server timeout) intercepting InferenceService resources should not cause the operator to hang or crash. The operator should handle slow API responses with appropriate timeouts.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-webhook-latency
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookLatency
+    dangerLevel: high
+    parameters:
+      resources: "inferenceservices"
+      apiGroups: "serving.kserve.io"
+      delay: "25s"
+    ttl: "180s"
+  hypothesis:
+    description: >-
+      Deploying a slow admission webhook (25s delay, just under the 30s API
+      server timeout) intercepting InferenceService resources should not
+      cause the operator to hang or crash. The operator should handle slow
+      API responses with appropriate timeouts.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
     allowDangerous: true
 ```
 

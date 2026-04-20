@@ -66,6 +66,7 @@ The operator experiences injected errors/latency on API calls. It should handle 
 
 | Component | Experiment | Danger | Description |
 |-----------|------------|--------|-------------|
+| odh-model-controller | odh-model-controller-cr-deletion-mid-reconcile | low | Injecting intermittent "not found" errors with 2s delay on GET operations simula... |
 | odh-model-controller | odh-model-controller-sdk-api-throttle | low | When 30% of Get and 20% of List operations are throttled with 500ms-1s delays, t... |
 | odh-model-controller | odh-model-controller-sdk-conflict-storm | high | When 70% of Update and 50% of Patch operations fail with conflict errors, the co... |
 | odh-model-controller | odh-model-controller-sdk-watch-disconnect | low | When 40% of reconcile operations encounter watch channel closures, the controlle... |

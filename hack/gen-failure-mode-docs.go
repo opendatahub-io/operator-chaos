@@ -194,6 +194,12 @@ func dangerForType(t string) string {
 		return "high"
 	case "ClientFault":
 		return "low"
+	case "OwnerRefOrphan":
+		return "medium"
+	case "QuotaExhaustion":
+		return "medium"
+	case "WebhookLatency":
+		return "high"
 	default:
 		return "medium"
 	}
@@ -406,6 +412,12 @@ graph TD
     N -->|Yes| O[FinalizerBlock]
     A --> P{API error handling?}
     P -->|Yes| Q[ClientFault]
+    A --> R{Ownership/adoption?}
+    R -->|Yes| S[OwnerRefOrphan]
+    A --> T{Resource pressure?}
+    T -->|Yes| U[QuotaExhaustion]
+    A --> V{API latency?}
+    V -->|Yes| W[WebhookLatency]
 ` + "```" + `
 
 ## Coverage by Component
