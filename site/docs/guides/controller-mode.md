@@ -110,8 +110,8 @@ The controller emits Kubernetes **events** at each phase transition for observab
 
 ```bash
 # Clone the repository
-git clone https://github.com/ugiordan/odh-platform-chaos.git
-cd odh-platform-chaos
+git clone https://github.com/ugiordan/operator-chaos.git
+cd operator-chaos
 
 # Install CRD and controller
 kubectl apply -k config/default

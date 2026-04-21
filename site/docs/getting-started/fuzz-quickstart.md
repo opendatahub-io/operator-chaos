@@ -105,7 +105,7 @@ import (
     "sigs.k8s.io/controller-runtime/pkg/client"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"
 )
 
 // Step 1: Implement a ReconcilerFactory.

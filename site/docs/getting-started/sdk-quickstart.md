@@ -31,7 +31,7 @@ flowchart LR
 Wrap an existing client with chaos fault injection:
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+import "github.com/opendatahub-io/operator-chaos/pkg/sdk"
 
 // Wrap an existing client with chaos fault injection.
 // FaultSpec fields:
@@ -159,7 +159,7 @@ import (
     "sigs.k8s.io/controller-runtime/pkg/client/fake"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk"
 )
 
 func TestReconcilerWithConnectionErrors(t *testing.T) {

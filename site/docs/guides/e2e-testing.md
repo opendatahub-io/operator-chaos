@@ -9,7 +9,7 @@ Step-by-step guide for running chaos experiments against **odh-model-controller*
 - `operator-chaos` CLI built and in your PATH:
 
 ```bash
-go install github.com/opendatahub-io/odh-platform-chaos/cmd/operator-chaos@latest
+go install github.com/opendatahub-io/operator-chaos/cmd/operator-chaos@latest
 ```
 
 - Verify the target component is running:

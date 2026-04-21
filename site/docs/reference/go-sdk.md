@@ -12,7 +12,7 @@ The SDK consists of three main packages:
 
 ## SDK Package (`pkg/sdk`)
 
-[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/odh-platform-chaos/pkg/sdk)
+[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/operator-chaos/pkg/sdk)
 
 ### ChaosClient
 
@@ -20,7 +20,7 @@ The SDK consists of three main packages:
 
 ```go
 import (
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk"
     "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -120,14 +120,14 @@ if err != nil {
 
 ## Fault Injection Primitives (`pkg/sdk/faults`)
 
-[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/faults)
+[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/operator-chaos/pkg/sdk/faults)
 
 The `faults` package provides declarative fault injection for common failure modes. These are typically used in integration tests or fuzzing harnesses.
 
 ### Network Faults
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/faults"
+import "github.com/opendatahub-io/operator-chaos/pkg/sdk/faults"
 
 // Inject random latency
 faults.NetworkLatency(50 * time.Millisecond, 200 * time.Millisecond)
@@ -167,13 +167,13 @@ faults.InformerResync()
 
 ## Fuzzing Harness (`pkg/sdk/fuzz`)
 
-[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz)
+[:octicons-link-external-16: View on pkg.go.dev](https://pkg.go.dev/github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz)
 
 The `fuzz` package provides a property-based testing harness for operator reconciliation logic. It automatically generates random CRD mutations and verifies reconciliation invariants.
 
 ```go
 import (
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk/fuzz"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"
     "testing"
 )
 
@@ -206,7 +206,7 @@ func TestMyOperatorFuzzing(t *testing.T) {
 Wrap your reconciler to collect metrics and observe behavior:
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+import "github.com/opendatahub-io/operator-chaos/pkg/sdk"
 
 wrapped := sdk.WrapReconciler(myReconciler, sdk.ReconcilerMetrics{
     RecordDuration: true,
@@ -236,7 +236,7 @@ The `model` package bridges operator knowledge models to the fuzz SDK. It provid
 Creates typed K8s objects from an OperatorKnowledge model. Each `ManagedResource` maps to its correct Go type (Deployment, DaemonSet, ConfigMap, etc.), with GVK, name, namespace, and labels populated. Unknown kinds fall back to `Unstructured`.
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/model"
+import "github.com/opendatahub-io/operator-chaos/pkg/model"
 
 k, _ := model.LoadKnowledge("knowledge/kserve.yaml")
 seeds := model.SeedObjects(k)
@@ -312,7 +312,7 @@ import (
     "os"
     "time"
 
-    "github.com/opendatahub-io/odh-platform-chaos/pkg/sdk"
+    "github.com/opendatahub-io/operator-chaos/pkg/sdk"
     "sigs.k8s.io/controller-runtime/pkg/client"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
 )

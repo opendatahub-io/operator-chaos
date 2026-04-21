@@ -257,7 +257,7 @@ The `data` field contains base64-encoded JSON with injection-specific rollback i
 ### Safety Helper Functions
 
 ```go
-import "github.com/opendatahub-io/odh-platform-chaos/pkg/safety"
+import "github.com/opendatahub-io/operator-chaos/pkg/safety"
 
 // Store rollback data with integrity checksum
 rollbackInfo := map[string]string{"originalValue": "foo"}

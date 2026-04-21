@@ -20,8 +20,8 @@ This guide walks you through setting up a local development environment for Oper
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/ugiordan/odh-platform-chaos.git
-cd odh-platform-chaos
+git clone https://github.com/ugiordan/operator-chaos.git
+cd operator-chaos
 ```
 
 ## Verify Go Version
@@ -98,7 +98,7 @@ Open `coverage.html` in a browser to view coverage reports.
 ## Project Structure
 
 ```
-odh-platform-chaos/
+operator-chaos/
 ├── api/v1alpha1/              # CRD types and validation
 │   ├── types.go               # ChaosExperiment CRD definition
 │   └── groupversion_info.go   # API group metadata
