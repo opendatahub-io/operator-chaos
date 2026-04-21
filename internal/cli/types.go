@@ -25,6 +25,9 @@ func newTypesCommand() *cobra.Command {
 				{"WebhookDisrupt", "Change webhook failure policy", v1alpha1.DangerLevelHigh},
 				{"RBACRevoke", "Revoke RBAC binding subjects", v1alpha1.DangerLevelHigh},
 				{"ClientFault", "Inject API-level faults into controller-runtime client", v1alpha1.DangerLevelMedium},
+				{"OwnerRefOrphan", "Remove ownerReferences to test re-adoption", v1alpha1.DangerLevelMedium},
+				{"QuotaExhaustion", "Create restrictive ResourceQuota", v1alpha1.DangerLevelMedium},
+				{"WebhookLatency", "Deploy slow admission webhook", v1alpha1.DangerLevelHigh},
 			}
 			fmt.Println("Available injection types:")
 			fmt.Println()
