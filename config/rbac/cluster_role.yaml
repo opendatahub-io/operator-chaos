@@ -25,14 +25,18 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch", "delete"]
-  # ConfigDrift injection
+  # ConfigDrift injection + NamespaceDeletion rollback ConfigMaps
   - apiGroups: [""]
     resources: ["configmaps", "secrets"]
-    verbs: ["get", "list", "create", "update", "patch", "delete"]
-  # Namespace and ServiceAccount read
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Namespace lifecycle (NamespaceDeletion injection needs create/delete)
   - apiGroups: [""]
-    resources: ["namespaces", "serviceaccounts"]
-    verbs: ["get", "list"]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  # ServiceAccount and Service read (Services listed by NamespaceDeletion for resource counting)
+  - apiGroups: [""]
+    resources: ["serviceaccounts", "services"]
+    verbs: ["get", "list", "watch"]
   # Deployment/ReplicaSet/StatefulSet manipulation
   - apiGroups: ["apps"]
     resources: ["deployments", "replicasets", "statefulsets"]
@@ -41,11 +45,11 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["networkpolicies"]
     verbs: ["get", "list", "create", "delete"]
-  # RBACRevoke injection
+  # RBACRevoke injection (watch needed for controller-runtime cache, create/delete for binding lifecycle)
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
-    verbs: ["get", "list", "update", "patch"]
-  # WebhookDisrupt injection
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # WebhookDisrupt injection (watch needed for controller-runtime cache)
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
-    verbs: ["get", "list", "update", "patch"]
+    verbs: ["get", "list", "watch", "update", "patch"]

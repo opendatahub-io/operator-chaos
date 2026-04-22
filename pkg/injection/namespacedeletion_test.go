@@ -80,7 +80,7 @@ func TestNamespaceDeletionInject(t *testing.T) {
 		WithObjects(victimNs, safeNs, deploy, svc).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -91,7 +91,7 @@ func TestNamespaceDeletionInject(t *testing.T) {
 		},
 	}
 
-	cleanup, events, err := injector.Inject(ctx, spec, "safe-ns")
+	cleanup, events, err := injector.Inject(ctx, spec, "ignored")
 	require.NoError(t, err)
 	require.NotNil(t, cleanup)
 	require.Len(t, events, 1)
@@ -158,7 +158,7 @@ func TestNamespaceDeletionInjectNamespaceNotFound(t *testing.T) {
 		WithObjects(safeNs).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -169,7 +169,7 @@ func TestNamespaceDeletionInjectNamespaceNotFound(t *testing.T) {
 		},
 	}
 
-	cleanup, events, err := injector.Inject(ctx, spec, "safe-ns")
+	cleanup, events, err := injector.Inject(ctx, spec, "ignored")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "getting namespace")
 	assert.Nil(t, cleanup)
@@ -190,7 +190,7 @@ func TestNamespaceDeletionInjectSelfNamespaceGuard(t *testing.T) {
 		WithObjects(ns).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "same-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -201,7 +201,7 @@ func TestNamespaceDeletionInjectSelfNamespaceGuard(t *testing.T) {
 		},
 	}
 
-	cleanup, events, err := injector.Inject(ctx, spec, "same-ns")
+	cleanup, events, err := injector.Inject(ctx, spec, "ignored")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "same namespace used for rollback")
 	assert.Nil(t, cleanup)
@@ -237,7 +237,7 @@ func TestNamespaceDeletionInjectStaleConfigMapCleanup(t *testing.T) {
 		WithObjects(victimNs, safeNs, staleCM).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -249,7 +249,7 @@ func TestNamespaceDeletionInjectStaleConfigMapCleanup(t *testing.T) {
 	}
 
 	// Inject should succeed despite the stale ConfigMap
-	cleanup, events, err := injector.Inject(ctx, spec, "safe-ns")
+	cleanup, events, err := injector.Inject(ctx, spec, "ignored")
 	require.NoError(t, err)
 	require.NotNil(t, cleanup)
 	require.Len(t, events, 1)
@@ -281,7 +281,7 @@ func TestNamespaceDeletionInjectStaleConfigMapNonChaosManaged(t *testing.T) {
 		WithObjects(victimNs, safeNs, nonChaosCM).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -293,7 +293,7 @@ func TestNamespaceDeletionInjectStaleConfigMapNonChaosManaged(t *testing.T) {
 	}
 
 	// Should refuse to overwrite the non-chaos-managed ConfigMap
-	cleanup, events, err := injector.Inject(ctx, spec, "safe-ns")
+	cleanup, events, err := injector.Inject(ctx, spec, "ignored")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not chaos-managed")
 	assert.Nil(t, cleanup)
@@ -333,7 +333,7 @@ func TestNamespaceDeletionRevert(t *testing.T) {
 		WithObjects(safeNs, rollbackCM).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -344,7 +344,7 @@ func TestNamespaceDeletionRevert(t *testing.T) {
 		},
 	}
 
-	err := injector.Revert(ctx, spec, "safe-ns")
+	err := injector.Revert(ctx, spec, "ignored")
 	require.NoError(t, err)
 
 	// Verify namespace was recreated with stored metadata
@@ -397,7 +397,7 @@ func TestNamespaceDeletionRevertNamespaceAlreadyExists(t *testing.T) {
 		WithObjects(victimNs, safeNs, rollbackCM).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -408,7 +408,7 @@ func TestNamespaceDeletionRevertNamespaceAlreadyExists(t *testing.T) {
 		},
 	}
 
-	err := injector.Revert(ctx, spec, "safe-ns")
+	err := injector.Revert(ctx, spec, "ignored")
 	require.NoError(t, err)
 
 	// Verify namespace still exists (not recreated)
@@ -440,7 +440,7 @@ func TestNamespaceDeletionRevertNoRollbackConfigMap(t *testing.T) {
 		WithObjects(safeNs).
 		Build()
 
-	injector := NewNamespaceDeletionInjector(fakeClient)
+	injector := NewNamespaceDeletionInjector(fakeClient, "safe-ns")
 	ctx := context.Background()
 
 	spec := v1alpha1.InjectionSpec{
@@ -452,8 +452,18 @@ func TestNamespaceDeletionRevertNoRollbackConfigMap(t *testing.T) {
 	}
 
 	// Revert should be no-op when no rollback ConfigMap exists
-	err := injector.Revert(ctx, spec, "safe-ns")
+	err := injector.Revert(ctx, spec, "ignored")
 	assert.NoError(t, err)
+}
+
+func TestNamespaceDeletionDefaultSafeNamespace(t *testing.T) {
+	injector := NewNamespaceDeletionInjector(nil, "")
+	assert.Equal(t, defaultSafeNamespace, injector.safeNamespace,
+		"empty safeNamespace should default to %q", defaultSafeNamespace)
+
+	injector2 := NewNamespaceDeletionInjector(nil, "custom-ns")
+	assert.Equal(t, "custom-ns", injector2.safeNamespace,
+		"explicit safeNamespace should be preserved")
 }
 
 func TestNamespaceDeletionValidate(t *testing.T) {
@@ -556,7 +566,7 @@ func TestNamespaceDeletionValidate(t *testing.T) {
 				Type:        v1alpha1.NamespaceDeletion,
 				DangerLevel: v1alpha1.DangerLevelHigh,
 				Parameters: map[string]string{
-					"namespace": "odh-chaos-system",
+					"namespace": "operator-chaos-system",
 				},
 			},
 			wantErr: true,

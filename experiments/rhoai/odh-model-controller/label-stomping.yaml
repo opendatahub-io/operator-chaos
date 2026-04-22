@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-odh-model-controller-label-stomping
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: Deployment/odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: odh-model-controller
+      labelKey: app
+      action: overwrite
+      newValue: chaos-stomped
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the 'app' label on the odh-model-controller Deployment is
+      overwritten with a garbage value, the DSC operator should detect
+      the drift and restore the original label during reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

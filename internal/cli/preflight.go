@@ -85,7 +85,14 @@ knowledge file structure without connecting to a cluster.`,
 				return fmt.Errorf("creating k8s client: %w", err)
 			}
 
-			results := checkClusterResources(cmd.Context(), k8sClient, knowledge, namespace)
+			// Only pass the namespace override if the user explicitly set --namespace.
+			// Otherwise, let the knowledge model's per-resource namespace be used.
+			nsOverride := ""
+			if cmd.Flags().Changed("namespace") {
+				nsOverride = namespace
+			}
+
+			results := checkClusterResources(cmd.Context(), k8sClient, knowledge, nsOverride)
 
 			printResourceTable(results)
 
@@ -221,6 +228,8 @@ func checkClusterResources(ctx context.Context, k8sClient client.Client, k *mode
 				ns = namespace
 			} else if mr.Namespace != "" {
 				ns = mr.Namespace
+			} else if k.Operator.Namespace != "" {
+				ns = k.Operator.Namespace
 			} else {
 				ns = v1alpha1.DefaultNamespace
 			}

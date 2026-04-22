@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-odh-model-controller-namespace-deletion
+spec:
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: Deployment/odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NamespaceDeletion
+    parameters:
+      namespace: redhat-ods-applications
+    count: 1
+    ttl: "600s"
+    dangerLevel: high
+  hypothesis:
+    description: >-
+      When the redhat-ods-applications namespace is deleted, the RHOAI
+      operator should detect the loss and recreate the namespace along
+      with all managed resources. This is an extreme resilience test.
+    recoveryTimeout: 300s
+  blastRadius:
+    maxPodsAffected: 100
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

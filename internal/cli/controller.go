@@ -137,7 +137,7 @@ func startController(namespace, metricsAddr, healthAddr string, leaderElect bool
 	registry.Register(v1alpha1.OwnerRefOrphan, injection.NewOwnerRefOrphanInjector(k8sClient))
 	registry.Register(v1alpha1.QuotaExhaustion, injection.NewQuotaExhaustionInjector(k8sClient))
 	registry.Register(v1alpha1.WebhookLatency, injection.NewWebhookLatencyInjector(k8sClient))
-	registry.Register(v1alpha1.NamespaceDeletion, injection.NewNamespaceDeletionInjector(k8sClient))
+	registry.Register(v1alpha1.NamespaceDeletion, injection.NewNamespaceDeletionInjector(k8sClient, namespace))
 	registry.Register(v1alpha1.LabelStomping, injection.NewLabelStompingInjector(k8sClient))
 
 	maxCycles := 10

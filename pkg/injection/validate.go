@@ -875,14 +875,16 @@ var forbiddenNamespaces = map[string]bool{
 }
 
 // forbiddenNamespacePrefixes are namespace name prefixes that must never be deleted.
+// Note: "redhat-ods-" is intentionally NOT forbidden here because it is the
+// primary RHOAI namespace that chaos experiments target. Safety is enforced via
+// dangerLevel: high + allowDangerous: true.
 var forbiddenNamespacePrefixes = []string{
 	"openshift-",
 	"chaos-",
-	"redhat-ods-",
 }
 
 // controllerNamespace is the namespace where the chaos controller runs.
-const controllerNamespace = "odh-chaos-system"
+const controllerNamespace = "operator-chaos-system"
 
 func validateNamespaceDeletionParams(spec v1alpha1.InjectionSpec) error {
 	if spec.DangerLevel != v1alpha1.DangerLevelHigh {

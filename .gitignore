@@ -17,3 +17,4 @@ site/site/
 odh-chaos
 operator-chaos
 docs/superpowers/
+dashboard.db*

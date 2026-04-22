@@ -15,12 +15,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// defaultSafeNamespace is used as the fallback namespace for storing rollback
+// ConfigMaps when no explicit safe namespace is provided.
+const defaultSafeNamespace = "operator-chaos-system"
+
 type NamespaceDeletionInjector struct {
-	client client.Client
+	client        client.Client
+	safeNamespace string
 }
 
-func NewNamespaceDeletionInjector(c client.Client) *NamespaceDeletionInjector {
-	return &NamespaceDeletionInjector{client: c}
+// NewNamespaceDeletionInjector creates a NamespaceDeletionInjector that stores
+// rollback ConfigMaps in the given safeNamespace. In controller mode this should
+// be the controller's own namespace; in CLI mode use an explicit value or pass ""
+// to use the default (operator-chaos-system).
+func NewNamespaceDeletionInjector(c client.Client, safeNamespace string) *NamespaceDeletionInjector {
+	if safeNamespace == "" {
+		safeNamespace = defaultSafeNamespace
+	}
+	return &NamespaceDeletionInjector{client: c, safeNamespace: safeNamespace}
 }
 
 func (n *NamespaceDeletionInjector) Validate(spec v1alpha1.InjectionSpec, blast v1alpha1.BlastRadiusSpec) error {
@@ -31,13 +43,19 @@ func rollbackConfigMapName(namespace string) string {
 	return "chaos-rollback-ns-" + namespace
 }
 
-func (n *NamespaceDeletionInjector) Inject(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) (CleanupFunc, []v1alpha1.InjectionEvent, error) {
+func (n *NamespaceDeletionInjector) Inject(ctx context.Context, spec v1alpha1.InjectionSpec, _ string) (CleanupFunc, []v1alpha1.InjectionEvent, error) {
 	targetNs := spec.Parameters["namespace"]
-	safeNamespace := namespace
+	safeNamespace := n.safeNamespace
 
 	// Prevent deleting the namespace where rollback data is stored
 	if targetNs == safeNamespace {
 		return nil, nil, fmt.Errorf("NamespaceDeletion cannot target namespace %q because it is the same namespace used for rollback data storage", targetNs)
+	}
+
+	// Verify the safe namespace exists before proceeding (rollback ConfigMap goes there)
+	var safeNsObj corev1.Namespace
+	if err := n.client.Get(ctx, types.NamespacedName{Name: safeNamespace}, &safeNsObj); err != nil {
+		return nil, nil, fmt.Errorf("safe namespace %q for rollback data does not exist (create it or set a different safe namespace): %w", safeNamespace, err)
 	}
 
 	// Get the namespace object
@@ -147,9 +165,9 @@ func (n *NamespaceDeletionInjector) Inject(ctx context.Context, spec v1alpha1.In
 	return cleanup, events, nil
 }
 
-func (n *NamespaceDeletionInjector) Revert(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) error {
+func (n *NamespaceDeletionInjector) Revert(ctx context.Context, spec v1alpha1.InjectionSpec, _ string) error {
 	targetNs := spec.Parameters["namespace"]
-	return n.restoreNamespace(ctx, targetNs, namespace)
+	return n.restoreNamespace(ctx, targetNs, n.safeNamespace)
 }
 
 func (n *NamespaceDeletionInjector) restoreNamespace(ctx context.Context, targetNs, safeNamespace string) error {

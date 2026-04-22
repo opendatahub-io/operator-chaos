@@ -125,6 +125,11 @@ spec:
                     - RBACRevoke
                     - FinalizerBlock
                     - ClientFault
+                    - OwnerRefOrphan
+                    - QuotaExhaustion
+                    - WebhookLatency
+                    - NamespaceDeletion
+                    - LabelStomping
                     type: string
                 required:
                 - type
@@ -300,6 +305,11 @@ spec:
                       - RBACRevoke
                       - FinalizerBlock
                       - ClientFault
+                      - OwnerRefOrphan
+                      - QuotaExhaustion
+                      - WebhookLatency
+                      - NamespaceDeletion
+                      - LabelStomping
                       type: string
                   required:
                   - action
