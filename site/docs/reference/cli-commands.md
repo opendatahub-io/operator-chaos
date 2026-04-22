@@ -329,7 +329,7 @@ operator-chaos init [flags]
   -h, --help               help for init
       --namespace string   target namespace (default "default")
       --operator string    target operator (required)
-      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency) (default "PodKill")
+      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency|NamespaceDeletion|LabelStomping) (default "PodKill")
 ```
 
 ### Options inherited from parent commands
@@ -441,7 +441,11 @@ operator-chaos preflight [flags]
 
 ## operator-chaos report
 
-Generate summary reports from experiment results
+Generate reports from experiment results
+
+### Synopsis
+
+Reads JSON experiment results from a directory and generates reports in the specified format.
 
 ```
 operator-chaos report <results-directory> [flags]
@@ -450,9 +454,9 @@ operator-chaos report <results-directory> [flags]
 ### Options
 
 ```
-      --format string   output format (summary, junit) (default "summary")
+      --format string   output format (summary, json, junit, html, markdown) (default "summary")
   -h, --help            help for report
-      --output string   output directory for reports
+      --output string   output file path (default: stdout for summary/markdown, auto-named file for json/junit/html)
 ```
 
 ### Options inherited from parent commands

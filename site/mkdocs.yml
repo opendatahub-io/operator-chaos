@@ -166,6 +166,8 @@ nav:
     - OwnerRefOrphan: failure-modes/ownerref-orphan.md
     - QuotaExhaustion: failure-modes/quota-exhaustion.md
     - WebhookLatency: failure-modes/webhook-latency.md
+    - LabelStomping: failure-modes/label-stomping.md
+    - NamespaceDeletion: failure-modes/namespace-deletion.md
     - Creating Custom Failure Modes: failure-modes/custom-failure-modes.md
   - Guides:
     - E2E Testing: guides/e2e-testing.md
