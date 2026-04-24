@@ -175,6 +175,7 @@ nav:
     - Dashboard (Chaos Operator): guides/dashboard-operator.md
     - Dashboard (Grafana): guides/dashboard-grafana.md
     - Knowledge Models: guides/knowledge-models.md
+    - Route Chaos: guides/route-chaos.md
     - Controller Mode: guides/controller-mode.md
     - Upgrade Testing: guides/upgrade-testing.md
   - Reference:

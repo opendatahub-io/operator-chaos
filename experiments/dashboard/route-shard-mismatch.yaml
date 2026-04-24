@@ -1,0 +1,45 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-route-shard-mismatch
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+    resource: Route/odh-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-dashboard
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "odh-dashboard"
+      path: "spec.host"
+      value: "dashboard.nonexistent-shard.local"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Setting spec.host to a domain that does not match any configured
+      IngressController's domain simulates a router shard misconfiguration.
+      Unlike host-collision (which uses a cluster-like domain), this
+      targets a completely non-routable local domain. No IngressController
+      will claim the Route, making the dashboard unreachable through the
+      orphaned host. The operator should detect the Route drift and
+      restore the original host. Expected verdict: Resilient if the
+      operator restores the host, Vulnerable if the Route remains
+      orphaned on a non-existent shard.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true

@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-route-host-deletion
+spec:
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Route/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "rhods-dashboard"
+      path: "spec.host"
+      value: "null"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Deleting the RHODS dashboard Route host field via null merge patch
+      removes the host assignment. The OpenShift router de-admits the
+      Route since it has no host to serve, making the dashboard
+      unreachable. The RHOAI operator should detect the missing host
+      and restore the Route. Expected verdict: Resilient if the host
+      is restored, Vulnerable if the Route remains without a host.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

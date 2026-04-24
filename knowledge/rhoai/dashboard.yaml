@@ -34,6 +34,10 @@ components:
         kind: Service
         name: rhods-dashboard
         namespace: redhat-ods-applications
+      - apiVersion: route.openshift.io/v1
+        kind: Route
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
     steadyState:
       checks:
         - type: conditionTrue

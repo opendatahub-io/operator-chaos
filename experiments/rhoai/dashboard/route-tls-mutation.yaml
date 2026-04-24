@@ -1,0 +1,44 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-route-tls-mutation
+spec:
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Route/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "rhods-dashboard"
+      path: "spec.tls.termination"
+      value: "passthrough"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Changing the TLS termination mode from "reencrypt" to "passthrough"
+      forces the router to stop terminating TLS and forward encrypted
+      traffic directly to the dashboard pod. Since the dashboard relies
+      on the router for TLS termination, this breaks HTTPS access. The
+      RHOAI operator should detect the TLS config drift and restore the
+      correct termination mode. Expected verdict: Resilient if the
+      operator reconciles the TLS settings, Vulnerable if the Route
+      remains broken.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

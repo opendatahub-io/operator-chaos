@@ -1,0 +1,44 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-route-tls-mutation
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+    resource: Route/odh-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-dashboard
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "odh-dashboard"
+      path: "spec.tls.termination"
+      value: "passthrough"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Changing the TLS termination mode from "edge" or "reencrypt" to
+      "passthrough" forces the router to stop terminating TLS and forward
+      encrypted traffic directly to the backend pod. Since the dashboard
+      pod likely does not serve TLS on its own, this breaks HTTPS access.
+      The operator should detect the TLS config drift and restore the
+      correct termination mode. Expected verdict: Resilient if the
+      operator reconciles the TLS settings, Vulnerable if the Route
+      remains broken.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true

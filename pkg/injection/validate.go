@@ -290,9 +290,8 @@ var sensitiveSpecFields = map[string]bool{
 }
 
 // isCoreKubernetesType returns true if the apiVersion represents a core
-// Kubernetes type rather than a CRD.
+// Kubernetes or OpenShift infrastructure type rather than a CRD.
 func isCoreKubernetesType(apiVersion string) bool {
-	// Core types: v1, apps/v1, batch/v1, etc.
 	return apiVersion == "v1" ||
 		strings.HasPrefix(apiVersion, "apps/") ||
 		strings.HasPrefix(apiVersion, "batch/") ||
@@ -312,7 +311,8 @@ func isCoreKubernetesType(apiVersion string) bool {
 		strings.HasPrefix(apiVersion, "node.k8s.io/") ||
 		strings.HasPrefix(apiVersion, "scheduling.k8s.io/") ||
 		strings.HasPrefix(apiVersion, "apiextensions.k8s.io/") ||
-		strings.HasPrefix(apiVersion, "apiregistration.k8s.io/")
+		strings.HasPrefix(apiVersion, "apiregistration.k8s.io/") ||
+		strings.HasPrefix(apiVersion, "route.openshift.io/")
 }
 
 // systemCriticalConfigs is a deny-list of ConfigMaps/Secrets that should never

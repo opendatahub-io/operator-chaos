@@ -826,6 +826,322 @@ func TestParseTypedValue(t *testing.T) {
 	}
 }
 
+func TestCRDMutationRouteHostCollision(t *testing.T) {
+	scheme := runtime.NewScheme()
+	gvk := schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"}
+	scheme.AddKnownTypeWithName(gvk, &unstructured.Unstructured{})
+	scheme.AddKnownTypeWithName(
+		schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "RouteList"},
+		&unstructured.UnstructuredList{},
+	)
+
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gvk)
+	obj.SetName("rhods-dashboard")
+	obj.SetNamespace("redhat-ods-applications")
+	obj.Object["spec"] = map[string]interface{}{
+		"host": "dashboard.apps.cluster.example.com",
+		"to": map[string]interface{}{
+			"kind": "Service",
+			"name": "rhods-dashboard",
+		},
+		"tls": map[string]interface{}{
+			"termination":                   "reencrypt",
+			"insecureEdgeTerminationPolicy": "Redirect",
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
+	injector := NewCRDMutationInjector(fakeClient)
+	ctx := context.Background()
+
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.CRDMutation,
+		Parameters: map[string]string{
+			"apiVersion": "route.openshift.io/v1",
+			"kind":       "Route",
+			"name":       "rhods-dashboard",
+			"path":       "spec.host",
+			"value":      "chaos-collision.apps.cluster.invalid",
+		},
+	}
+
+	cleanup, events, err := injector.Inject(ctx, spec, "redhat-ods-applications")
+	require.NoError(t, err)
+	require.NotNil(t, cleanup)
+	require.Len(t, events, 1)
+	assert.Equal(t, "spec.host", events[0].Details["path"])
+
+	current := &unstructured.Unstructured{}
+	current.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("rhods-dashboard", "redhat-ods-applications"), current))
+	host, found, _ := unstructured.NestedString(current.Object, "spec", "host")
+	require.True(t, found)
+	assert.Equal(t, "chaos-collision.apps.cluster.invalid", host)
+
+	// TLS and backend should be preserved
+	termination, found, _ := unstructured.NestedString(current.Object, "spec", "tls", "termination")
+	require.True(t, found)
+	assert.Equal(t, "reencrypt", termination)
+
+	backendName, found, _ := unstructured.NestedString(current.Object, "spec", "to", "name")
+	require.True(t, found)
+	assert.Equal(t, "rhods-dashboard", backendName)
+
+	require.NoError(t, cleanup(ctx))
+
+	restored := &unstructured.Unstructured{}
+	restored.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("rhods-dashboard", "redhat-ods-applications"), restored))
+	restoredHost, found, _ := unstructured.NestedString(restored.Object, "spec", "host")
+	require.True(t, found)
+	assert.Equal(t, "dashboard.apps.cluster.example.com", restoredHost)
+}
+
+func TestCRDMutationRouteTLSTermination(t *testing.T) {
+	scheme := runtime.NewScheme()
+	gvk := schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"}
+	scheme.AddKnownTypeWithName(gvk, &unstructured.Unstructured{})
+	scheme.AddKnownTypeWithName(
+		schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "RouteList"},
+		&unstructured.UnstructuredList{},
+	)
+
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gvk)
+	obj.SetName("dashboard-route")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{
+		"host": "dashboard.apps.example.com",
+		"tls": map[string]interface{}{
+			"termination":                   "reencrypt",
+			"insecureEdgeTerminationPolicy": "Redirect",
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
+	injector := NewCRDMutationInjector(fakeClient)
+	ctx := context.Background()
+
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.CRDMutation,
+		Parameters: map[string]string{
+			"apiVersion": "route.openshift.io/v1",
+			"kind":       "Route",
+			"name":       "dashboard-route",
+			"path":       "spec.tls.termination",
+			"value":      "passthrough",
+		},
+	}
+
+	cleanup, _, err := injector.Inject(ctx, spec, "test-ns")
+	require.NoError(t, err)
+
+	current := &unstructured.Unstructured{}
+	current.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("dashboard-route", "test-ns"), current))
+
+	termination, found, _ := unstructured.NestedString(current.Object, "spec", "tls", "termination")
+	require.True(t, found)
+	assert.Equal(t, "passthrough", termination)
+
+	// insecureEdgeTerminationPolicy should be preserved by merge patch
+	policy, found, _ := unstructured.NestedString(current.Object, "spec", "tls", "insecureEdgeTerminationPolicy")
+	require.True(t, found)
+	assert.Equal(t, "Redirect", policy)
+
+	require.NoError(t, cleanup(ctx))
+
+	restored := &unstructured.Unstructured{}
+	restored.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("dashboard-route", "test-ns"), restored))
+	restoredTerm, found, _ := unstructured.NestedString(restored.Object, "spec", "tls", "termination")
+	require.True(t, found)
+	assert.Equal(t, "reencrypt", restoredTerm)
+}
+
+func TestCRDMutationRouteBackendDisruption(t *testing.T) {
+	scheme := runtime.NewScheme()
+	gvk := schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"}
+	scheme.AddKnownTypeWithName(gvk, &unstructured.Unstructured{})
+	scheme.AddKnownTypeWithName(
+		schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "RouteList"},
+		&unstructured.UnstructuredList{},
+	)
+
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gvk)
+	obj.SetName("model-registry-route")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{
+		"host": "registry.apps.example.com",
+		"to": map[string]interface{}{
+			"kind":   "Service",
+			"name":   "model-registry-svc",
+			"weight": int64(100),
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
+	injector := NewCRDMutationInjector(fakeClient)
+	ctx := context.Background()
+
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.CRDMutation,
+		Parameters: map[string]string{
+			"apiVersion": "route.openshift.io/v1",
+			"kind":       "Route",
+			"name":       "model-registry-route",
+			"path":       "spec.to.name",
+			"value":      "chaos-nonexistent-service",
+		},
+	}
+
+	cleanup, _, err := injector.Inject(ctx, spec, "test-ns")
+	require.NoError(t, err)
+
+	current := &unstructured.Unstructured{}
+	current.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("model-registry-route", "test-ns"), current))
+
+	backendName, found, _ := unstructured.NestedString(current.Object, "spec", "to", "name")
+	require.True(t, found)
+	assert.Equal(t, "chaos-nonexistent-service", backendName)
+
+	// Weight and kind should be preserved
+	weight, found, _ := unstructured.NestedFieldNoCopy(current.Object, "spec", "to", "weight")
+	require.True(t, found)
+	assert.Equal(t, int64(100), weight)
+
+	kind, found, _ := unstructured.NestedString(current.Object, "spec", "to", "kind")
+	require.True(t, found)
+	assert.Equal(t, "Service", kind)
+
+	require.NoError(t, cleanup(ctx))
+
+	restored := &unstructured.Unstructured{}
+	restored.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("model-registry-route", "test-ns"), restored))
+	restoredName, found, _ := unstructured.NestedString(restored.Object, "spec", "to", "name")
+	require.True(t, found)
+	assert.Equal(t, "model-registry-svc", restoredName)
+}
+
+func TestCRDMutationRouteValidation(t *testing.T) {
+	injector := &CRDMutationInjector{}
+	blast := v1alpha1.BlastRadiusSpec{MaxPodsAffected: 1}
+
+	tests := []struct {
+		name    string
+		spec    v1alpha1.InjectionSpec
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Route mutation requires dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.CRDMutation,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.host",
+					"value":      "chaos.example.com",
+				},
+			},
+			wantErr: true,
+			errMsg:  "dangerLevel: high",
+		},
+		{
+			name: "valid Route host mutation with dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type:        v1alpha1.CRDMutation,
+				DangerLevel: v1alpha1.DangerLevelHigh,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.host",
+					"value":      "chaos.example.com",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid Route TLS mutation with dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type:        v1alpha1.CRDMutation,
+				DangerLevel: v1alpha1.DangerLevelHigh,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.tls.termination",
+					"value":      "passthrough",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid Route backend mutation with dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type:        v1alpha1.CRDMutation,
+				DangerLevel: v1alpha1.DangerLevelHigh,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.to.name",
+					"value":      "nonexistent",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Route null value requires dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type: v1alpha1.CRDMutation,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.host",
+					"value":      "null",
+				},
+			},
+			wantErr: true,
+			errMsg:  "dangerLevel: high",
+		},
+		{
+			name: "Route null value accepted with dangerLevel high",
+			spec: v1alpha1.InjectionSpec{
+				Type:        v1alpha1.CRDMutation,
+				DangerLevel: v1alpha1.DangerLevelHigh,
+				Parameters: map[string]string{
+					"apiVersion": "route.openshift.io/v1",
+					"kind":       "Route",
+					"name":       "rhods-dashboard",
+					"path":       "spec.host",
+					"value":      "null",
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := injector.Validate(tt.spec, blast)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errMsg)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 // client_key is a helper to create a NamespacedName for client.Get.
 func client_key(name, namespace string) client.ObjectKey {
 	return client.ObjectKey{Name: name, Namespace: namespace}

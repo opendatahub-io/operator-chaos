@@ -28,6 +28,10 @@ components:
         kind: Lease
         name: 85f368d1.opendatahub.io
         namespace: redhat-ods-applications
+      - apiVersion: route.openshift.io/v1
+        kind: Route
+        name: model-registry-operator-rest
+        namespace: redhat-ods-applications
     webhooks:
       - name: model-registry-operator-validating-webhook-configuration
         type: validating

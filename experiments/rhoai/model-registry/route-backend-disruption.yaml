@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-model-registry-route-backend-disruption
+spec:
+  target:
+    operator: model-registry
+    component: model-registry-operator
+    resource: Route/model-registry-operator-rest
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: model-registry-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "model-registry-operator-rest"
+      path: "spec.to.name"
+      value: "chaos-nonexistent-service"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Changing the model-registry Route backend to a non-existent service
+      makes all API requests return 503. The operator should detect the
+      broken backend and reconcile the Route. Expected verdict: Resilient
+      if restored, Vulnerable if the API stays unreachable.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

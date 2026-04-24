@@ -1,0 +1,45 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: dashboard-route-host-deletion
+spec:
+  target:
+    operator: dashboard
+    component: odh-dashboard
+    resource: Route/odh-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-dashboard
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "odh-dashboard"
+      path: "spec.host"
+      value: "null"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Deleting the Route host field via null merge patch removes the
+      host assignment from the Route. The OpenShift router de-admits
+      the Route since it has no host to serve, making the dashboard
+      unreachable. The operator should detect the missing host and
+      restore the Route to its original configuration. This indirectly
+      tests status clearing: without a host, the router clears the
+      Route's admission status. Expected verdict: Resilient if the
+      operator restores the host, Vulnerable if the Route remains
+      without a host.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true

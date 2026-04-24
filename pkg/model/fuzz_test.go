@@ -16,9 +16,9 @@ func TestSeedObjectsSingleComponent(t *testing.T) {
 
 	objects := SeedObjects(k)
 
-	// dashboard.yaml has 7 managed resources: 1 Deployment, 1 ServiceAccount,
-	// 3 ClusterRoleBindings, 1 Service, 1 ConfigMap
-	assert.Len(t, objects, 7)
+	// dashboard.yaml has 8 managed resources: 1 Deployment, 1 ServiceAccount,
+	// 3 ClusterRoleBindings, 1 Service, 1 ConfigMap, 1 Route
+	assert.Len(t, objects, 8)
 
 	// Check the Deployment has correct type, name, namespace, labels, replicas.
 	var deploy *appsv1.Deployment
@@ -117,8 +117,8 @@ func TestSeedObjectsWebhooksAndFinalizers(t *testing.T) {
 
 	objects := SeedObjects(k)
 
-	// model-registry: Deployment, ServiceAccount, ClusterRoleBinding, Lease, Service = 5
-	assert.Len(t, objects, 5)
+	// model-registry: Deployment, ServiceAccount, ClusterRoleBinding, Lease, Service, Route = 6
+	assert.Len(t, objects, 6)
 
 	// Verify Deployment has replicas
 	var deploy *appsv1.Deployment

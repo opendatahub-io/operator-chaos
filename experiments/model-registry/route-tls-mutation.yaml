@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: model-registry-route-tls-mutation
+spec:
+  target:
+    operator: model-registry
+    component: model-registry-operator
+    resource: Route/model-registry-operator-rest
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: model-registry-operator-controller-manager
+        namespace: odh-model-registries
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "model-registry-operator-rest"
+      path: "spec.tls.termination"
+      value: "passthrough"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Changing the TLS termination mode on the model-registry REST API
+      Route from edge/reencrypt to passthrough breaks HTTPS access to
+      the model-registry API. The operator should detect the TLS config
+      drift and restore the correct termination mode. Expected verdict:
+      Resilient if the operator reconciles the TLS settings, Vulnerable
+      if the REST API becomes unreachable over HTTPS.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - odh-model-registries
+    allowDangerous: true

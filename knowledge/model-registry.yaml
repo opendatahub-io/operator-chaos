@@ -31,6 +31,10 @@ components:
         kind: Service
         name: model-registry-operator-controller-manager-metrics-service
         namespace: odh-model-registries
+      - apiVersion: route.openshift.io/v1
+        kind: Route
+        name: model-registry-operator-rest
+        namespace: odh-model-registries
     webhooks:
       - name: vmodelregistry.opendatahub.io
         type: validating
