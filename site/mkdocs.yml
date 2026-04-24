@@ -73,16 +73,18 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation: getting-started/installation.md
-    - CLI Quick Start: getting-started/cli-quickstart.md
-    - SDK Quick Start: getting-started/sdk-quickstart.md
-    - Fuzz Quick Start: getting-started/fuzz-quickstart.md
+  - Modes:
+    - CLI: getting-started/cli-quickstart.md
+    - SDK: getting-started/sdk-quickstart.md
+    - Controller: guides/controller-mode.md
+    - Fuzz: getting-started/fuzz-quickstart.md
   - Injection Types:
     - failure-modes/index.md
-    - Pod & Process:
+    - Infrastructure:
       - PodKill: failure-modes/podkill.md
-      - QuotaExhaustion: failure-modes/quota-exhaustion.md
-    - Network:
       - NetworkPartition: failure-modes/network-partition.md
+      - QuotaExhaustion: failure-modes/quota-exhaustion.md
+      - NamespaceDeletion: failure-modes/namespace-deletion.md
     - Configuration:
       - ConfigDrift: failure-modes/config-drift.md
       - CRDMutation: failure-modes/crd-mutation.md
@@ -91,11 +93,9 @@ nav:
       - RBACRevoke: failure-modes/rbac-revoke.md
       - WebhookDisrupt: failure-modes/webhook-disrupt.md
       - WebhookLatency: failure-modes/webhook-latency.md
-    - Lifecycle:
+    - Ownership & SDK:
       - FinalizerBlock: failure-modes/finalizer-block.md
       - OwnerRefOrphan: failure-modes/ownerref-orphan.md
-      - NamespaceDeletion: failure-modes/namespace-deletion.md
-    - SDK:
       - ClientFault: failure-modes/client-fault.md
     - Creating Custom Injection Types: failure-modes/custom-failure-modes.md
   - Guides:
@@ -104,10 +104,8 @@ nav:
       - Route Chaos: guides/route-chaos.md
       - Knowledge Models: guides/knowledge-models.md
       - Upgrade Testing: guides/upgrade-testing.md
-    - Operations:
-      - Controller Mode: guides/controller-mode.md
+    - Deployment & Monitoring:
       - CI Integration: guides/ci-integration.md
-    - Observability:
       - Dashboard (Chaos Operator): guides/dashboard-operator.md
       - Dashboard (Grafana): guides/dashboard-grafana.md
   - Components:
