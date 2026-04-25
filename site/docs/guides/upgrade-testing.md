@@ -25,12 +25,12 @@ These are the failure modes that surface in production after the upgrade complet
 
 ```mermaid
 flowchart LR
-    A["Create\nKnowledge\nSnapshots"] --> B["operator-chaos\ndiff"]
-    B --> C["operator-chaos\ndiff-crds"]
-    C --> D["operator-chaos\nsimulate-upgrade\n--dry-run"]
-    D --> E["Review\nExperiments"]
-    E --> F["operator-chaos\nsimulate-upgrade"]
-    F --> G["operator-chaos\nvalidate-version"]
+    A["Create Knowledge<br/>Snapshots"] --> B["operator-chaos<br/>diff"]
+    B --> C["operator-chaos<br/>diff-crds"]
+    C --> D["operator-chaos<br/>simulate-upgrade<br/>--dry-run"]
+    D --> E["Review<br/>Experiments"]
+    E --> F["operator-chaos<br/>simulate-upgrade"]
+    F --> G["operator-chaos<br/>validate-version"]
 
     style A fill:#bbdefb,stroke:#1565c0
     style B fill:#ce93d8,stroke:#6a1b9a

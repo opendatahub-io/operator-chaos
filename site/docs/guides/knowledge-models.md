@@ -199,18 +199,18 @@ components:
 ```mermaid
 graph TD
     subgraph intra["kserve.yaml · intra-operator dependencies"]
-        A["kserve-controller-manager\n(primary controller)"]
-        B["llmisvc-controller-manager\n(LLM inference)"]
-        C["kserve-localmodel-controller\n(model caching)"]
+        A["kserve-controller-manager<br/>(primary controller)"]
+        B["llmisvc-controller-manager<br/>(LLM inference)"]
+        C["kserve-localmodel-controller<br/>(model caching)"]
         B -->|depends on| A
         C -->|depends on| A
     end
 
     subgraph cross["odh-model-controller.yaml · cross-operator dependency"]
-        D["odh-model-controller\n(model serving lifecycle)"]
+        D["odh-model-controller<br/>(model serving lifecycle)"]
     end
 
-    D -->|"cross-operator\ndepends on"| A
+    D -->|"cross-operator<br/>depends on"| A
 
     style intra fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
     style cross fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c

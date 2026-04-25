@@ -29,10 +29,10 @@ Operator Chaos answers this by testing reconciliation: verifying operators resto
 
 ```mermaid
 flowchart LR
-    A["Define\nExperiment"] --> B["Verify\nBaseline"]
-    B --> C["Inject\nFault"]
-    C --> D["Observe\nRecovery"]
-    D --> E{"Render\nVerdict"}
+    A["Define<br/>Experiment"] --> B["Verify<br/>Baseline"]
+    B --> C["Inject<br/>Fault"]
+    C --> D["Observe<br/>Recovery"]
+    D --> E{"Render<br/>Verdict"}
     E -->|recovered| R["Resilient"]
     E -->|partial| G["Degraded"]
     E -->|not recovered| F["Failed"]

@@ -39,18 +39,19 @@ You only need to replace the placeholder `reconcilerFactory` function with your 
 
 ```mermaid
 flowchart TD
-    F["Go Fuzz Engine"] -->|"generates opMask,\nfaultType, intensity"| D[DecodeFaultConfig]
+    F["Go Fuzz Engine"] -->|"generates opMask,<br/>faultType, intensity"| D[DecodeFaultConfig]
     D --> FC[FaultConfig]
-    FC --> CC["ChaosClient\nwraps Fake Client"]
+    FC --> CC["ChaosClient<br/>(wraps Fake Client)"]
+    CC --> R
 
-    subgraph harness["Harness.Run()"]
-        CC --> R[Run Reconciler]
-        R -->|"panic?"| FAIL1["FAIL\npanic is always a bug"]
-        R -->|"non-chaos error?"| FAIL2["FAIL\nreal bug in reconciler"]
-        R -->|"chaos error?"| OK1["Expected\ncontinue"]
+    subgraph harness ["Harness.Run()"]
+        R[Run Reconciler]
+        R -->|panic| FAIL1["FAIL: always a bug"]
+        R -->|non-chaos error| FAIL2["FAIL: real bug"]
+        R -->|chaos error| OK1[Expected]
         OK1 --> INV[Check Invariants]
-        INV -->|"violation?"| FAIL3["FAIL\nstate corrupted"]
-        INV -->|"all pass"| PASS["PASS"]
+        INV -->|violation| FAIL3["FAIL: state corrupted"]
+        INV -->|pass| PASS["PASS"]
     end
 
     style F fill:#bbdefb,stroke:#1565c0

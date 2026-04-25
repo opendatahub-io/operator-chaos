@@ -36,16 +36,16 @@ graph TB
     end
 
     subgraph bb["Blackboard"]
-        Board["ObservationBoard\n(thread-safe shared state)"]
+        Board["ObservationBoard<br/>(thread-safe shared state)"]
     end
 
     subgraph p1["Phase 1 · Blocking"]
-        Recon["Reconciliation\nContributor"]
+        Recon["Reconciliation<br/>Contributor"]
     end
 
     subgraph p2["Phase 2 · Concurrent"]
-        Steady["Steady-State\nContributor"]
-        Collateral["Collateral Damage\nContributor"]
+        Steady["Steady-State<br/>Contributor"]
+        Collateral["Collateral Damage<br/>Contributor"]
     end
 
     subgraph ev["Evaluation"]

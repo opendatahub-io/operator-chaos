@@ -9,7 +9,7 @@ Wrap a controller-runtime `client.Client` with fault injection. The `ChaosClient
 flowchart LR
     Rec[Reconciler] -->|"Get / List / Update / ..."| CC[ChaosClient]
     CC --> FC{FaultConfig}
-    FC -->|"fault fires"| ERR["ChaosError\n(expected)"]
+    FC -->|"fault fires"| ERR["ChaosError<br/>(expected)"]
     FC -->|"no fault"| RC[Real Client]
     RC --> API[K8s API Server]
 

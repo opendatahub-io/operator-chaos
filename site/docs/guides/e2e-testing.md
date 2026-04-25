@@ -93,21 +93,21 @@ The suite progresses from low to high danger, validating basic recovery before t
 ```mermaid
 flowchart TD
     subgraph low["Low Danger · validates basic recovery"]
-        A["01 PodKill\nKill controller pods"]
-        B["02 ConfigDrift\nCorrupt ConfigMap data"]
+        A["01 PodKill<br/>Kill controller pods"]
+        B["02 ConfigDrift<br/>Corrupt ConfigMap data"]
         A --> B
     end
 
     subgraph med["Medium Danger · tests reconciliation under stress"]
-        C["03 NetworkPartition\nIsolate from API server"]
-        D["04 CRDMutation\nMutate InferenceService spec"]
-        E["05 FinalizerBlock\nBlock Deployment deletion"]
+        C["03 NetworkPartition<br/>Isolate from API server"]
+        D["04 CRDMutation<br/>Mutate InferenceService spec"]
+        E["05 FinalizerBlock<br/>Block Deployment deletion"]
         C --> D --> E
     end
 
     subgraph high["High Danger · cluster-wide impact"]
-        F["06 WebhookDisrupt\nDisrupt admission webhook"]
-        G["07 RBACRevoke\nRevoke controller permissions"]
+        F["06 WebhookDisrupt<br/>Disrupt admission webhook"]
+        G["07 RBACRevoke<br/>Revoke controller permissions"]
         F --> G
     end
 

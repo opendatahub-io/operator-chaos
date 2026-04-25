@@ -18,20 +18,20 @@ Before diffing can occur, the engine must pair components from the old version w
 
 ```mermaid
 flowchart TD
-    Start["Load Version A\nLoad Version B"] --> Exact["Exact Match Phase\n(match by name)"]
+    Start["Load Version A<br/>Load Version B"] --> Exact["Exact Match Phase<br/>(match by name)"]
     
-    Exact -->|matched| M1["Matched Pairs\n(same name)"]
-    Exact -->|unmatched A| UA["Unmatched A\n(candidates)"]
-    Exact -->|unmatched B| UB["Unmatched B\n(candidates)"]
+    Exact -->|matched| M1["Matched Pairs<br/>(same name)"]
+    Exact -->|unmatched A| UA["Unmatched A<br/>(candidates)"]
+    Exact -->|unmatched B| UB["Unmatched B<br/>(candidates)"]
     
-    UA --> Fuzzy["Fuzzy Match Phase\n(similarity scoring)"]
+    UA --> Fuzzy["Fuzzy Match Phase<br/>(similarity scoring)"]
     UB --> Fuzzy
     
-    Fuzzy --> Score["Compute Similarity\nfor all A×B pairs"]
+    Fuzzy --> Score["Compute Similarity<br/>for all A×B pairs"]
     Score --> Threshold{"Score ≥ 0.6?"}
     
-    Threshold -->|yes| M2["Matched Pairs\n(fuzzy)"]
-    Threshold -->|no| Unmatched["Unmatched\n(added/removed)"]
+    Threshold -->|yes| M2["Matched Pairs<br/>(fuzzy)"]
+    Threshold -->|no| Unmatched["Unmatched<br/>(added/removed)"]
     
     M1 --> Output["Final Pairing"]
     M2 --> Output

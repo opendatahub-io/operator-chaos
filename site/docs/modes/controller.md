@@ -57,11 +57,11 @@ stateDiagram-v2
     [*] --> Pending: CR Created
 
     state "Happy Path" as happy {
-        Pending --> SteadyStatePre: Validation OK\nLock Acquired
-        SteadyStatePre --> Injecting: Baseline\nEstablished
+        Pending --> SteadyStatePre: Validated, Lock Acquired
+        SteadyStatePre --> Injecting: Baseline OK
         Injecting --> Observing: Fault Injected
-        Observing --> SteadyStatePost: Recovery Timeout\nElapsed
-        SteadyStatePost --> Evaluating: Post-Check\nComplete
+        Observing --> SteadyStatePost: Timeout Elapsed
+        SteadyStatePost --> Evaluating: Post-Check OK
         Evaluating --> Complete: Verdict Rendered
     }
 
