@@ -178,12 +178,16 @@ func validateCRDMutationParams(spec v1alpha1.InjectionSpec) error {
 		return fmt.Errorf("CRDMutation 'value' exceeds maximum length of %d bytes", maxParameterValueLength)
 	}
 
-	// Reject JSON objects and arrays as values via actual JSON parsing.
+	// Reject JSON objects and arrays as values unless dangerLevel is high.
+	// Gateway API resources (HTTPRoute, Gateway) use arrays for hostnames,
+	// rules, and parentRefs, so complex values are needed for those mutations.
 	var jsonProbe any
 	if json.Unmarshal([]byte(value), &jsonProbe) == nil {
 		switch jsonProbe.(type) {
 		case map[string]any, []any:
-			return fmt.Errorf("CRDMutation 'value' must be a scalar (string, number, boolean), not a JSON object or array")
+			if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+				return fmt.Errorf("CRDMutation 'value' must be a scalar (string, number, boolean), not a JSON object or array; set dangerLevel: high to allow complex values")
+			}
 		}
 	}
 

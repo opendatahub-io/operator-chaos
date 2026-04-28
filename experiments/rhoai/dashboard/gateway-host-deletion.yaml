@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-gateway-host-deletion
+spec:
+  tier: 3
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: HTTPRoute/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "gateway.networking.k8s.io/v1"
+      kind: "HTTPRoute"
+      name: "rhods-dashboard"
+      path: "spec.hostnames"
+      value: "null"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Removing all hostnames from the HTTPRoute causes the Gateway to
+      match all requests on that listener, which can conflict with other
+      HTTPRoutes or make the dashboard unreachable depending on Gateway
+      implementation. The RHOAI operator should detect the missing
+      hostnames and restore the HTTPRoute configuration.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

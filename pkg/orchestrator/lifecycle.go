@@ -185,14 +185,18 @@ var forbiddenNamespaces = map[string]bool{
 var forbiddenNamespacePrefixes = []string{"openshift-"}
 
 // checkForbiddenNamespace returns an error if the namespace is in the forbidden
-// list or matches a forbidden prefix.
-func checkForbiddenNamespace(ns, context string) error {
+// list or matches a forbidden prefix. When allowDangerous is true, the prefix
+// check is skipped (e.g., to allow targeting openshift-ingress for Route experiments).
+// Hard-forbidden namespaces (kube-system, etc.) are always blocked.
+func checkForbiddenNamespace(ns, context string, allowDangerous bool) error {
 	if forbiddenNamespaces[ns] {
 		return fmt.Errorf("%s namespace %q is forbidden", context, ns)
 	}
-	for _, prefix := range forbiddenNamespacePrefixes {
-		if strings.HasPrefix(ns, prefix) {
-			return fmt.Errorf("%s namespace %q matches forbidden prefix %q", context, ns, prefix)
+	if !allowDangerous {
+		for _, prefix := range forbiddenNamespacePrefixes {
+			if strings.HasPrefix(ns, prefix) {
+				return fmt.Errorf("%s namespace %q matches forbidden prefix %q", context, ns, prefix)
+			}
 		}
 	}
 	return nil
@@ -215,13 +219,16 @@ func (o *Orchestrator) ValidateExperiment(ctx context.Context, exp *v1alpha1.Cha
 	}
 
 	// Check resolved namespace against forbidden list.
-	if err := checkForbiddenNamespace(namespace, "experiment target"); err != nil {
+	// When allowDangerous is true, openshift-* prefix namespaces are permitted
+	// (e.g., openshift-ingress for data-science-gateway Route experiments).
+	allowDangerous := exp.Spec.BlastRadius.AllowDangerous
+	if err := checkForbiddenNamespace(namespace, "experiment target", allowDangerous); err != nil {
 		return err
 	}
 
 	// Reject forbidden namespaces in AllowedNamespaces
 	for _, ns := range exp.Spec.BlastRadius.AllowedNamespaces {
-		if err := checkForbiddenNamespace(ns, "blast radius"); err != nil {
+		if err := checkForbiddenNamespace(ns, "blast radius", allowDangerous); err != nil {
 			return err
 		}
 	}
@@ -229,7 +236,7 @@ func (o *Orchestrator) ValidateExperiment(ctx context.Context, exp *v1alpha1.Cha
 	// Validate steady-state check namespaces.
 	for _, check := range exp.Spec.SteadyState.Checks {
 		if check.Namespace != "" {
-			if err := checkForbiddenNamespace(check.Namespace, "steady-state check"); err != nil {
+			if err := checkForbiddenNamespace(check.Namespace, "steady-state check", allowDangerous); err != nil {
 				return err
 			}
 		}

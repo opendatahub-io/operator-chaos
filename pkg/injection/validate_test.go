@@ -101,6 +101,38 @@ func TestValidateCRDMutationRejectsArrayValue(t *testing.T) {
 	assert.Contains(t, err.Error(), "scalar")
 }
 
+func TestValidateCRDMutationAllowsArrayValueWithDangerHigh(t *testing.T) {
+	spec := v1alpha1.InjectionSpec{
+		Type:        v1alpha1.CRDMutation,
+		DangerLevel: v1alpha1.DangerLevelHigh,
+		Parameters: map[string]string{
+			"apiVersion": "gateway.networking.k8s.io/v1",
+			"kind":       "HTTPRoute",
+			"name":       "odh-dashboard",
+			"path":       "spec.hostnames",
+			"value":      `["chaos.invalid"]`,
+		},
+	}
+	err := validateCRDMutationParams(spec)
+	assert.NoError(t, err)
+}
+
+func TestValidateCRDMutationAllowsObjectValueWithDangerHigh(t *testing.T) {
+	spec := v1alpha1.InjectionSpec{
+		Type:        v1alpha1.CRDMutation,
+		DangerLevel: v1alpha1.DangerLevelHigh,
+		Parameters: map[string]string{
+			"apiVersion": "test.example.com/v1",
+			"kind":       "TestResource",
+			"name":       "my-resource",
+			"path":       "spec.config",
+			"value":      `{"nested": "object"}`,
+		},
+	}
+	err := validateCRDMutationParams(spec)
+	assert.NoError(t, err)
+}
+
 func TestValidateFinalizerBlockCoreTypeRequiresDangerHigh(t *testing.T) {
 	spec := v1alpha1.InjectionSpec{
 		Type: v1alpha1.FinalizerBlock,

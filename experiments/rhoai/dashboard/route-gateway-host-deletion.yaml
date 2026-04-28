@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-route-gateway-host-deletion
+spec:
+  tier: 3
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Route/data-science-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: "data-science-gateway"
+      path: "spec.host"
+      value: "null"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Removing the host from the data-science-gateway Route causes the
+      router to de-admit the Route since it has no host to serve. All
+      RHOAI components become unreachable. The GatewayConfig controller
+      should detect the missing host and restore the Route.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - openshift-ingress
+    allowDangerous: true

@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-gateway-host-collision
+spec:
+  tier: 3
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: HTTPRoute/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "gateway.networking.k8s.io/v1"
+      kind: "HTTPRoute"
+      name: "rhods-dashboard"
+      path: "spec.hostnames"
+      value: '["chaos-collision.apps.cluster.invalid"]'
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Mutating the HTTPRoute hostnames to a non-matching domain simulates
+      a DNS misconfiguration on ROSA/HyperShift clusters. The Gateway
+      will stop routing traffic for the original hostname, making the
+      dashboard unreachable. The RHOAI operator should detect the
+      hostname drift and reconcile the HTTPRoute.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

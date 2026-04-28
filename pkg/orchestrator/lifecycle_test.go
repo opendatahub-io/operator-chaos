@@ -733,6 +733,35 @@ func TestValidateExperimentForbiddenOpenShiftNamespace(t *testing.T) {
 	assert.Contains(t, err.Error(), "forbidden prefix")
 }
 
+func TestValidateExperimentAllowDangerousOpenshiftNamespace(t *testing.T) {
+	obs := &mockObserver{}
+	inj := &mockInjector{}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	exp.Namespace = "openshift-ingress"
+	exp.Spec.BlastRadius.AllowedNamespaces = []string{"openshift-ingress"}
+	exp.Spec.BlastRadius.AllowDangerous = true
+
+	err := orch.ValidateExperiment(context.Background(), exp)
+	assert.NoError(t, err)
+}
+
+func TestValidateExperimentAllowDangerousStillBlocksKubeSystem(t *testing.T) {
+	obs := &mockObserver{}
+	inj := &mockInjector{}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	exp.Namespace = "kube-system"
+	exp.Spec.BlastRadius.AllowedNamespaces = []string{"kube-system"}
+	exp.Spec.BlastRadius.AllowDangerous = true
+
+	err := orch.ValidateExperiment(context.Background(), exp)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "forbidden")
+}
+
 func TestValidateExperimentForbiddenDefaultNamespace(t *testing.T) {
 	obs := &mockObserver{}
 	inj := &mockInjector{}

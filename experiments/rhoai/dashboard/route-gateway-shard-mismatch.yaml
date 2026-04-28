@@ -1,13 +1,13 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: rhoai-dashboard-route-host-collision
+  name: rhoai-dashboard-route-gateway-shard-mismatch
 spec:
   tier: 3
   target:
     operator: dashboard
     component: rhods-dashboard
-    resource: Route/rhods-dashboard
+    resource: Route/data-science-gateway
   steadyState:
     checks:
       - type: conditionTrue
@@ -23,22 +23,20 @@ spec:
     parameters:
       apiVersion: "route.openshift.io/v1"
       kind: "Route"
-      name: "rhods-dashboard"
+      name: "data-science-gateway"
       path: "spec.host"
-      value: "chaos-collision.apps.cluster.invalid"
+      value: "gateway.nonexistent-shard.local"
     ttl: "300s"
   hypothesis:
     description: >-
-      Mutating the RHODS dashboard Route host to a non-matching domain
-      simulates a host collision or DNS misconfiguration. The OpenShift
-      router will re-evaluate the Route and may reject or de-admit it.
-      The RHOAI operator should detect the Route drift and reconcile
-      the host back to its correct value. Expected verdict: Resilient
-      if the operator restores the Route, Vulnerable if the Route
-      remains misconfigured.
+      Setting the data-science-gateway Route host to a domain that does
+      not match any configured IngressController simulates a router
+      shard misconfiguration. No IngressController will claim the Route,
+      making all RHOAI components unreachable. The GatewayConfig
+      controller should detect the drift and restore the original host.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
-      - redhat-ods-applications
+      - openshift-ingress
     allowDangerous: true

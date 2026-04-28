@@ -1,0 +1,43 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-gateway-backend-disruption
+spec:
+  tier: 3
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: HTTPRoute/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "gateway.networking.k8s.io/v1"
+      kind: "HTTPRoute"
+      name: "rhods-dashboard"
+      path: "spec.rules"
+      value: '[{"backendRefs":[{"group":"","kind":"Service","name":"chaos-nonexistent-service","port":8443,"weight":1}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]'
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Replacing the HTTPRoute rules with a backend reference to a
+      non-existent service makes all requests return 503 through the
+      Gateway API ingress path. This is the Gateway API equivalent of
+      route-backend-disruption for ROSA/HyperShift clusters. The RHOAI
+      operator should detect the broken backend and reconcile the
+      HTTPRoute rules.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

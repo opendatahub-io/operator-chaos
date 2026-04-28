@@ -1,19 +1,19 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: rhoai-model-registry-route-host-collision
+  name: rhoai-dashboard-route-gateway-host-collision
 spec:
   tier: 3
   target:
-    operator: model-registry
-    component: model-registry-operator
-    resource: Route/model-catalog-https
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Route/data-science-gateway
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
-        name: model-registry-operator-controller-manager
+        name: rhods-dashboard
         namespace: redhat-ods-applications
         conditionType: Available
     timeout: "30s"
@@ -23,20 +23,20 @@ spec:
     parameters:
       apiVersion: "route.openshift.io/v1"
       kind: "Route"
-      name: "model-catalog-https"
+      name: "data-science-gateway"
       path: "spec.host"
       value: "chaos-collision.apps.cluster.invalid"
     ttl: "300s"
   hypothesis:
     description: >-
-      Mutating the RHOAI model-registry REST API Route host simulates a
-      host collision or DNS misconfiguration. The operator should detect
-      the Route drift and reconcile the host back to its correct value.
-      Expected verdict: Resilient if the operator restores the Route
-      host, Vulnerable if the REST API becomes unreachable.
+      Mutating the data-science-gateway Route host to a non-matching
+      domain makes the shared RHOAI ingress unreachable. The router
+      re-evaluates admission and may reject the Route. The GatewayConfig
+      controller should detect the host drift and restore the correct
+      value.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
-      - rhoai-model-registries
+      - openshift-ingress
     allowDangerous: true

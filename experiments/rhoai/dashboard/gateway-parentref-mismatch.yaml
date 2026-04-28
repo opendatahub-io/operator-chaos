@@ -1,13 +1,13 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: rhoai-dashboard-route-host-deletion
+  name: rhoai-dashboard-gateway-parentref-mismatch
 spec:
   tier: 3
   target:
     operator: dashboard
     component: rhods-dashboard
-    resource: Route/rhods-dashboard
+    resource: HTTPRoute/rhods-dashboard
   steadyState:
     checks:
       - type: conditionTrue
@@ -21,20 +21,20 @@ spec:
     type: CRDMutation
     dangerLevel: high
     parameters:
-      apiVersion: "route.openshift.io/v1"
-      kind: "Route"
+      apiVersion: "gateway.networking.k8s.io/v1"
+      kind: "HTTPRoute"
       name: "rhods-dashboard"
-      path: "spec.host"
-      value: "null"
+      path: "spec.parentRefs"
+      value: '[{"name":"chaos-nonexistent-gateway","namespace":"openshift-ingress"}]'
     ttl: "300s"
   hypothesis:
     description: >-
-      Deleting the RHODS dashboard Route host field via null merge patch
-      removes the host assignment. The OpenShift router de-admits the
-      Route since it has no host to serve, making the dashboard
-      unreachable. The RHOAI operator should detect the missing host
-      and restore the Route. Expected verdict: Resilient if the host
-      is restored, Vulnerable if the Route remains without a host.
+      Changing the HTTPRoute parentRef to a non-existent Gateway orphans
+      the route from its ingress path. This is the Gateway API equivalent
+      of route-shard-mismatch on standard OCP. No Gateway will claim the
+      HTTPRoute, making the dashboard unreachable. The RHOAI operator
+      should detect the parentRef drift and restore the reference to
+      data-science-gateway.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
