@@ -716,10 +716,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#why-controller-mode" class="md-nav__link">
+  <a href="#cli-vs-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why Controller Mode?
+        CLI vs Controller
       
     </span>
   </a>
@@ -749,33 +749,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#step-by-step-walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Step-by-Step Walkthrough
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Installation">
+    <nav class="md-nav" aria-label="Step-by-Step Walkthrough">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#deploy-the-controller" class="md-nav__link">
+  <a href="#step-1-install-the-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deploy the Controller
+        Step 1: Install the controller
       
     </span>
   </a>
@@ -783,10 +772,76 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-knowledge-models" class="md-nav__link">
+  <a href="#step-2-verify-the-controller-is-running" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load Knowledge Models
+        Step 2: Verify the controller is running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-load-knowledge-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Load knowledge models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-create-a-chaosexperiment-cr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Create a ChaosExperiment CR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-watch-the-experiment-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Watch the experiment progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-check-kubernetes-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Check Kubernetes events
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-check-the-verdict-in-the-cr-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Check the verdict in the CR status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-check-prometheus-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Check Prometheus metrics
       
     </span>
   </a>
@@ -799,41 +854,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-experiment" class="md-nav__link">
+  <a href="#scheduling-experiments-with-cronjobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First Experiment
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Your First Experiment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#chaosexperiment-cr-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ChaosExperiment CR Structure
+        Scheduling Experiments with CronJobs
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#example-podkill-experiment" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#gitops-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: PodKill Experiment
+        GitOps Integration
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -853,7 +891,7 @@
   <a href="#delete-a-single-experiment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Delete a Single Experiment
+        Delete a single experiment
       
     </span>
   </a>
@@ -864,7 +902,7 @@
   <a href="#uninstall-the-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Uninstall the Controller
+        Uninstall the controller
       
     </span>
   </a>
@@ -873,6 +911,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#safety-mechanisms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety Mechanisms
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5340,10 +5389,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#why-controller-mode" class="md-nav__link">
+  <a href="#cli-vs-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why Controller Mode?
+        CLI vs Controller
       
     </span>
   </a>
@@ -5373,33 +5422,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#step-by-step-walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Step-by-Step Walkthrough
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Installation">
+    <nav class="md-nav" aria-label="Step-by-Step Walkthrough">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#deploy-the-controller" class="md-nav__link">
+  <a href="#step-1-install-the-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deploy the Controller
+        Step 1: Install the controller
       
     </span>
   </a>
@@ -5407,10 +5445,76 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-knowledge-models" class="md-nav__link">
+  <a href="#step-2-verify-the-controller-is-running" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load Knowledge Models
+        Step 2: Verify the controller is running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-load-knowledge-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Load knowledge models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-create-a-chaosexperiment-cr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Create a ChaosExperiment CR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-watch-the-experiment-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Watch the experiment progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-check-kubernetes-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Check Kubernetes events
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-check-the-verdict-in-the-cr-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Check the verdict in the CR status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-check-prometheus-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Check Prometheus metrics
       
     </span>
   </a>
@@ -5423,41 +5527,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#your-first-experiment" class="md-nav__link">
+  <a href="#scheduling-experiments-with-cronjobs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Your First Experiment
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Your First Experiment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#chaosexperiment-cr-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ChaosExperiment CR Structure
+        Scheduling Experiments with CronJobs
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#example-podkill-experiment" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#gitops-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: PodKill Experiment
+        GitOps Integration
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -5477,7 +5564,7 @@
   <a href="#delete-a-single-experiment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Delete a Single Experiment
+        Delete a single experiment
       
     </span>
   </a>
@@ -5488,7 +5575,7 @@
   <a href="#uninstall-the-controller" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Uninstall the Controller
+        Uninstall the controller
       
     </span>
   </a>
@@ -5497,6 +5584,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#safety-mechanisms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety Mechanisms
+      
+    </span>
+  </a>
   
 </li>
       
@@ -5532,23 +5630,58 @@
 
 
 <h1 id="controller-mode">Controller Mode<a class="headerlink" href="#controller-mode" title="Permanent link">¶</a></h1>
-<p>Controller mode runs chaos experiments as Kubernetes Custom Resources (CRs), managed by a dedicated reconciler. Instead of running one-shot experiments via the CLI, you create <code>ChaosExperiment</code> CRs that the controller drives through the experiment lifecycle.</p>
-<h2 id="why-controller-mode">Why Controller Mode?<a class="headerlink" href="#why-controller-mode" title="Permanent link">¶</a></h2>
-<p><strong>CLI mode</strong> (via <code>operator-chaos run</code>) is great for:</p>
-<ul>
-<li>Local development and testing</li>
-<li>CI/CD pipelines with ephemeral clusters</li>
-<li>One-off experiments with immediate results</li>
-</ul>
-<p><strong>Controller mode</strong> is better for:</p>
-<ul>
-<li>Continuous chaos testing in long-lived clusters</li>
-<li>Scheduled experiments via Kubernetes CronJobs</li>
-<li>Multi-tenant environments where teams manage their own experiments</li>
-<li>Integration with GitOps workflows (Argo CD, Flux)</li>
-<li>Auditable experiment history stored as CRs</li>
-</ul>
-<p>In controller mode, experiments are <strong>declarative</strong>: you define the desired experiment as a CR, and the controller reconciles it to completion. The controller enforces safety mechanisms, manages distributed locking, and provides Kubernetes-native integrations (events, conditions, metrics).</p>
+<p>Run chaos experiments as Kubernetes Custom Resources (CRs), managed by a dedicated controller. Instead of running one-shot experiments via the CLI, you create <code>ChaosExperiment</code> CRs that the controller drives through the experiment lifecycle automatically.</p>
+<div class="admonition tip">
+<p class="admonition-title">When to use Controller mode</p>
+<p>Use this for continuous chaos testing in long-lived clusters, scheduled experiments via CronJobs, GitOps-driven experiment management (Argo CD, Flux), or multi-tenant environments where teams manage their own experiments through Kubernetes RBAC.</p>
+</div>
+<h2 id="cli-vs-controller">CLI vs Controller<a class="headerlink" href="#cli-vs-controller" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>CLI Mode</th>
+<th>Controller Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>How it runs</strong></td>
+<td>One-shot binary invocation</td>
+<td>Kubernetes Deployment watching CRs</td>
+</tr>
+<tr>
+<td><strong>Experiment definition</strong></td>
+<td>YAML file on disk</td>
+<td>ChaosExperiment CR in the cluster</td>
+</tr>
+<tr>
+<td><strong>Lifecycle management</strong></td>
+<td>CLI process manages everything</td>
+<td>Controller reconciles phases</td>
+</tr>
+<tr>
+<td><strong>Crash recovery</strong></td>
+<td>Experiment lost if process dies</td>
+<td>Resumes from last completed phase</td>
+</tr>
+<tr>
+<td><strong>Scheduling</strong></td>
+<td>Cron or CI trigger</td>
+<td>Kubernetes CronJobs</td>
+</tr>
+<tr>
+<td><strong>Multi-tenancy</strong></td>
+<td>N/A</td>
+<td>RBAC on ChaosExperiment namespace</td>
+</tr>
+<tr>
+<td><strong>Observability</strong></td>
+<td>CLI output, report files</td>
+<td>K8s events, conditions, Prometheus metrics</td>
+</tr>
+</tbody>
+</table>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h2>
 <pre class="mermaid"><code>graph TD
     CR[ChaosExperiment CR]
@@ -5571,7 +5704,7 @@
     style Injector fill:#ffcc80,stroke:#e65100
     style Observer fill:#a5d6a7,stroke:#2e7d32
     style Evaluator fill:#ef9a9a,stroke:#c62828</code></pre>
-<p>The controller uses the <strong>phase-per-reconcile</strong> pattern: each reconcile loop advances the experiment by exactly one phase, updating <code>.status.phase</code> and <code>.status.conditions</code>. This ensures crash safety: if the controller restarts, it resumes from the last completed phase.</p>
+<p>The controller uses the <strong>phase-per-reconcile</strong> pattern: each reconcile loop advances the experiment by exactly one phase, updating <code>.status.phase</code> and <code>.status.conditions</code>. If the controller restarts, it resumes from the last completed phase.</p>
 <h2 id="experiment-lifecycle">Experiment Lifecycle<a class="headerlink" href="#experiment-lifecycle" title="Permanent link">¶</a></h2>
 <p>Each <code>ChaosExperiment</code> CR progresses through these phases:</p>
 <pre class="mermaid"><code>stateDiagram-v2
@@ -5597,266 +5730,281 @@
 <thead>
 <tr>
 <th>Phase</th>
-<th>Description</th>
-<th>Requeue Behavior</th>
+<th>What Happens</th>
+<th>Next Step</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>Pending</code></td>
 <td>Validates experiment spec, loads knowledge model, acquires distributed lock</td>
-<td>Immediate requeue on validation success</td>
+<td>Immediate requeue</td>
 </tr>
 <tr>
 <td><code>SteadyStatePre</code></td>
 <td>Runs pre-injection steady-state checks to establish baseline</td>
-<td>Immediate requeue on check success; abort on failure</td>
+<td>Abort on failure, otherwise requeue</td>
 </tr>
 <tr>
 <td><code>Injecting</code></td>
 <td>Applies the fault (kills pod, mutates config, etc.)</td>
-<td>Immediate requeue on successful injection</td>
+<td>Immediate requeue</td>
 </tr>
 <tr>
 <td><code>Observing</code></td>
-<td>Waits for recovery timeout, monitors reconciliation</td>
-<td>Requeues every 30s until timeout elapsed</td>
+<td>Waits for recovery timeout, monitors reconciliation cycles</td>
+<td>Requeues every 30s until timeout</td>
 </tr>
 <tr>
 <td><code>SteadyStatePost</code></td>
 <td>Runs post-recovery steady-state checks</td>
-<td>Immediate requeue on check completion</td>
+<td>Immediate requeue</td>
 </tr>
 <tr>
 <td><code>Evaluating</code></td>
-<td>Renders verdict based on findings</td>
-<td>Immediate requeue after verdict set</td>
+<td>Renders verdict based on all findings</td>
+<td>Immediate requeue</td>
 </tr>
 <tr>
 <td><code>Complete</code></td>
-<td>Experiment finished successfully</td>
-<td>Terminal state, no requeue</td>
+<td>Experiment finished, verdict set</td>
+<td>Terminal state</td>
 </tr>
 <tr>
 <td><code>Aborted</code></td>
-<td>Experiment aborted due to validation error or baseline failure</td>
-<td>Terminal state, cleanup performed, no requeue</td>
+<td>Experiment aborted due to validation or baseline failure</td>
+<td>Terminal state, cleanup performed</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Status conditions</strong> track progress:</p>
-<ul>
-<li><code>SteadyStateEstablished</code>: Pre-check passed</li>
-<li><code>FaultInjected</code>: Fault applied successfully</li>
-<li><code>RecoveryObserved</code>: Recovery timeout elapsed</li>
-<li><code>Complete</code>: Experiment finished</li>
-</ul>
-<p>The controller emits Kubernetes <strong>events</strong> at each phase transition for observability.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
-<ol>
-<li><strong>Kubernetes cluster</strong> (v1.25+) or OpenShift (4.12+)</li>
-<li><strong>cluster-admin RBAC</strong> (controller needs permissions to create/delete/mutate arbitrary resources)</li>
-<li><strong>ChaosExperiment CRD</strong> installed (comes with <code>kubectl apply -k config/default</code>)</li>
-<li><strong>Knowledge models</strong> loaded (see <a href="../../guides/knowledge-models/">Knowledge Models</a>)</li>
-</ol>
-<div class="admonition warning">
-<p class="admonition-title">RBAC Permissions</p>
-<p>The controller has broad RBAC permissions to support dynamic experiment targets. It can delete pods, mutate ConfigMaps, revoke RBAC bindings, and modify webhook configurations. Deploy in a dedicated namespace and review CRs before approval.</p>
-</div>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¶</a></h2>
-<h3 id="deploy-the-controller">Deploy the Controller<a class="headerlink" href="#deploy-the-controller" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Clone the repository</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ugiordan/operator-chaos.git
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">cd</span><span class="w"> </span>operator-chaos
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Install CRD and controller</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>config/default
+<h2 id="step-by-step-walkthrough">Step-by-Step Walkthrough<a class="headerlink" href="#step-by-step-walkthrough" title="Permanent link">¶</a></h2>
+<h3 id="step-1-install-the-controller">Step 1: Install the controller<a class="headerlink" href="#step-1-install-the-controller" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ugiordan/operator-chaos.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>operator-chaos
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>$<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>config/default
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>namespace/operator-chaos-system<span class="w"> </span>created
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>customresourcedefinition.apiextensions.k8s.io/chaosexperiments.chaos.operatorchaos.io<span class="w"> </span>created
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>serviceaccount/operator-chaos-controller<span class="w"> </span>created
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>clusterrole.rbac.authorization.k8s.io/operator-chaos-controller<span class="w"> </span>created
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>clusterrolebinding.rbac.authorization.k8s.io/operator-chaos-controller<span class="w"> </span>created
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>deployment.apps/operator-chaos-controller<span class="w"> </span>created
 </code></pre></div>
-<p>This creates:</p>
-<ul>
-<li>Namespace: <code>operator-chaos-system</code></li>
-<li>CRD: <code>chaosexperiments.chaos.operatorchaos.io</code></li>
-<li>ServiceAccount: <code>operator-chaos-controller</code></li>
-<li>ClusterRole/ClusterRoleBinding: RBAC for controller</li>
-<li>Deployment: <code>operator-chaos-controller</code> (1 replica)</li>
-</ul>
-<p><strong>Verify deployment:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>deployment<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># NAME                   READY   UP-TO-DATE   AVAILABLE   AGE</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># operator-chaos-controller   1/1     1            1           30s</span>
+<h3 id="step-2-verify-the-controller-is-running">Step 2: Verify the controller is running<a class="headerlink" href="#step-2-verify-the-controller-is-running" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>deployment<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>NAME<span class="w">                        </span>READY<span class="w">   </span>UP-TO-DATE<span class="w">   </span>AVAILABLE<span class="w">   </span>AGE
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>operator-chaos-controller<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span><span class="m">1</span><span class="w">            </span><span class="m">1</span><span class="w">           </span>30s
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>crd<span class="w"> </span>chaosexperiments.chaos.operatorchaos.io
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># NAME                                    CREATED AT</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># chaosexperiments.chaos.operatorchaos.io   2024-03-30T12:00:00Z</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>crd<span class="w"> </span>chaosexperiments.chaos.operatorchaos.io
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>NAME<span class="w">                                      </span>CREATED<span class="w"> </span>AT
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>chaosexperiments.chaos.operatorchaos.io<span class="w">   </span><span class="m">2025</span>-03-30T12:00:00Z
 </code></pre></div>
-<h3 id="load-knowledge-models">Load Knowledge Models<a class="headerlink" href="#load-knowledge-models" title="Permanent link">¶</a></h3>
-<p>The controller needs knowledge models to validate experiments and perform steady-state checks. Mount them as a ConfigMap or volume:</p>
-<p><strong>Option 1: ConfigMap</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Create ConfigMap from knowledge/ directory</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>create<span class="w"> </span>configmap<span class="w"> </span>operator-knowledge<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>--from-file<span class="o">=</span>knowledge/
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Update controller deployment to mount ConfigMap</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>kubectl<span class="w"> </span>patch<span class="w"> </span>deployment<span class="w"> </span>operator-chaos-controller<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span>--type<span class="o">=</span>json<span class="w"> </span>-p<span class="o">=</span><span class="s1">'[</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s1">  {</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="s1">    "op": "add",</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="s1">    "path": "/spec/template/spec/containers/0/args/-",</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="s1">    "value": "--knowledge-dir=/knowledge"</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="s1">  },</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="s1">  {</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="s1">    "op": "add",</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="s1">    "path": "/spec/template/spec/volumes/-",</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="s1">    "value": {"name": "knowledge", "configMap": {"name": "operator-knowledge"}}</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="s1">  },</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="s1">  {</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="s1">    "op": "add",</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="s1">    "path": "/spec/template/spec/containers/0/volumeMounts/-",</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="s1">    "value": {"name": "knowledge", "mountPath": "/knowledge", "readOnly": true}</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="s1">  }</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="s1">]'</span>
+<h3 id="step-3-load-knowledge-models">Step 3: Load knowledge models<a class="headerlink" href="#step-3-load-knowledge-models" title="Permanent link">¶</a></h3>
+<p>The controller needs knowledge models to validate experiments. Mount them as a ConfigMap:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>create<span class="w"> </span>configmap<span class="w"> </span>operator-knowledge<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--from-file<span class="o">=</span>knowledge/
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>configmap/operator-knowledge<span class="w"> </span>created
 </code></pre></div>
-<p><strong>Option 2: PersistentVolume</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">knowledge-pvc</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operator-chaos-system</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ReadOnlyMany</span><span class="p p-Indicator">]</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="nn">---</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># Update deployment to mount PVC at /knowledge</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># Add --knowledge-dir=/knowledge to container args</span>
+<p>Patch the controller deployment to mount the ConfigMap:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>patch<span class="w"> </span>deployment<span class="w"> </span>operator-chaos-controller<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span>--type<span class="o">=</span>json<span class="w"> </span>-p<span class="o">=</span><span class="s1">'[</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s1">  {"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--knowledge-dir=/knowledge"},</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s1">  {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"name": "knowledge", "configMap": {"name": "operator-knowledge"}}},</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s1">  {"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/-", "value": {"name": "knowledge", "mountPath": "/knowledge", "readOnly": true}}</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s1">]'</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>deployment.apps/operator-chaos-controller<span class="w"> </span>patched
 </code></pre></div>
-<p><strong>Verify knowledge models loaded:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span>deployment/operator-chaos-controller<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"Loaded knowledge"</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># Loaded knowledge models: kserve, odh-model-controller, dashboard</span>
+<p>Verify the models loaded:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span>deployment/operator-chaos-controller<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"Loaded knowledge"</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Loaded<span class="w"> </span>knowledge<span class="w"> </span>models:<span class="w"> </span>kserve,<span class="w"> </span>odh-model-controller,<span class="w"> </span>dashboard
 </code></pre></div>
-<h2 id="your-first-experiment">Your First Experiment<a class="headerlink" href="#your-first-experiment" title="Permanent link">¶</a></h2>
-<h3 id="chaosexperiment-cr-structure">ChaosExperiment CR Structure<a class="headerlink" href="#chaosexperiment-cr-structure" title="Permanent link">¶</a></h3>
+<h3 id="step-4-create-a-chaosexperiment-cr">Step 4: Create a ChaosExperiment CR<a class="headerlink" href="#step-4-create-a-chaosexperiment-cr" title="Permanent link">¶</a></h3>
+<p>Save this as <code>experiment-cr.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chaos.operatorchaos.io/v1alpha1</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ChaosExperiment</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-experiment</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-namespace</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">omc-pod-kill</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operator-chaos-system</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nt">spec</span><span class="p">:</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">target</span><span class="p">:</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub-operator</span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nt">resource</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment/odh-model-controller</span><span class="w">  </span><span class="c1"># optional</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="nt">injection</span><span class="p">:</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodKill</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">control-plane=odh-model-controller</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="nt">ttl</span><span class="p">:</span><span class="w"> </span><span class="s">"300s"</span>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
-<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">  </span><span class="nt">hypothesis</span><span class="p">:</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Pod</span><span class="nv"> </span><span class="s">kill</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">recover</span><span class="nv"> </span><span class="s">within</span><span class="nv"> </span><span class="s">120s"</span>
-<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">    </span><span class="nt">recoveryTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120s</span>
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
-<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">  </span><span class="nt">steadyState</span><span class="p">:</span>
-<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">    </span><span class="nt">checks</span><span class="p">:</span>
-<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conditionTrue</span>
-<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">        </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
-<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
-<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">        </span><span class="nt">conditionType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Available</span>
-<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="s">"30s"</span>
-<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>
-<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">  </span><span class="nt">blastRadius</span><span class="p">:</span>
-<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">    </span><span class="nt">maxPodsAffected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">    </span><span class="nt">allowedNamespaces</span><span class="p">:</span>
-<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span><span class="nt">injection</span><span class="p">:</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodKill</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">control-plane=odh-model-controller</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">  </span><span class="nt">hypothesis</span><span class="p">:</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">      </span><span class="no">When the odh-model-controller pod is killed, Kubernetes should</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">      </span><span class="no">recreate it within 120s and the controller should resume reconciling</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">      </span><span class="no">InferenceService resources without data loss.</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">    </span><span class="nt">recoveryTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120s</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">  </span><span class="nt">steadyState</span><span class="p">:</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">    </span><span class="nt">checks</span><span class="p">:</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conditionTrue</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">        </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">        </span><span class="nt">conditionType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Available</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="s">"30s"</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">  </span><span class="nt">blastRadius</span><span class="p">:</span>
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">    </span><span class="nt">maxPodsAffected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">    </span><span class="nt">allowedNamespaces</span><span class="p">:</span>
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
 </code></pre></div>
-<p><strong>Key fields:</strong></p>
-<ul>
-<li><strong><code>target</code></strong>: Which operator/component to fault</li>
-<li><strong><code>injection</code></strong>: Fault type and parameters (see <a href="../../failure-modes/">Failure Modes</a>)</li>
-<li><strong><code>hypothesis</code></strong>: Expected behavior and recovery timeout</li>
-<li><strong><code>steadyState</code></strong>: Checks to run pre/post injection</li>
-<li><strong><code>blastRadius</code></strong>: Safety constraints</li>
-</ul>
-<h3 id="example-podkill-experiment">Example: PodKill Experiment<a class="headerlink" href="#example-podkill-experiment" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chaos.operatorchaos.io/v1alpha1</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ChaosExperiment</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nt">metadata</span><span class="p">:</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller-pod-kill</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operator-chaos-experiments</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nt">spec</span><span class="p">:</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">target</span><span class="p">:</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="nt">injection</span><span class="p">:</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodKill</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">control-plane=odh-model-controller</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">    </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">  </span><span class="nt">hypothesis</span><span class="p">:</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">      </span><span class="no">When the odh-model-controller pod is killed, Kubernetes should</span>
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">      </span><span class="no">recreate it within the recovery timeout and the controller should</span>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">      </span><span class="no">resume reconciling InferenceService resources without data loss.</span>
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">    </span><span class="nt">recoveryTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120s</span>
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">  </span><span class="nt">steadyState</span><span class="p">:</span>
-<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">    </span><span class="nt">checks</span><span class="p">:</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conditionTrue</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">        </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">odh-model-controller</span>
-<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
-<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">        </span><span class="nt">conditionType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Available</span>
-<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="s">"30s"</span>
-<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>
-<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="w">  </span><span class="nt">blastRadius</span><span class="p">:</span>
-<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="w">    </span><span class="nt">maxPodsAffected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="w">    </span><span class="nt">allowedNamespaces</span><span class="p">:</span>
-<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opendatahub</span>
+<p>Apply it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>experiment-cr.yaml
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>chaosexperiment.chaos.operatorchaos.io/omc-pod-kill<span class="w"> </span>created
 </code></pre></div>
-<p><strong>Apply the experiment:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>experiment.yaml
+<h3 id="step-5-watch-the-experiment-progress">Step 5: Watch the experiment progress<a class="headerlink" href="#step-5-watch-the-experiment-progress" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>omc-pod-kill<span class="w"> </span>-w
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>NAME<span class="w">           </span>PHASE<span class="w">            </span>VERDICT<span class="w">     </span>TYPE<span class="w">      </span>TARGET<span class="w">                  </span>AGE
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>omc-pod-kill<span class="w">   </span>Pending<span class="w">                      </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>1s
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>omc-pod-kill<span class="w">   </span>SteadyStatePre<span class="w">               </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>2s
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>omc-pod-kill<span class="w">   </span>Injecting<span class="w">                    </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>5s
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>omc-pod-kill<span class="w">   </span>Observing<span class="w">                    </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>6s
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>omc-pod-kill<span class="w">   </span>SteadyStatePost<span class="w">              </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>126s
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>omc-pod-kill<span class="w">   </span>Evaluating<span class="w">                   </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>127s
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>omc-pod-kill<span class="w">   </span>Complete<span class="w">         </span>Resilient<span class="w">   </span>PodKill<span class="w">   </span>odh-model-controller<span class="w">    </span>128s
 </code></pre></div>
-<p><strong>Watch progress:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>odh-model-controller-pod-kill<span class="w"> </span>-w
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># NAME                              PHASE           VERDICT   TYPE      TARGET                 AGE</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># odh-model-controller-pod-kill     Pending                   PodKill   odh-model-controller   1s</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># odh-model-controller-pod-kill     SteadyStatePre            PodKill   odh-model-controller   2s</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># odh-model-controller-pod-kill     Injecting                 PodKill   odh-model-controller   5s</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># odh-model-controller-pod-kill     Observing                 PodKill   odh-model-controller   6s</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># odh-model-controller-pod-kill     SteadyStatePost           PodKill   odh-model-controller   126s</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1"># odh-model-controller-pod-kill     Evaluating                PodKill   odh-model-controller   127s</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="c1"># odh-model-controller-pod-kill     Complete        Resilient PodKill   odh-model-controller   128s</span>
+<h3 id="step-6-check-kubernetes-events">Step 6: Check Kubernetes events<a class="headerlink" href="#step-6-check-kubernetes-events" title="Permanent link">¶</a></h3>
+<p>The controller emits events at each lifecycle transition:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span>--field-selector<span class="w"> </span>involvedObject.name<span class="o">=</span>omc-pod-kill<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span>--sort-by<span class="o">=</span><span class="s1">'.lastTimestamp'</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>LAST<span class="w"> </span>SEEN<span class="w">   </span>TYPE<span class="w">     </span>REASON<span class="w">                </span>OBJECT<span class="w">                          </span>MESSAGE
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>2m<span class="w">          </span>Normal<span class="w">   </span>ExperimentStarted<span class="w">     </span>chaosexperiment/omc-pod-kill<span class="w">    </span>Experiment<span class="w"> </span>started
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>2m<span class="w">          </span>Normal<span class="w">   </span>SteadyStatePrePassed<span class="w">  </span>chaosexperiment/omc-pod-kill<span class="w">    </span>Pre-injection<span class="w"> </span>steady-state<span class="w"> </span>passed
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>118s<span class="w">        </span>Normal<span class="w">   </span>InjectionApplied<span class="w">      </span>chaosexperiment/omc-pod-kill<span class="w">    </span>PodKill<span class="w"> </span>injection<span class="w"> </span>applied
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>118s<span class="w">        </span>Normal<span class="w">   </span>ObserverFindings<span class="w">      </span>chaosexperiment/omc-pod-kill<span class="w">    </span>Recovery<span class="w"> </span>observed:<span class="w"> </span><span class="m">5</span><span class="w"> </span>reconcile<span class="w"> </span>cycles
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>5s<span class="w">          </span>Normal<span class="w">   </span>RecoveryDetected<span class="w">      </span>chaosexperiment/omc-pod-kill<span class="w">    </span>Post-injection<span class="w"> </span>steady-state<span class="w"> </span>passed
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>3s<span class="w">          </span>Normal<span class="w">   </span>ExperimentComplete<span class="w">    </span>chaosexperiment/omc-pod-kill<span class="w">    </span>Verdict:<span class="w"> </span>Resilient<span class="w"> </span><span class="o">(</span>high<span class="w"> </span>confidence<span class="o">)</span>
 </code></pre></div>
-<h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">¶</a></h2>
-<h3 id="delete-a-single-experiment">Delete a Single Experiment<a class="headerlink" href="#delete-a-single-experiment" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiment<span class="w"> </span>my-experiment
+<h3 id="step-7-check-the-verdict-in-the-cr-status">Step 7: Check the verdict in the CR status<a class="headerlink" href="#step-7-check-the-verdict-in-the-cr-status" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>chaosexperiment<span class="w"> </span>omc-pod-kill<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="o">{</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="s2">"phase"</span>:<span class="w"> </span><span class="s2">"Complete"</span>,
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="s2">"verdict"</span>:<span class="w"> </span><span class="s2">"Resilient"</span>,
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="s2">"conditions"</span>:<span class="w"> </span><span class="o">[</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="o">{</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"SteadyStateEstablished"</span>,
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">      </span><span class="s2">"status"</span>:<span class="w"> </span><span class="s2">"True"</span>,
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">      </span><span class="s2">"lastTransitionTime"</span>:<span class="w"> </span><span class="s2">"2025-03-30T12:00:02Z"</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="o">}</span>,
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="o">{</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">      </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"FaultInjected"</span>,
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">      </span><span class="s2">"status"</span>:<span class="w"> </span><span class="s2">"True"</span>,
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">      </span><span class="s2">"lastTransitionTime"</span>:<span class="w"> </span><span class="s2">"2025-03-30T12:00:05Z"</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">    </span><span class="o">}</span>,
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="o">{</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">      </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"RecoveryObserved"</span>,
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">      </span><span class="s2">"status"</span>:<span class="w"> </span><span class="s2">"True"</span>,
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">      </span><span class="s2">"lastTransitionTime"</span>:<span class="w"> </span><span class="s2">"2025-03-30T12:02:06Z"</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="o">}</span>,
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="o">{</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">      </span><span class="s2">"type"</span>:<span class="w"> </span><span class="s2">"Complete"</span>,
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="w">      </span><span class="s2">"status"</span>:<span class="w"> </span><span class="s2">"True"</span>,
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">      </span><span class="s2">"lastTransitionTime"</span>:<span class="w"> </span><span class="s2">"2025-03-30T12:02:08Z"</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">    </span><span class="o">}</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">  </span><span class="o">]</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="o">}</span>
 </code></pre></div>
-<p>This triggers finalizer cleanup, which reverts the fault if still active.</p>
-<h3 id="uninstall-the-controller">Uninstall the Controller<a class="headerlink" href="#uninstall-the-controller" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Delete all experiments first (ensures cleanup runs)</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiments<span class="w"> </span>--all<span class="w"> </span>-A
+<h3 id="step-8-check-prometheus-metrics">Step 8: Check Prometheus metrics<a class="headerlink" href="#step-8-check-prometheus-metrics" title="Permanent link">¶</a></h3>
+<p>The controller exposes metrics on its metrics endpoint:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>port-forward<span class="w"> </span>-n<span class="w"> </span>operator-chaos-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span>deployment/operator-chaos-controller<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="p">&amp;</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Uninstall controller and CRD</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-k<span class="w"> </span>config/default
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>$<span class="w"> </span>curl<span class="w"> </span>-s<span class="w"> </span>localhost:8080/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>chaosexperiment
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1"># HELP chaosexperiment_verdict_total Total experiments by verdict</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># TYPE chaosexperiment_verdict_total counter</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>chaosexperiment_verdict_total<span class="o">{</span><span class="nv">verdict</span><span class="o">=</span><span class="s2">"Resilient"</span><span class="o">}</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="c1"># HELP chaosexperiment_recovery_time_seconds Recovery time in seconds</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="c1"># TYPE chaosexperiment_recovery_time_seconds histogram</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>chaosexperiment_recovery_time_seconds_bucket<span class="o">{</span><span class="nv">le</span><span class="o">=</span><span class="s2">"30"</span><span class="o">}</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>chaosexperiment_recovery_time_seconds_bucket<span class="o">{</span><span class="nv">le</span><span class="o">=</span><span class="s2">"60"</span><span class="o">}</span><span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>chaosexperiment_recovery_time_seconds_sum<span class="w"> </span><span class="m">12</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>chaosexperiment_recovery_time_seconds_count<span class="w"> </span><span class="m">1</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="c1"># HELP chaosexperiment_active Currently running experiments</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="c1"># TYPE chaosexperiment_active gauge</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>chaosexperiment_active<span class="w"> </span><span class="m">0</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="c1"># HELP chaosexperiment_injections_total Total injections by type</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="c1"># TYPE chaosexperiment_injections_total counter</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>chaosexperiment_injections_total<span class="o">{</span><span class="nv">type</span><span class="o">=</span><span class="s2">"PodKill"</span><span class="o">}</span><span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+<h2 id="scheduling-experiments-with-cronjobs">Scheduling Experiments with CronJobs<a class="headerlink" href="#scheduling-experiments-with-cronjobs" title="Permanent link">¶</a></h2>
+<p>Run experiments on a schedule using Kubernetes CronJobs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CronJob</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daily-chaos-podkill</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operator-chaos-system</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">"0</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span><span class="w">  </span><span class="c1"># 3 AM daily</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="nt">jobTemplate</span><span class="p">:</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">      </span><span class="nt">template</span><span class="p">:</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">          </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operator-chaos-controller</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chaos</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">            </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/opendatahub/operator-chaos:latest</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">            </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"operator-chaos"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"run"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">            </span><span class="nt">args</span><span class="p">:</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"/experiments/pod-kill.yaml"</span>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"--knowledge=/knowledge/odh-model-controller.yaml"</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="w">          </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span>
+</code></pre></div>
+<h2 id="gitops-integration">GitOps Integration<a class="headerlink" href="#gitops-integration" title="Permanent link">¶</a></h2>
+<p>Store <code>ChaosExperiment</code> CRs in your Git repository alongside your operator manifests. Argo CD or Flux will apply them automatically when merged:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>my-operator/
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  manifests/
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    deployment.yaml
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    service.yaml
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>  chaos/
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    pod-kill.yaml
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    config-drift.yaml
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    network-partition.yaml
+</code></pre></div>
+<p>When a CR is created, the controller picks it up and runs the experiment. When deleted, the controller ensures cleanup via finalizers.</p>
+<h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">¶</a></h2>
+<h3 id="delete-a-single-experiment">Delete a single experiment<a class="headerlink" href="#delete-a-single-experiment" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>$<span class="w"> </span>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiment<span class="w"> </span>omc-pod-kill
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>chaosexperiment.chaos.operatorchaos.io<span class="w"> </span><span class="s2">"omc-pod-kill"</span><span class="w"> </span>deleted
+</code></pre></div>
+<p>This triggers finalizer cleanup, which reverts any active faults.</p>
+<h3 id="uninstall-the-controller">Uninstall the controller<a class="headerlink" href="#uninstall-the-controller" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Delete all experiments first to ensure cleanup runs</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>$<span class="w"> </span>kubectl<span class="w"> </span>delete<span class="w"> </span>chaosexperiments<span class="w"> </span>--all<span class="w"> </span>-A
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Uninstall controller and CRD</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>$<span class="w"> </span>kubectl<span class="w"> </span>delete<span class="w"> </span>-k<span class="w"> </span>config/default
 </code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">CRD Deletion</p>
-<p>Deleting the CRD deletes all ChaosExperiment CRs immediately, <strong>bypassing finalizers</strong>. Always delete experiments individually to ensure faults are reverted.</p>
+<p class="admonition-title">CRD deletion</p>
+<p>Deleting the CRD removes all ChaosExperiment CRs immediately, bypassing finalizers. Always delete experiments individually first to ensure faults are reverted.</p>
 </div>
+<h2 id="safety-mechanisms">Safety Mechanisms<a class="headerlink" href="#safety-mechanisms" title="Permanent link">¶</a></h2>
+<p>The controller enforces several safety mechanisms:</p>
+<ul>
+<li><strong>Blast radius limits</strong>: <code>maxPodsAffected</code> and <code>allowedNamespaces</code> restrict the experiment scope</li>
+<li><strong>Distributed locking</strong>: Only one experiment per component runs at a time</li>
+<li><strong>Dry run mode</strong>: Set <code>blastRadius.dryRun: true</code> to validate without injecting</li>
+<li><strong>Danger level enforcement</strong>: High-danger experiments require <code>blastRadius.allowDangerous: true</code></li>
+<li><strong>Finalizer-based cleanup</strong>: Faults are always reverted, even if the experiment CR is deleted mid-run</li>
+</ul>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
 <ul>
-<li>See <a href="../../guides/controller-advanced/">Controller Advanced Guide</a> for CronJobs, GitOps, safety mechanisms, and detailed status fields</li>
-<li>Learn about <a href="../../guides/knowledge-models/">Knowledge Models</a> to define operator semantics</li>
-<li>See <a href="../../failure-modes/">Failure Modes</a> for all available fault types</li>
-<li>Read <a href="../../guides/ci-integration/">CI Integration Guide</a> for pipeline integration</li>
+<li>See <a href="../../guides/controller-advanced/">Controller Advanced Guide</a> for advanced status fields, safety details, and troubleshooting</li>
+<li>Run experiments from the command line with <a href="../cli/">CLI mode</a></li>
+<li>Learn about <a href="../../failure-modes/">failure modes and parameters</a></li>
+<li>Set up <a href="../../guides/ci-integration/">CI/CD integration</a></li>
 </ul>
 
 
@@ -5880,7 +6028,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 25, 2026 17:14:42 UTC">April 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 27, 2026 10:47:07 UTC">April 27, 2026</span>
   </span>
 
     

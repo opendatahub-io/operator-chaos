@@ -85,7 +85,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fuzz-quickstart" class="md-skip">
+        <a href="#fuzz-mode" class="md-skip">
           Skip to content
         </a>
       
@@ -744,10 +744,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#auto-generate-from-knowledge-models" class="md-nav__link">
+  <a href="#what-does-it-actually-do" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Generate from Knowledge Models
+        What Does It Actually Do?
       
     </span>
   </a>
@@ -777,22 +777,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-a-fuzz-test-manual" class="md-nav__link">
+  <a href="#step-by-step-walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing a Fuzz Test (Manual)
+        Step-by-Step Walkthrough
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Writing a Fuzz Test (Manual)">
+    <nav class="md-nav" aria-label="Step-by-Step Walkthrough">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1-implement-a-reconcilerfactory" class="md-nav__link">
+  <a href="#step-1-write-a-reconciler-factory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Implement a ReconcilerFactory
+        Step 1: Write a reconciler factory
       
     </span>
   </a>
@@ -803,7 +803,40 @@
   <a href="#step-2-write-the-fuzz-test" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: Write the Fuzz Test
+        Step 2: Write the fuzz test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-run-the-fuzz-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Run the fuzz test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-interpret-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Interpret failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-fix-and-re-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Fix and re-run
       
     </span>
   </a>
@@ -816,10 +849,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-fuzz-tests" class="md-nav__link">
+  <a href="#auto-generate-from-knowledge-models" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running Fuzz Tests
+        Auto-Generate from Knowledge Models
       
     </span>
   </a>
@@ -839,10 +872,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#operation-bitmask" class="md-nav__link">
+  <a href="#opmask-uint16-which-operations-get-faults" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Operation Bitmask
+        opMask (uint16): Which operations get faults
       
     </span>
   </a>
@@ -850,10 +883,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fault-types" class="md-nav__link">
+  <a href="#faulttype-uint8-what-error-to-inject" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fault Types
+        faultType (uint8): What error to inject
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intensity-uint16-how-often-the-fault-fires" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        intensity (uint16): How often the fault fires
       
     </span>
   </a>
@@ -866,22 +910,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-invariants" class="md-nav__link">
+  <a href="#invariants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-in Invariants
+        Invariants
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Built-in Invariants">
+    <nav class="md-nav" aria-label="Invariants">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#objectexists" class="md-nav__link">
+  <a href="#built-in-objectexists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ObjectExists
+        Built-in: ObjectExists
       
     </span>
   </a>
@@ -889,10 +933,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#objectcount" class="md-nav__link">
+  <a href="#built-in-objectcount" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ObjectCount
+        Built-in: ObjectCount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom invariants
       
     </span>
   </a>
@@ -905,10 +960,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-invariants" class="md-nav__link">
+  <a href="#ci-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom Invariants
+        CI Integration
       
     </span>
   </a>
@@ -916,21 +971,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#understanding-fuzz-failures" class="md-nav__link">
+  <a href="#comparison-with-other-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Understanding Fuzz Failures
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integration-with-cicd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration with CI/CD
+        Comparison with Other Modes
       
     </span>
   </a>
@@ -5373,10 +5417,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#auto-generate-from-knowledge-models" class="md-nav__link">
+  <a href="#what-does-it-actually-do" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Generate from Knowledge Models
+        What Does It Actually Do?
       
     </span>
   </a>
@@ -5406,22 +5450,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-a-fuzz-test-manual" class="md-nav__link">
+  <a href="#step-by-step-walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing a Fuzz Test (Manual)
+        Step-by-Step Walkthrough
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Writing a Fuzz Test (Manual)">
+    <nav class="md-nav" aria-label="Step-by-Step Walkthrough">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1-implement-a-reconcilerfactory" class="md-nav__link">
+  <a href="#step-1-write-a-reconciler-factory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Implement a ReconcilerFactory
+        Step 1: Write a reconciler factory
       
     </span>
   </a>
@@ -5432,7 +5476,40 @@
   <a href="#step-2-write-the-fuzz-test" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: Write the Fuzz Test
+        Step 2: Write the fuzz test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-run-the-fuzz-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Run the fuzz test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-interpret-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Interpret failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-fix-and-re-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Fix and re-run
       
     </span>
   </a>
@@ -5445,10 +5522,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-fuzz-tests" class="md-nav__link">
+  <a href="#auto-generate-from-knowledge-models" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running Fuzz Tests
+        Auto-Generate from Knowledge Models
       
     </span>
   </a>
@@ -5468,10 +5545,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#operation-bitmask" class="md-nav__link">
+  <a href="#opmask-uint16-which-operations-get-faults" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Operation Bitmask
+        opMask (uint16): Which operations get faults
       
     </span>
   </a>
@@ -5479,10 +5556,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fault-types" class="md-nav__link">
+  <a href="#faulttype-uint8-what-error-to-inject" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fault Types
+        faultType (uint8): What error to inject
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intensity-uint16-how-often-the-fault-fires" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        intensity (uint16): How often the fault fires
       
     </span>
   </a>
@@ -5495,22 +5583,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-invariants" class="md-nav__link">
+  <a href="#invariants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-in Invariants
+        Invariants
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Built-in Invariants">
+    <nav class="md-nav" aria-label="Invariants">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#objectexists" class="md-nav__link">
+  <a href="#built-in-objectexists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ObjectExists
+        Built-in: ObjectExists
       
     </span>
   </a>
@@ -5518,10 +5606,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#objectcount" class="md-nav__link">
+  <a href="#built-in-objectcount" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ObjectCount
+        Built-in: ObjectCount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom invariants
       
     </span>
   </a>
@@ -5534,10 +5633,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-invariants" class="md-nav__link">
+  <a href="#ci-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom Invariants
+        CI Integration
       
     </span>
   </a>
@@ -5545,21 +5644,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#understanding-fuzz-failures" class="md-nav__link">
+  <a href="#comparison-with-other-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Understanding Fuzz Failures
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integration-with-cicd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration with CI/CD
+        Comparison with Other Modes
       
     </span>
   </a>
@@ -5597,39 +5685,27 @@
   
 
 
-<h1 id="fuzz-quickstart">Fuzz Quickstart<a class="headerlink" href="#fuzz-quickstart" title="Permanent link">¶</a></h1>
-<p>Use Go's native fuzz engine to automatically explore fault combinations your reconciler might encounter. The <code>pkg/sdk/fuzz</code> package provides a harness that:</p>
+<h1 id="fuzz-mode">Fuzz Mode<a class="headerlink" href="#fuzz-mode" title="Permanent link">¶</a></h1>
+<p>Use Go's native fuzz engine to automatically explore fault combinations your reconciler might encounter. Instead of writing one test per error scenario, the fuzz harness generates thousands of random fault configurations and runs your reconciler against each one, catching panics, unhandled errors, and state corruption.</p>
+<div class="admonition tip">
+<p class="admonition-title">When to use Fuzz mode</p>
+<p>Use this when you want to find edge cases in your reconciler's error handling during development. Manual tests cover the cases you think of. Fuzz testing covers the ones you don't.</p>
+</div>
+<h2 id="what-does-it-actually-do">What Does It Actually Do?<a class="headerlink" href="#what-does-it-actually-do" title="Permanent link">¶</a></h2>
+<p>Traditional chaos testing requires you to define each fault scenario manually: "inject a connection refused on Get, verify recovery." Fuzz mode inverts this. You provide:</p>
 <ol>
-<li>Creates a fresh fake client with seed objects</li>
-<li>Wraps it with <code>ChaosClient</code> using fuzz-generated fault configurations</li>
-<li>Runs your reconciler and catches panics</li>
-<li>Distinguishes chaos-injected errors (expected) from real bugs</li>
-<li>Checks post-reconcile invariants</li>
+<li>A <strong>reconciler factory</strong> (a function that creates your reconciler given a <code>client.Client</code>)</li>
+<li><strong>Seed objects</strong> (the Kubernetes resources your reconciler expects to exist)</li>
+<li><strong>Invariants</strong> (conditions that must always hold after reconciliation)</li>
 </ol>
-<div class="admonition tip">
-<p class="admonition-title">When to Use Fuzz Testing</p>
-<p>Use this when you want to find edge cases in your reconciler's error handling during development. The fuzz engine explores thousands of fault combinations automatically, finding panics and logic bugs that manual tests miss.</p>
-</div>
-<h2 id="auto-generate-from-knowledge-models">Auto-Generate from Knowledge Models<a class="headerlink" href="#auto-generate-from-knowledge-models" title="Permanent link">¶</a></h2>
-<p>If you have an <a href="../../guides/knowledge-models/">operator knowledge model</a>, you can generate a complete fuzz test file automatically:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Generate to stdout</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>operator-chaos<span class="w"> </span>generate<span class="w"> </span>fuzz-targets<span class="w"> </span>--knowledge<span class="w"> </span>knowledge/kserve.yaml
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Generate to a file</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>operator-chaos<span class="w"> </span>generate<span class="w"> </span>fuzz-targets<span class="w"> </span>--knowledge<span class="w"> </span>knowledge/kserve.yaml<span class="w"> </span>--output<span class="w"> </span>fuzz_kserve_test.go
-</code></pre></div>
-<p>The generated file contains:</p>
+<p>The fuzz engine then:</p>
 <ul>
-<li>One <code>FuzzXxx</code> function per component (e.g., <code>FuzzKserveControllerManager</code>)</li>
-<li>Seed objects from <code>managedResources</code> (Deployments, ConfigMaps, RBAC, etc.)</li>
-<li>Invariants from <code>steadyState.checks</code> and Deployment replicas</li>
-<li>Seed corpus entries derived from architectural traits (webhooks, finalizers, leader election, dependencies)</li>
+<li>Generates random fault configurations (which operations fail, what error, how often)</li>
+<li>Wraps a fake client with those faults using the <a href="../sdk/">SDK ChaosClient</a></li>
+<li>Runs your reconciler</li>
+<li>Reports any panics, unexpected errors, or invariant violations as test failures</li>
 </ul>
-<p>You only need to replace the placeholder <code>reconcilerFactory</code> function with your actual reconciler constructor.</p>
-<div class="admonition tip">
-<p class="admonition-title">When to use auto-generation vs manual</p>
-<p>Use <code>generate fuzz-targets</code> when you already have a knowledge model. It gives the fuzzer architecturally relevant starting points. Write tests manually when you need custom invariants or want to target specific reconciler paths.</p>
-</div>
+<p>No cluster is needed. Everything runs in-process with a fake client.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h2>
 <pre class="mermaid"><code>flowchart TD
     F["Go Fuzz Engine"] --&gt;|"generates opMask,&lt;br/&gt;faultType, intensity"| D[DecodeFaultConfig]
@@ -5659,146 +5735,225 @@
     style FAIL2 fill:#ef9a9a,stroke:#c62828
     style FAIL3 fill:#ef9a9a,stroke:#c62828
     style PASS fill:#a5d6a7,stroke:#2e7d32</code></pre>
+<p>The key insight: <strong>chaos-injected errors are expected and silently ignored.</strong> If your reconciler returns a <code>ChaosError</code>, that means it propagated the injected fault correctly. The harness only reports failures for:</p>
+<ul>
+<li><strong>Panics</strong>: Your code crashed. Always a bug.</li>
+<li><strong>Non-chaos errors</strong>: Your reconciler returned an error that didn't originate from the ChaosClient. This means your code has a bug unrelated to fault handling.</li>
+<li><strong>Invariant violations</strong>: Your reconciler ran to completion, but post-reconcile state is wrong (e.g., a resource that should always exist was deleted).</li>
+</ul>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h2>
 <ul>
 <li>Go 1.18+ (for native fuzzing support)</li>
 <li>controller-runtime v0.23+</li>
 <li>No Kubernetes cluster needed (uses fake client)</li>
 </ul>
-<h2 id="writing-a-fuzz-test-manual">Writing a Fuzz Test (Manual)<a class="headerlink" href="#writing-a-fuzz-test-manual" title="Permanent link">¶</a></h2>
-<h3 id="step-1-implement-a-reconcilerfactory">Step 1: Implement a ReconcilerFactory<a class="headerlink" href="#step-1-implement-a-reconcilerfactory" title="Permanent link">¶</a></h3>
-<p>This constructs your reconciler with a given <code>client.Client</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/client"</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/reconcile"</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
+<h2 id="step-by-step-walkthrough">Step-by-Step Walkthrough<a class="headerlink" href="#step-by-step-walkthrough" title="Permanent link">¶</a></h2>
+<h3 id="step-1-write-a-reconciler-factory">Step 1: Write a reconciler factory<a class="headerlink" href="#step-1-write-a-reconciler-factory" title="Permanent link">¶</a></h3>
+<p>The fuzz harness needs a function that creates your reconciler given a <code>client.Client</code>. This decouples your reconciler construction from any specific client implementation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/client"</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/reconcile"</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">func</span><span class="w"> </span><span class="nx">myFactory</span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Reconciler</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MyReconciler</span><span class="p">{</span><span class="nx">client</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">}</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-2-write-the-fuzz-test">Step 2: Write the fuzz test<a class="headerlink" href="#step-2-write-the-fuzz-test" title="Permanent link">¶</a></h3>
+<p>Create a file named <code>fuzz_test.go</code> in your controller's package:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">mycontroller_test</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="s">"testing"</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">func</span><span class="w"> </span><span class="nx">myFactory</span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Reconciler</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MyReconciler</span><span class="p">{</span><span class="nx">client</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">}</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nx">corev1</span><span class="w"> </span><span class="s">"k8s.io/api/core/v1"</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nx">metav1</span><span class="w"> </span><span class="s">"k8s.io/apimachinery/pkg/apis/meta/v1"</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="s">"k8s.io/apimachinery/pkg/runtime"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="s">"k8s.io/apimachinery/pkg/types"</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/client"</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/reconcile"</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="s">"github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="kd">func</span><span class="w"> </span><span class="nx">FuzzMyReconciler</span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="c1">// Seed corpus: starting values for the fuzz engine to mutate.</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="c1">// Each f.Add() call provides one (opMask, faultType, intensity) tuple.</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">uint16</span><span class="p">(</span><span class="mh">0x01FF</span><span class="p">),</span><span class="w"> </span><span class="nb">uint8</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nb">uint16</span><span class="p">(</span><span class="mi">32768</span><span class="p">))</span><span class="w">  </span><span class="c1">// all ops, conflict error, 50%</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">uint16</span><span class="p">(</span><span class="mh">0x0001</span><span class="p">),</span><span class="w"> </span><span class="nb">uint8</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="nb">uint16</span><span class="p">(</span><span class="mi">65535</span><span class="p">))</span><span class="w">   </span><span class="c1">// Get only, not found, 100%</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">uint16</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nb">uint8</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nb">uint16</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="w">            </span><span class="c1">// no faults (baseline)</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="nx">scheme</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runtime</span><span class="p">.</span><span class="nx">NewScheme</span><span class="p">()</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="nx">_</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">corev1</span><span class="p">.</span><span class="nx">AddToScheme</span><span class="p">(</span><span class="nx">scheme</span><span class="p">)</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Fuzz</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">opMask</span><span class="w"> </span><span class="kt">uint16</span><span class="p">,</span><span class="w"> </span><span class="nx">faultType</span><span class="w"> </span><span class="kt">uint8</span><span class="p">,</span><span class="w"> </span><span class="nx">intensity</span><span class="w"> </span><span class="kt">uint16</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">        </span><span class="c1">// Seed objects: the initial cluster state before reconciliation.</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">        </span><span class="nx">cm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">            </span><span class="nx">ObjectMeta</span><span class="p">:</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ObjectMeta</span><span class="p">{</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">                </span><span class="nx">Name</span><span class="p">:</span><span class="w">      </span><span class="s">"my-config"</span><span class="p">,</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">                </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">,</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">            </span><span class="nx">Data</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"key"</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span><span class="p">},</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">        </span><span class="c1">// The reconcile request targeting this ConfigMap.</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">        </span><span class="nx">req</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">            </span><span class="nx">NamespacedName</span><span class="p">:</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">                </span><span class="nx">Name</span><span class="p">:</span><span class="w">      </span><span class="s">"my-config"</span><span class="p">,</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">                </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">,</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="w">        </span><span class="c1">// Create harness with factory, scheme, request, and seed objects.</span>
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="w">        </span><span class="nx">h</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">NewHarness</span><span class="p">(</span><span class="nx">myFactory</span><span class="p">,</span><span class="w"> </span><span class="nx">scheme</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">cm</span><span class="p">)</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="w">        </span><span class="c1">// Add invariant: ConfigMap must still exist after reconciliation.</span>
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a><span class="w">        </span><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectExists</span><span class="p">(</span>
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a><span class="w">            </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="w">            </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{},</span>
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a><span class="w">        </span><span class="p">))</span>
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a><span class="w">        </span><span class="c1">// Decode fuzz bytes into a FaultConfig and run.</span>
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a><span class="w">        </span><span class="nx">fc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">DecodeFaultConfig</span><span class="p">(</span><span class="nx">opMask</span><span class="p">,</span><span class="w"> </span><span class="nx">faultType</span><span class="p">,</span><span class="w"> </span><span class="nx">intensity</span><span class="p">)</span>
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">h</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">fc</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a><span class="w">            </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a><span class="w">    </span><span class="p">})</span>
+<a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="step-2-write-the-fuzz-test">Step 2: Write the Fuzz Test<a class="headerlink" href="#step-2-write-the-fuzz-test" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">mycontroller_test</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="s">"testing"</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nx">corev1</span><span class="w"> </span><span class="s">"k8s.io/api/core/v1"</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nx">metav1</span><span class="w"> </span><span class="s">"k8s.io/apimachinery/pkg/apis/meta/v1"</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="s">"k8s.io/apimachinery/pkg/runtime"</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="s">"k8s.io/apimachinery/pkg/types"</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/client"</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="s">"sigs.k8s.io/controller-runtime/pkg/reconcile"</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="s">"github.com/opendatahub-io/operator-chaos/pkg/sdk/fuzz"</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">)</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="c1">// Step 1: Implement a ReconcilerFactory.</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="c1">// This constructs your reconciler with a given client.Client.</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="kd">func</span><span class="w"> </span><span class="nx">myFactory</span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Reconciler</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MyReconciler</span><span class="p">{</span><span class="nx">client</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">}</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="p">}</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="c1">// Step 2: Write the fuzz test.</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="kd">func</span><span class="w"> </span><span class="nx">FuzzMyReconciler</span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="c1">// Seed corpus: the fuzz engine starts with these values and mutates them.</span>
-<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">uint16</span><span class="p">(</span><span class="mh">0x01FF</span><span class="p">),</span><span class="w"> </span><span class="nb">uint8</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nb">uint16</span><span class="p">(</span><span class="mi">32768</span><span class="p">))</span>
-<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">uint16</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nb">uint8</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="nb">uint16</span><span class="p">(</span><span class="mi">65535</span><span class="p">))</span>
-<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
-<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="nx">scheme</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runtime</span><span class="p">.</span><span class="nx">NewScheme</span><span class="p">()</span>
-<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">    </span><span class="nx">_</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">corev1</span><span class="p">.</span><span class="nx">AddToScheme</span><span class="p">(</span><span class="nx">scheme</span><span class="p">)</span>
-<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
-<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="nx">f</span><span class="p">.</span><span class="nx">Fuzz</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">opMask</span><span class="w"> </span><span class="kt">uint16</span><span class="p">,</span><span class="w"> </span><span class="nx">faultType</span><span class="w"> </span><span class="kt">uint8</span><span class="p">,</span><span class="w"> </span><span class="nx">intensity</span><span class="w"> </span><span class="kt">uint16</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="c1">// Seed objects: the initial cluster state before reconciliation.</span>
-<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="nx">cm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{</span>
-<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">            </span><span class="nx">ObjectMeta</span><span class="p">:</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ObjectMeta</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
-<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">            </span><span class="nx">Data</span><span class="p">:</span><span class="w">       </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"key"</span><span class="p">:</span><span class="w"> </span><span class="s">"value"</span><span class="p">},</span>
-<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">        </span><span class="nx">req</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span>
-<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">            </span><span class="nx">NamespacedName</span><span class="p">:</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
-<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>
-<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">        </span><span class="c1">// Create harness with factory, scheme, request, and seed objects.</span>
-<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">        </span><span class="nx">h</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">NewHarness</span><span class="p">(</span><span class="nx">myFactory</span><span class="p">,</span><span class="w"> </span><span class="nx">scheme</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">cm</span><span class="p">)</span>
-<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>
-<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">        </span><span class="c1">// Add invariants: conditions that must hold after every reconciliation.</span>
-<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">        </span><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectExists</span><span class="p">(</span>
-<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">            </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
-<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">            </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{},</span>
-<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">        </span><span class="p">))</span>
-<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>
-<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">        </span><span class="c1">// DecodeFaultConfig maps fuzz bytes to a valid FaultConfig:</span>
-<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">        </span><span class="c1">//   opMask:    bitmask selecting which operations get faults</span>
-<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="w">        </span><span class="c1">//              0x01FF enables all 9 operations, 0x0001 enables only Get</span>
-<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="w">        </span><span class="c1">//   faultType: selects error message from 11 realistic K8s errors</span>
-<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="w">        </span><span class="c1">//   intensity: maps to error rate (0 = never, 65535 = always fire)</span>
-<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="w">        </span><span class="nx">fc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">DecodeFaultConfig</span><span class="p">(</span><span class="nx">opMask</span><span class="p">,</span><span class="w"> </span><span class="nx">faultType</span><span class="p">,</span><span class="w"> </span><span class="nx">intensity</span><span class="p">)</span>
-<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>
-<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="w">        </span><span class="c1">// Run returns an error only for REAL bugs:</span>
-<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a><span class="w">        </span><span class="c1">//   - Panics (always a bug)</span>
-<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a><span class="w">        </span><span class="c1">//   - Non-chaos errors (reconciler returned an error not from ChaosClient)</span>
-<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a><span class="w">        </span><span class="c1">//   - Invariant violations (post-reconcile state is wrong)</span>
-<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a><span class="w">        </span><span class="c1">// Chaos-injected errors (sdk.ChaosError) are expected and silently ignored.</span>
-<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">h</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">fc</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a><span class="w">            </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a><span class="w">    </span><span class="p">})</span>
-<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a><span class="p">}</span>
+<h3 id="step-3-run-the-fuzz-test">Step 3: Run the fuzz test<a class="headerlink" href="#step-3-run-the-fuzz-test" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Quick smoke test (30 seconds)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler<span class="w"> </span>-fuzztime<span class="o">=</span>30s
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>0s,<span class="w"> </span>gathering<span class="w"> </span>baseline<span class="w"> </span>coverage:<span class="w"> </span><span class="m">0</span>/3<span class="w"> </span>completed
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>0s,<span class="w"> </span>gathering<span class="w"> </span>baseline<span class="w"> </span>coverage:<span class="w"> </span><span class="m">3</span>/3<span class="w"> </span>completed,<span class="w"> </span>now<span class="w"> </span>fuzzing<span class="w"> </span>with<span class="w"> </span><span class="m">8</span><span class="w"> </span>workers
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>3s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">1842</span><span class="w"> </span><span class="o">(</span><span class="m">614</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">15</span><span class="o">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>6s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">4291</span><span class="w"> </span><span class="o">(</span><span class="m">816</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">14</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">17</span><span class="o">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>9s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">6830</span><span class="w"> </span><span class="o">(</span><span class="m">846</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">18</span><span class="o">)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>12s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">9402</span><span class="w"> </span><span class="o">(</span><span class="m">857</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">18</span><span class="o">)</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>15s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">12091</span><span class="w"> </span><span class="o">(</span><span class="m">896</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>18s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">14673</span><span class="w"> </span><span class="o">(</span><span class="m">860</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>21s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">17284</span><span class="w"> </span><span class="o">(</span><span class="m">870</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>24s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">19901</span><span class="w"> </span><span class="o">(</span><span class="m">872</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>27s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">22486</span><span class="w"> </span><span class="o">(</span><span class="m">862</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>fuzz:<span class="w"> </span>elapsed:<span class="w"> </span>30s,<span class="w"> </span>execs:<span class="w"> </span><span class="m">25107</span><span class="w"> </span><span class="o">(</span><span class="m">874</span>/sec<span class="o">)</span>,<span class="w"> </span>new<span class="w"> </span>interesting:<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="o">(</span>total:<span class="w"> </span><span class="m">19</span><span class="o">)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>PASS
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>ok<span class="w">      </span>github.com/example/my-operator/pkg/mycontroller<span class="w"> </span><span class="m">30</span>.124s
 </code></pre></div>
-<h2 id="running-fuzz-tests">Running Fuzz Tests<a class="headerlink" href="#running-fuzz-tests" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Run for 30 seconds (quick smoke test)</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler<span class="w"> </span>-fuzztime<span class="o">=</span>30s
+<p>The engine ran ~25,000 different fault configurations in 30 seconds. "New interesting" means the engine found inputs that exercise new code paths.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Thorough exploration (5 minutes)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler<span class="w"> </span>-fuzztime<span class="o">=</span>5m
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Run for 5 minutes (thorough exploration)</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler<span class="w"> </span>-fuzztime<span class="o">=</span>5m
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Run indefinitely until a failure is found</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Run indefinitely until a failure is found</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler
 </code></pre></div>
-<p>Failures are saved to <code>testdata/fuzz/FuzzMyReconciler/</code> and automatically replayed on subsequent <code>go test</code> runs.</p>
+<h3 id="step-4-interpret-failures">Step 4: Interpret failures<a class="headerlink" href="#step-4-interpret-failures" title="Permanent link">¶</a></h3>
+<p>When the fuzz engine finds a bug, it reports the inputs that triggered it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>--- FAIL: FuzzMyReconciler (0.03s)
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    --- FAIL: FuzzMyReconciler/seed#1 (0.00s)
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        harness.go:87: reconciler panicked: runtime error: invalid memory address
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                        or nil pointer dereference
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        Failing input:
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>            opMask:    0x0001 (Get only)
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>            faultType: 1 (not found)
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            intensity: 65535 (100% error rate)
+</code></pre></div>
+<p>This tells you: when every Get call returns "not found", your reconciler panics due to a nil pointer dereference. The fix is to add a nil check after the Get call.</p>
+<p>Failing inputs are saved to <code>testdata/fuzz/FuzzMyReconciler/</code> and automatically replayed on subsequent <code>go test</code> runs, so the bug becomes a permanent regression test.</p>
+<h3 id="step-5-fix-and-re-run">Step 5: Fix and re-run<a class="headerlink" href="#step-5-fix-and-re-run" title="Permanent link">¶</a></h3>
+<p>After fixing the bug, re-run to verify the fix and continue exploring:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Replay the saved failure (regression test)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-run<span class="o">=</span>FuzzMyReconciler
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>PASS
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ok<span class="w">      </span>github.com/example/my-operator/pkg/mycontroller<span class="w"> </span><span class="m">0</span>.015s
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Continue fuzzing to find more issues</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./pkg/mycontroller/<span class="w"> </span>-fuzz<span class="o">=</span>FuzzMyReconciler<span class="w"> </span>-fuzztime<span class="o">=</span>2m
+</code></pre></div>
+<h2 id="auto-generate-from-knowledge-models">Auto-Generate from Knowledge Models<a class="headerlink" href="#auto-generate-from-knowledge-models" title="Permanent link">¶</a></h2>
+<p>If you have an <a href="../../guides/knowledge-models/">operator knowledge model</a>, you can skip writing the fuzz test manually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$<span class="w"> </span>operator-chaos<span class="w"> </span>generate<span class="w"> </span>fuzz-targets<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span>--knowledge<span class="w"> </span>knowledge/kserve.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>--output<span class="w"> </span>fuzz_kserve_test.go
+</code></pre></div>
+<p>The generated file contains:</p>
+<ul>
+<li>One <code>FuzzXxx</code> function per component (e.g., <code>FuzzKserveControllerManager</code>)</li>
+<li>Seed objects derived from <code>managedResources</code> (Deployments, ConfigMaps, RBAC)</li>
+<li>Invariants from <code>steadyState.checks</code> and Deployment replicas</li>
+<li>Seed corpus entries derived from architectural traits (webhooks, finalizers, leader election)</li>
+</ul>
+<p>You only need to replace the placeholder <code>reconcilerFactory</code> function with your actual reconciler constructor.</p>
 <h2 id="decodefaultconfig-reference">DecodeFaultConfig Reference<a class="headerlink" href="#decodefaultconfig-reference" title="Permanent link">¶</a></h2>
 <p>The <code>DecodeFaultConfig</code> function maps three fuzz primitives to a valid <code>*sdk.FaultConfig</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">fc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">DecodeFaultConfig</span><span class="p">(</span><span class="nx">opMask</span><span class="p">,</span><span class="w"> </span><span class="nx">faultType</span><span class="p">,</span><span class="w"> </span><span class="nx">intensity</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="opmask-uint16-which-operations-get-faults">opMask (uint16): Which operations get faults<a class="headerlink" href="#opmask-uint16-which-operations-get-faults" title="Permanent link">¶</a></h3>
+<p>Each bit enables faults for one operation:</p>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Mapping</th>
+<th>Bit</th>
+<th>Hex</th>
+<th>Operation</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>opMask</code></td>
-<td><code>uint16</code></td>
-<td>Bitmask: bit 0 = Get, bit 1 = List, bit 2 = Create, bit 3 = Update, bit 4 = Delete, bit 5 = Patch, bit 6 = DeleteAllOf, bit 7 = Reconcile, bit 8 = Apply</td>
+<td>0</td>
+<td><code>0x0001</code></td>
+<td>Get</td>
 </tr>
 <tr>
-<td><code>faultType</code></td>
-<td><code>uint8</code></td>
-<td>Index into 11 realistic K8s error messages (conflict, not found, timeout, server error, etcd, throttle, connection refused, gone, webhook denied, quota exceeded, unavailable)</td>
+<td>1</td>
+<td><code>0x0002</code></td>
+<td>List</td>
 </tr>
 <tr>
-<td><code>intensity</code></td>
-<td><code>uint16</code></td>
-<td>Error rate: 0 = never fire, 65535 = always fire</td>
+<td>2</td>
+<td><code>0x0004</code></td>
+<td>Create</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>0x0008</code></td>
+<td>Update</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>0x0010</code></td>
+<td>Delete</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>0x0020</code></td>
+<td>Patch</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>0x0040</code></td>
+<td>DeleteAllOf</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>0x0080</code></td>
+<td>Reconcile</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>0x0100</code></td>
+<td>Apply</td>
 </tr>
 </tbody>
 </table>
-<h3 id="operation-bitmask">Operation Bitmask<a class="headerlink" href="#operation-bitmask" title="Permanent link">¶</a></h3>
-<p>The <code>opMask</code> parameter uses individual bits to enable/disable faults for each operation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="mh">0x0001</span><span class="w">  </span><span class="c1">// Only Get</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="mh">0x0002</span><span class="w">  </span><span class="c1">// Only List</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="mh">0x0004</span><span class="w">  </span><span class="c1">// Only Create</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="mh">0x0008</span><span class="w">  </span><span class="c1">// Only Update</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="mh">0x0010</span><span class="w">  </span><span class="c1">// Only Delete</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="mh">0x0020</span><span class="w">  </span><span class="c1">// Only Patch</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="mh">0x0040</span><span class="w">  </span><span class="c1">// Only DeleteAllOf</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="mh">0x0080</span><span class="w">  </span><span class="c1">// Only Reconcile</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="mh">0x0100</span><span class="w">  </span><span class="c1">// Only Apply</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="mh">0x01FF</span><span class="w">  </span><span class="c1">// All operations (all 9 bits set)</span>
-</code></pre></div>
-<h3 id="fault-types">Fault Types<a class="headerlink" href="#fault-types" title="Permanent link">¶</a></h3>
-<p>The <code>faultType</code> parameter selects from these realistic Kubernetes error messages:</p>
+<p>Examples:</p>
+<ul>
+<li><code>0x0001</code> = only Get is faulted</li>
+<li><code>0x0009</code> = Get + Update</li>
+<li><code>0x01FF</code> = all 9 operations</li>
+</ul>
+<h3 id="faulttype-uint8-what-error-to-inject">faultType (uint8): What error to inject<a class="headerlink" href="#faulttype-uint8-what-error-to-inject" title="Permanent link">¶</a></h3>
+<p>Index into 11 realistic Kubernetes error messages:</p>
 <table>
 <thead>
 <tr>
@@ -5809,121 +5964,143 @@
 <tbody>
 <tr>
 <td>0</td>
-<td>"the object has been modified; please apply your changes to the latest version and try again"</td>
+<td><code>the object has been modified; please apply your changes to the latest version and try again</code></td>
 </tr>
 <tr>
 <td>1</td>
-<td>"not found"</td>
+<td><code>not found</code></td>
 </tr>
 <tr>
 <td>2</td>
-<td>"context deadline exceeded"</td>
+<td><code>context deadline exceeded</code></td>
 </tr>
 <tr>
 <td>3</td>
-<td>"Internal error occurred: unexpected response: 500"</td>
+<td><code>Internal error occurred: unexpected response: 500</code></td>
 </tr>
 <tr>
 <td>4</td>
-<td>"etcdserver: request timed out"</td>
+<td><code>etcdserver: request timed out</code></td>
 </tr>
 <tr>
 <td>5</td>
-<td>"rate limit exceeded, retry after 5s"</td>
+<td><code>rate limit exceeded, retry after 5s</code></td>
 </tr>
 <tr>
 <td>6</td>
-<td>"connection refused"</td>
+<td><code>connection refused</code></td>
 </tr>
 <tr>
 <td>7</td>
-<td>"the server could not find the requested resource (HTTP 410: Gone)"</td>
+<td><code>the server could not find the requested resource (HTTP 410: Gone)</code></td>
 </tr>
 <tr>
 <td>8</td>
-<td>"admission webhook denied the request"</td>
+<td><code>admission webhook denied the request</code></td>
 </tr>
 <tr>
 <td>9</td>
-<td>"exceeded quota"</td>
+<td><code>exceeded quota</code></td>
 </tr>
 <tr>
 <td>10</td>
-<td>"Service Unavailable"</td>
+<td><code>Service Unavailable</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="built-in-invariants">Built-in Invariants<a class="headerlink" href="#built-in-invariants" title="Permanent link">¶</a></h2>
-<p>Invariants are conditions that must hold after every reconciliation. The framework provides two built-in invariants:</p>
-<h3 id="objectexists">ObjectExists<a class="headerlink" href="#objectexists" title="Permanent link">¶</a></h3>
-<p>Checks that a specific object still exists after reconciliation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectExists</span><span class="p">(</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{},</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">))</span>
+<p>Values &gt; 10 wrap around (modulo 11).</p>
+<h3 id="intensity-uint16-how-often-the-fault-fires">intensity (uint16): How often the fault fires<a class="headerlink" href="#intensity-uint16-how-often-the-fault-fires" title="Permanent link">¶</a></h3>
+<p>Maps linearly to error rate: <code>0</code> = never fire, <code>65535</code> = always fire, <code>32768</code> = ~50%.</p>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Permanent link">¶</a></h2>
+<p>Invariants are conditions that must hold after every reconciliation, regardless of what faults were injected.</p>
+<h3 id="built-in-objectexists">Built-in: ObjectExists<a class="headerlink" href="#built-in-objectexists" title="Permanent link">¶</a></h3>
+<p>Checks that a specific object still exists:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectExists</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">},</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{},</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">))</span>
 </code></pre></div>
-<h3 id="objectcount">ObjectCount<a class="headerlink" href="#objectcount" title="Permanent link">¶</a></h3>
-<p>Checks that the count of objects of a given type matches <code>n</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">list</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMapList</span><span class="p">{}</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectCount</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">// With label selector</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nx">opts</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">client</span><span class="p">.</span><span class="nx">ListOption</span><span class="p">{</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">MatchingLabels</span><span class="p">{</span><span class="s">"app"</span><span class="p">:</span><span class="w"> </span><span class="s">"my-app"</span><span class="p">},</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">}</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectCount</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="o">...</span><span class="p">))</span>
+<h3 id="built-in-objectcount">Built-in: ObjectCount<a class="headerlink" href="#built-in-objectcount" title="Permanent link">¶</a></h3>
+<p>Checks that the number of objects of a given type matches an expected count:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// Exactly 3 ConfigMaps should exist</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectCount</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMapList</span><span class="p">{},</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1">// Exactly 1 ConfigMap with label "app=my-app"</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">fuzz</span><span class="p">.</span><span class="nx">ObjectCount</span><span class="p">(</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMapList</span><span class="p">{},</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">MatchingLabels</span><span class="p">{</span><span class="s">"app"</span><span class="p">:</span><span class="w"> </span><span class="s">"my-app"</span><span class="p">},</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">))</span>
 </code></pre></div>
-<h2 id="custom-invariants">Custom Invariants<a class="headerlink" href="#custom-invariants" title="Permanent link">¶</a></h2>
-<p>You can define custom invariants as functions that check post-reconcile state:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">customInvariant</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nx">cm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{}</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">}</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">cm</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"ConfigMap missing: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">cm</span><span class="p">.</span><span class="nx">Data</span><span class="p">[</span><span class="s">"key"</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"value"</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"ConfigMap data corrupted: got %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">cm</span><span class="p">.</span><span class="nx">Data</span><span class="p">[</span><span class="s">"key"</span><span class="p">])</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">}</span>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="nx">customInvariant</span><span class="p">)</span>
+<h3 id="custom-invariants">Custom invariants<a class="headerlink" href="#custom-invariants" title="Permanent link">¶</a></h3>
+<p>Write any check as a function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nx">h</span><span class="p">.</span><span class="nx">AddInvariant</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nx">cm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{}</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-config"</span><span class="p">,</span><span class="w"> </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="s">"default"</span><span class="p">}</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">cm</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"ConfigMap missing: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">cm</span><span class="p">.</span><span class="nx">Data</span><span class="p">[</span><span class="s">"key"</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"value"</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"ConfigMap data corrupted: got %q, want %q"</span><span class="p">,</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">            </span><span class="nx">cm</span><span class="p">.</span><span class="nx">Data</span><span class="p">[</span><span class="s">"key"</span><span class="p">],</span><span class="w"> </span><span class="s">"value"</span><span class="p">)</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="p">})</span>
 </code></pre></div>
-<h2 id="understanding-fuzz-failures">Understanding Fuzz Failures<a class="headerlink" href="#understanding-fuzz-failures" title="Permanent link">¶</a></h2>
-<p>When the fuzz engine finds a bug, it reports:</p>
-<ol>
-<li><strong>The fuzz inputs</strong> that triggered the failure (saved to <code>testdata/fuzz/</code>)</li>
-<li><strong>The failure type</strong>:</li>
-<li><strong>Panic</strong>: Your reconciler panicked (always a bug)</li>
-<li><strong>Non-chaos error</strong>: Your reconciler returned an error that wasn't injected by ChaosClient</li>
-<li>
-<p><strong>Invariant violation</strong>: Post-reconcile state doesn't match expectations</p>
-</li>
-<li>
-<p><strong>The failure output</strong> including stack trace</p>
-</li>
-</ol>
-<p>Example failure output:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>--- FAIL: FuzzMyReconciler (0.03s)
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    --- FAIL: FuzzMyReconciler (0.00s)
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>        harness.go:123: reconciler panicked: runtime error: invalid memory address or nil pointer dereference
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        Fuzz inputs:
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>            opMask:    0x0001 (Get only)
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>            faultType: 1 (not found)
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>            intensity: 65535 (100% error rate)
+<h2 id="ci-integration">CI Integration<a class="headerlink" href="#ci-integration" title="Permanent link">¶</a></h2>
+<p>Add fuzz tests to your CI pipeline. Even a 2-minute run catches many issues:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># GitHub Actions</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Fuzz test reconcilers</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">go test ./pkg/... -fuzz=. -fuzztime=2m</span>
 </code></pre></div>
-<h2 id="integration-with-cicd">Integration with CI/CD<a class="headerlink" href="#integration-with-cicd" title="Permanent link">¶</a></h2>
-<p>Add fuzz tests to your CI pipeline:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># GitHub Actions example</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Fuzz test reconcilers</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="no">go test ./pkg/... -fuzz=. -fuzztime=2m</span>
-</code></pre></div>
-<p>For regression testing, commit the <code>testdata/fuzz/</code> directory to ensure discovered bugs are always re-tested.</p>
+<p>Commit the <code>testdata/fuzz/</code> directory to your repository so discovered failures become permanent regression tests.</p>
+<h2 id="comparison-with-other-modes">Comparison with Other Modes<a class="headerlink" href="#comparison-with-other-modes" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Fuzz Mode</th>
+<th>SDK Mode</th>
+<th>CLI Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cluster needed?</strong></td>
+<td>No (fake client)</td>
+<td>No (fake or real)</td>
+<td>Yes (live cluster)</td>
+</tr>
+<tr>
+<td><strong>Fault configuration</strong></td>
+<td>Auto-generated</td>
+<td>Manual</td>
+<td>Manual (YAML)</td>
+</tr>
+<tr>
+<td><strong>Coverage</strong></td>
+<td>Thousands of combinations</td>
+<td>One scenario per test</td>
+<td>One scenario per experiment</td>
+</tr>
+<tr>
+<td><strong>What it finds</strong></td>
+<td>Panics, nil pointers, logic bugs</td>
+<td>Specific error handling paths</td>
+<td>Real recovery behavior</td>
+</tr>
+<tr>
+<td><strong>Speed</strong></td>
+<td>~800 runs/sec</td>
+<td>Milliseconds per test</td>
+<td>Seconds to minutes per experiment</td>
+</tr>
+</tbody>
+</table>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
 <ul>
-<li>Integrate with <a href="../sdk/">SDK middleware</a></li>
+<li>Learn about <a href="../sdk/">SDK mode</a> for targeted error injection</li>
+<li>Run full cluster experiments with <a href="../cli/">CLI mode</a></li>
 </ul>
 
 
@@ -5947,7 +6124,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 25, 2026 17:14:42 UTC">April 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 27, 2026 10:47:07 UTC">April 27, 2026</span>
   </span>
 
     
