@@ -317,6 +317,10 @@
          <lastmod>2026-04-29</lastmod>
     </url>
     <url>
+         <loc>https://ugiordan.github.io/operator-chaos/failure-modes/olm-lifecycle/</loc>
+         <lastmod>2026-04-29</lastmod>
+    </url>
+    <url>
          <loc>https://ugiordan.github.io/operator-chaos/failure-modes/ownerref-orphan/</loc>
          <lastmod>2026-04-29</lastmod>
     </url>
