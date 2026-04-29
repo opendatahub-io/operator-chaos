@@ -771,6 +771,7 @@ operator-chaos suite <experiments-directory> [flags]
 | `--dry-run` | Validate without running | `false` |
 | `--timeout` | Timeout per experiment | `10m` |
 | `--max-tier` | Skip experiments above this tier (0 = no filter) | `0` |
+| `--cooldown` | Delay between sequential experiments for cluster recovery (e.g. `30s`) | `0` |
 | `--distributed-lock` | Use Kubernetes Lease-based distributed locking | `false` |
 | `--lock-namespace` | Namespace for distributed lock leases | `default` |
 
@@ -815,7 +816,7 @@ operator-chaos preflight [flags]
 | `--knowledge` | Path to operator knowledge YAML | |
 | `--local` | Local-only validation (no cluster access) | `false` |
 
-Pre-flight checks validate a knowledge model before running experiments. In `--local` mode, validates YAML structure and cross-references (e.g. steady-state checks reference declared managed resources). Without `--local`, also verifies that declared resources exist on the cluster.
+Pre-flight checks validate a knowledge model before running experiments. In `--local` mode, validates YAML structure and cross-references (e.g. steady-state checks reference declared managed resources). Without `--local`, also verifies that declared resources exist on the cluster and checks resource capacity: it sums CPU and memory requests across all Deployment-type managed resources (containers x replicas) and warns when they exceed 80% of total node allocatable capacity.
 
 ### controller start
 

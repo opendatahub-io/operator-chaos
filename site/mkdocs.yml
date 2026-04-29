@@ -104,6 +104,11 @@ nav:
       - Knowledge Models: guides/knowledge-models.md
       - Upgrade Testing: guides/upgrade-testing.md
       - Controller Advanced: guides/controller-advanced.md
+    - Environments:
+      - kind: guides/environments/kind.md
+      - k3s: guides/environments/k3s.md
+      - OpenShift (OCP/ROSA): guides/environments/ocp.md
+      - OKD: guides/environments/okd.md
     - Operations:
       - CI Integration: guides/ci-integration.md
       - Operator Dashboard: guides/dashboard-operator.md

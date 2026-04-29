@@ -229,6 +229,12 @@ Finalizers:  0
 Cluster preflight passed.
 ```
 
+When connecting to a cluster, preflight also checks resource capacity. It sums CPU and memory requests across all Deployment-type managed resources and warns if they exceed 80% of total node allocatable capacity:
+
+```
+Warning: operator deployments request 5 CPU (71% of 7 allocatable across 2 nodes)
+```
+
 If a resource is missing, the output shows it clearly:
 
 ```bash
@@ -337,6 +343,17 @@ HTML report written to /tmp/chaos-results/report.html
 ```
 
 The suite generates JUnit XML (for CI integration) and HTML reports in the `--report-dir`.
+
+For disruptive experiments that leave the cluster in a temporarily degraded state, use `--cooldown` to add a delay between sequential experiments:
+
+```bash
+$ operator-chaos suite experiments/ \
+    --knowledge knowledge.yaml \
+    --cooldown 30s \
+    --max-tier 3
+```
+
+This prevents cascading pre-check failures where one experiment's aftermath causes the next experiment's steady-state validation to fail.
 
 ### Step 9: Clean up chaos artifacts
 

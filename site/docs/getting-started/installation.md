@@ -55,6 +55,17 @@ operator-chaos version
 
 You should see the version information for the installed CLI.
 
+## Environment Guides
+
+Set up your cluster for chaos testing. Each environment supports different [fidelity tiers](../modes/cli.md#step-8-run-a-suite-of-experiments):
+
+| Environment | Tiers | Best For |
+|-------------|-------|----------|
+| **[kind](../guides/environments/kind.md)** | 1 | CI pipelines, fast dev loops |
+| **[k3s](../guides/environments/k3s.md)** | 1-2 | Real NetworkPolicy enforcement, lightweight CI |
+| **[OCP / ROSA](../guides/environments/ocp.md)** | 1-6 | Full fidelity: OLM, Routes, SCCs, webhooks |
+| **[OKD](../guides/environments/okd.md)** | 1-6 | Free OCP-compatible, community testing |
+
 ## Next Steps
 
 Choose your usage mode based on your testing needs:

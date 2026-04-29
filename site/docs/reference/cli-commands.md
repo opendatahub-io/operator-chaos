@@ -565,6 +565,7 @@ operator-chaos suite <experiments-directory> [flags]
       --knowledge stringArray   path to operator knowledge YAML (repeatable)
       --knowledge-dir string    directory of operator knowledge YAMLs
       --lock-namespace string   namespace for distributed lock leases (default "default")
+      --cooldown duration        delay between sequential experiments for cluster recovery (e.g. 30s)
       --max-tier int32          skip experiments above this tier (0 = no filter)
       --parallel int            max concurrent experiments (default 1)
       --report-dir string       directory for report output

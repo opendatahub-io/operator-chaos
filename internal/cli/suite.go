@@ -40,6 +40,7 @@ func newSuiteCommand() *cobra.Command {
 		distributedLock bool
 		lockNamespace   string
 		maxTier         int32
+		cooldown        time.Duration
 	)
 
 	cmd := &cobra.Command{
@@ -96,9 +97,12 @@ func newSuiteCommand() *cobra.Command {
 			var results []suiteResult
 
 			if parallel > 1 && !dryRun {
+				if cooldown > 0 {
+					fmt.Fprintf(os.Stderr, "Warning: --cooldown is ignored when --parallel > 1\n")
+				}
 				results = runParallel(cmd.Context(), experimentFiles, deps, timeout, parallel, namespace, maxTier)
 			} else {
-				results = runSequential(cmd.Context(), experimentFiles, deps, dryRun, timeout, namespace, maxTier)
+				results = runSequential(cmd.Context(), experimentFiles, deps, dryRun, timeout, namespace, maxTier, cooldown)
 			}
 
 			// Print results and count verdicts
@@ -169,17 +173,28 @@ func newSuiteCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&distributedLock, "distributed-lock", false, "use Kubernetes Lease-based distributed locking")
 	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
 	cmd.Flags().Int32Var(&maxTier, "max-tier", 0, "skip experiments above this tier (0 = no filter)")
+	cmd.Flags().DurationVar(&cooldown, "cooldown", 0, "delay between sequential experiments to allow cluster recovery (e.g. 30s)")
 
 	return cmd
 }
 
-// runSequential executes experiments one at a time.
-func runSequential(parentCtx context.Context, files []string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32) []suiteResult {
+// runSequential executes experiments one at a time with an optional cooldown
+// between experiments to allow the cluster to stabilize after disruptive injections.
+func runSequential(parentCtx context.Context, files []string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32, cooldown time.Duration) []suiteResult {
 	results := make([]suiteResult, 0, len(files))
 
-	for _, file := range files {
+	for i, file := range files {
 		r := runSingleExperiment(parentCtx, file, deps, dryRun, timeout, namespace, maxTier)
 		results = append(results, r)
+
+		if cooldown > 0 && i < len(files)-1 && !dryRun && r.status != "skip" {
+			fmt.Fprintf(os.Stderr, "Cooldown: waiting %s before next experiment...\n", cooldown)
+			select {
+			case <-time.After(cooldown):
+			case <-parentCtx.Done():
+				return results
+			}
+		}
 	}
 
 	return results

@@ -7,6 +7,8 @@ import (
 	"text/tabwriter"
 
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -119,6 +121,12 @@ knowledge file structure without connecting to a cluster.`,
 			}
 			if missing > 0 || errored > 0 {
 				return fmt.Errorf("%d resources missing, %d resources could not be checked", missing, errored)
+			}
+
+			// 5. Resource capacity check
+			capacityWarnings := checkResourceCapacity(cmd.Context(), k8sClient, knowledge, nsOverride)
+			for _, w := range capacityWarnings {
+				fmt.Fprintf(os.Stderr, "\nWarning: %s\n", w)
 			}
 
 			fmt.Println("\nCluster preflight passed.")
@@ -302,4 +310,112 @@ func printResourceTable(results []resourceStatus) {
 		_, _ = fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n", r.Component, r.Name, r.Kind, status)
 	}
 	_ = w.Flush()
+}
+
+// checkResourceCapacity compares total resource requests of Deployments in the
+// knowledge model against cluster node capacity. Returns warning strings for
+// any resource that exceeds allocatable capacity.
+func checkResourceCapacity(ctx context.Context, k8sClient client.Client, k *model.OperatorKnowledge, namespace string) []string {
+	var warnings []string
+
+	// Collect all Deployment-type managed resources
+	type deployRef struct {
+		component string
+		name      string
+		namespace string
+	}
+	var deployRefs []deployRef
+
+	for _, comp := range k.Components {
+		for _, mr := range comp.ManagedResources {
+			if mr.Kind != "Deployment" || mr.APIVersion != "apps/v1" {
+				continue
+			}
+			ns := mr.Namespace
+			if namespace != "" {
+				ns = namespace
+			} else if ns == "" {
+				ns = k.Operator.Namespace
+			}
+			deployRefs = append(deployRefs, deployRef{
+				component: comp.Name,
+				name:      mr.Name,
+				namespace: ns,
+			})
+		}
+	}
+
+	if len(deployRefs) == 0 {
+		return nil
+	}
+
+	// Sum up CPU and memory requests across all deployments
+	totalCPU := resource.Quantity{}
+	totalMemory := resource.Quantity{}
+
+	for _, ref := range deployRefs {
+		deploy := &appsv1.Deployment{}
+		err := k8sClient.Get(ctx, client.ObjectKey{Name: ref.name, Namespace: ref.namespace}, deploy)
+		if err != nil {
+			continue
+		}
+
+		replicas := int64(1)
+		if deploy.Spec.Replicas != nil {
+			replicas = int64(*deploy.Spec.Replicas)
+		}
+
+		for _, container := range deploy.Spec.Template.Spec.Containers {
+			if cpu := container.Resources.Requests.Cpu(); cpu != nil && !cpu.IsZero() {
+				perReplica := cpu.DeepCopy()
+				for range replicas {
+					totalCPU.Add(perReplica)
+				}
+			}
+			if mem := container.Resources.Requests.Memory(); mem != nil && !mem.IsZero() {
+				perReplica := mem.DeepCopy()
+				for range replicas {
+					totalMemory.Add(perReplica)
+				}
+			}
+		}
+	}
+
+	// Get cluster node capacity
+	nodeList := &corev1.NodeList{}
+	if err := k8sClient.List(ctx, nodeList); err != nil {
+		warnings = append(warnings, fmt.Sprintf("could not list nodes for capacity check: %v", err))
+		return warnings
+	}
+
+	clusterCPU := resource.Quantity{}
+	clusterMemory := resource.Quantity{}
+	for _, node := range nodeList.Items {
+		if cpu := node.Status.Allocatable.Cpu(); cpu != nil {
+			clusterCPU.Add(*cpu)
+		}
+		if mem := node.Status.Allocatable.Memory(); mem != nil {
+			clusterMemory.Add(*mem)
+		}
+	}
+
+	if !totalCPU.IsZero() && !clusterCPU.IsZero() {
+		usagePct := float64(totalCPU.MilliValue()) / float64(clusterCPU.MilliValue()) * 100
+		if usagePct > 80 {
+			warnings = append(warnings, fmt.Sprintf(
+				"operator deployments request %s CPU (%.0f%% of %s allocatable across %d nodes)",
+				totalCPU.String(), usagePct, clusterCPU.String(), len(nodeList.Items)))
+		}
+	}
+
+	if !totalMemory.IsZero() && !clusterMemory.IsZero() {
+		usagePct := float64(totalMemory.Value()) / float64(clusterMemory.Value()) * 100
+		if usagePct > 80 {
+			warnings = append(warnings, fmt.Sprintf(
+				"operator deployments request %s memory (%.0f%% of %s allocatable across %d nodes)",
+				totalMemory.String(), usagePct, clusterMemory.String(), len(nodeList.Items)))
+		}
+	}
+
+	return warnings
 }

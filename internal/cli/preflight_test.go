@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -365,6 +366,136 @@ func TestPreflightErrorStatusForUnknownGVK(t *testing.T) {
 	// The fake client returns an error for unregistered types
 	assert.Equal(t, "Error", status)
 	assert.NotEmpty(t, errMsg)
+}
+
+func TestPreflightResourceCapacityWarning(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = appsv1.AddToScheme(scheme)
+	_ = corev1.AddToScheme(scheme)
+
+	replicas := int32(2)
+	deploy := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "hungry-deploy",
+			Namespace: "test-ns",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app": "test"}},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "main",
+							Image: "test:latest",
+							Resources: corev1.ResourceRequirements{
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse("2"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	node := &corev1.Node{
+		ObjectMeta: metav1.ObjectMeta{Name: "node-1"},
+		Status: corev1.NodeStatus{
+			Allocatable: corev1.ResourceList{
+				corev1.ResourceCPU:    resource.MustParse("4"),
+				corev1.ResourceMemory: resource.MustParse("16Gi"),
+			},
+		},
+	}
+
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(deploy, node).
+		Build()
+
+	knowledge := &model.OperatorKnowledge{
+		Operator: model.OperatorMeta{Name: "test", Namespace: "test-ns"},
+		Components: []model.ComponentModel{
+			{
+				Name: "comp",
+				ManagedResources: []model.ManagedResource{
+					{APIVersion: "apps/v1", Kind: "Deployment", Name: "hungry-deploy", Namespace: "test-ns"},
+				},
+			},
+		},
+	}
+
+	warnings := checkResourceCapacity(context.Background(), k8sClient, knowledge, "")
+	require.Len(t, warnings, 1)
+	assert.Contains(t, warnings[0], "CPU")
+	assert.Contains(t, warnings[0], "100%")
+}
+
+func TestPreflightResourceCapacityNoWarning(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = appsv1.AddToScheme(scheme)
+	_ = corev1.AddToScheme(scheme)
+
+	replicas := int32(1)
+	deploy := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "small-deploy",
+			Namespace: "test-ns",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": "test"}},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app": "test"}},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "main",
+							Image: "test:latest",
+							Resources: corev1.ResourceRequirements{
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU: resource.MustParse("100m"),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	node := &corev1.Node{
+		ObjectMeta: metav1.ObjectMeta{Name: "node-1"},
+		Status: corev1.NodeStatus{
+			Allocatable: corev1.ResourceList{
+				corev1.ResourceCPU:    resource.MustParse("4"),
+				corev1.ResourceMemory: resource.MustParse("16Gi"),
+			},
+		},
+	}
+
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(deploy, node).
+		Build()
+
+	knowledge := &model.OperatorKnowledge{
+		Operator: model.OperatorMeta{Name: "test", Namespace: "test-ns"},
+		Components: []model.ComponentModel{
+			{
+				Name: "comp",
+				ManagedResources: []model.ManagedResource{
+					{APIVersion: "apps/v1", Kind: "Deployment", Name: "small-deploy", Namespace: "test-ns"},
+				},
+			},
+		},
+	}
+
+	warnings := checkResourceCapacity(context.Background(), k8sClient, knowledge, "")
+	assert.Empty(t, warnings)
 }
 
 func TestPreflightVerboseLocalMode(t *testing.T) {
