@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-operator-olm-subscription-channel-corrupt
+spec:
+  tier: 3
+  target:
+    operator: opendatahub-operator
+    component: opendatahub-operator
+    resource: Subscription/opendatahub-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: opendatahub-operator-controller-manager
+        namespace: opendatahub-operator-system
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "Subscription"
+      name: "opendatahub-operator"
+      path: "spec.channel"
+      value: "nonexistent-channel"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Mutating the Subscription channel to a non-existent value should cause
+      OLM to report the Subscription as unhealthy. The operator deployment
+      should remain running (channel changes only affect future upgrades,
+      not the currently installed CSV). After rollback, the Subscription
+      channel is restored and OLM resumes normal operation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

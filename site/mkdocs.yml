@@ -96,8 +96,10 @@ nav:
     - Lifecycle:
       - FinalizerBlock: failure-modes/finalizer-block.md
       - OwnerRefOrphan: failure-modes/ownerref-orphan.md
+      - OLM Lifecycle: failure-modes/olm-lifecycle.md
     - Creating Custom Failure Modes: failure-modes/custom-failure-modes.md
   - Guides:
+    - Profiles: guides/profiles.md
     - Testing Scenarios:
       - E2E Testing: guides/e2e-testing.md
       - Route Chaos: guides/route-chaos.md

@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-operator-olm-subscription-channel-corrupt
+spec:
+  tier: 3
+  target:
+    operator: opendatahub-operator
+    component: rhods-operator
+    resource: Subscription/rhods-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-operator
+        namespace: redhat-ods-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "Subscription"
+      name: "rhods-operator"
+      path: "spec.channel"
+      value: "nonexistent-channel"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Mutating the RHOAI Subscription channel to a non-existent value
+      should cause OLM to report the Subscription as unhealthy. The
+      operator deployment should remain running (channel changes only
+      affect future upgrades). After rollback, the Subscription channel
+      is restored and OLM resumes normal operation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-operator

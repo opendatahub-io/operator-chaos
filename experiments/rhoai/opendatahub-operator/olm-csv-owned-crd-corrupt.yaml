@@ -1,0 +1,45 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-operator-olm-csv-owned-crd-corrupt
+spec:
+  tier: 3
+  target:
+    operator: opendatahub-operator
+    component: rhods-operator
+    resource: ClusterServiceVersion
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-operator
+        namespace: redhat-ods-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    # NOTE: Replace the CSV name with the actual installed CSV name.
+    # Find it with: oc get csv -n redhat-ods-operator | grep rhods
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "ClusterServiceVersion"
+      name: "rhods-operator.3.3.2"
+      path: "spec.customresourcedefinitions.owned"
+      value: "[]"
+    dangerLevel: high
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the CSV's owned CRD list to an empty array should cause
+      OLM to report the CSV as invalid. The operator deployment should
+      remain running since OLM does not delete pods when CSV metadata
+      is corrupted. OLM may self-heal by re-reconciling the CSV from
+      the InstallPlan before the chaos framework rolls back. After
+      rollback (or OLM self-heal), the CSV should return to Succeeded.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-operator

@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-operator-olm-subscription-approval-flip
+spec:
+  tier: 3
+  target:
+    operator: opendatahub-operator
+    component: rhods-operator
+    resource: Subscription/rhods-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-operator
+        namespace: redhat-ods-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "Subscription"
+      name: "rhods-operator"
+      path: "spec.installPlanApproval"
+      value: "Manual"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Flipping installPlanApproval from Automatic to Manual should block
+      any pending RHOAI upgrades but not affect the currently running
+      operator. After rollback, the approval mode is restored.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-operator
