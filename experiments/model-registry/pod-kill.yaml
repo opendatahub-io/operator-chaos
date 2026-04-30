@@ -14,7 +14,7 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         name: model-registry-operator-controller-manager
-        namespace: odh-model-registries
+        namespace: opendatahub
         conditionType: Available
     timeout: "30s"
   injection:
@@ -33,4 +33,4 @@ spec:
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
-      - odh-model-registries
+      - opendatahub

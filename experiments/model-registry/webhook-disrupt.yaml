@@ -7,21 +7,21 @@ spec:
   target:
     operator: model-registry
     component: model-registry-operator
-    resource: ValidatingWebhookConfiguration/vmodelregistry.opendatahub.io
+    resource: ValidatingWebhookConfiguration/model-registry-operator-validating-webhook-configuration
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
         name: model-registry-operator-controller-manager
-        namespace: odh-model-registries
+        namespace: opendatahub
         conditionType: Available
     timeout: "30s"
   injection:
     type: WebhookDisrupt
     dangerLevel: high
     parameters:
-      webhookName: vmodelregistry.opendatahub.io
+      webhookName: model-registry-operator-validating-webhook-configuration
       action: setFailurePolicy
       value: Ignore
     ttl: "60s"

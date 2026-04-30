@@ -7,14 +7,14 @@ spec:
   target:
     operator: model-registry
     component: model-registry-operator
-    resource: Route/model-registry-operator-rest
+    resource: Route/model-catalog-https
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
         name: model-registry-operator-controller-manager
-        namespace: odh-model-registries
+        namespace: opendatahub
         conditionType: Available
     timeout: "30s"
   injection:
@@ -23,7 +23,7 @@ spec:
     parameters:
       apiVersion: "route.openshift.io/v1"
       kind: "Route"
-      name: "model-registry-operator-rest"
+      name: "model-catalog-https"
       path: "spec.tls.termination"
       value: "passthrough"
     ttl: "300s"
@@ -39,5 +39,6 @@ spec:
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
+      - opendatahub
       - odh-model-registries
     allowDangerous: true

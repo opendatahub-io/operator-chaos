@@ -1,6 +1,6 @@
 operator:
   name: model-registry
-  namespace: odh-model-registries
+  namespace: opendatahub
   repository: https://github.com/opendatahub-io/model-registry-operator
 
 components:
@@ -10,7 +10,7 @@ components:
       - apiVersion: apps/v1
         kind: Deployment
         name: model-registry-operator-controller-manager
-        namespace: odh-model-registries
+        namespace: opendatahub
         labels:
           control-plane: controller-manager
           app.kubernetes.io/name: model-registry-operator
@@ -19,27 +19,27 @@ components:
       - apiVersion: v1
         kind: ServiceAccount
         name: model-registry-operator-controller-manager
-        namespace: odh-model-registries
+        namespace: opendatahub
       - apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRoleBinding
         name: model-registry-operator-manager-rolebinding
       - apiVersion: coordination.k8s.io/v1
         kind: Lease
         name: 85f368d1.opendatahub.io
-        namespace: odh-model-registries
+        namespace: opendatahub
       - apiVersion: v1
         kind: Service
         name: model-registry-operator-controller-manager-metrics-service
-        namespace: odh-model-registries
+        namespace: opendatahub
       - apiVersion: route.openshift.io/v1
         kind: Route
-        name: model-registry-operator-rest
+        name: model-catalog-https
         namespace: odh-model-registries
     webhooks:
-      - name: vmodelregistry.opendatahub.io
+      - name: model-registry-operator-validating-webhook-configuration
         type: validating
         path: /validate-modelregistry-opendatahub-io-modelregistry
-      - name: mmodelregistry.opendatahub.io
+      - name: model-registry-operator-mutating-webhook-configuration
         type: mutating
         path: /mutate-modelregistry-opendatahub-io-modelregistry
     finalizers:
@@ -50,7 +50,7 @@ components:
           apiVersion: apps/v1
           kind: Deployment
           name: model-registry-operator-controller-manager
-          namespace: odh-model-registries
+          namespace: opendatahub
           conditionType: Available
       timeout: "60s"
 
