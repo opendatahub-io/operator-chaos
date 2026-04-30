@@ -7,7 +7,7 @@ spec:
   target:
     operator: workbenches
     component: odh-notebook-controller
-    resource: MutatingWebhookConfiguration/notebooks.opendatahub.io
+    resource: MutatingWebhookConfiguration/odh-notebook-controller-mutating-webhook-configuration
   steadyState:
     checks:
       - type: conditionTrue
@@ -21,7 +21,7 @@ spec:
     type: WebhookDisrupt
     dangerLevel: high
     parameters:
-      webhookName: notebooks.opendatahub.io
+      webhookName: odh-notebook-controller-mutating-webhook-configuration
       webhookType: mutating
       action: setFailurePolicy
       value: Ignore

@@ -21,6 +21,10 @@ spec:
     type: WebhookDisrupt
     dangerLevel: high
     parameters:
+      # NOTE: The ValidatingWebhookConfiguration object name is deployment-specific
+      # (e.g. "datasciencecluster-v1-validator.opendatahub.io-76l4f" with an auto-generated suffix).
+      # This value must be updated to match the actual object name on your cluster.
+      # Run: kubectl get validatingwebhookconfiguration | grep datasciencecluster
       webhookName: validating.datasciencecluster.opendatahub.io
       action: setFailurePolicy
       value: Ignore

@@ -7,7 +7,7 @@ spec:
   target:
     operator: odh-model-controller
     component: odh-model-controller
-    resource: ValidatingWebhookConfiguration/validating.odh-model-controller.opendatahub.io
+    resource: MutatingWebhookConfiguration/mutating.odh-model-controller.opendatahub.io
   steadyState:
     checks:
       - type: conditionTrue
@@ -21,17 +21,19 @@ spec:
     type: WebhookDisrupt
     dangerLevel: high
     parameters:
-      webhookName: validating.odh-model-controller.opendatahub.io
+      webhookName: mutating.odh-model-controller.opendatahub.io
+      webhookType: mutating
       action: setFailurePolicy
       value: Ignore
     ttl: "60s"
   hypothesis:
     description: >-
-      When the validating webhook failurePolicy is weakened from Fail to
-      Ignore, invalid resources can bypass admission validation. The chaos
-      framework restores the original failurePolicy via TTL-based cleanup
-      after 60s. During the disruption window, the controller itself
-      remains operational but admission guardrails are absent.
+      When the mutating webhook failurePolicy is weakened from Fail to
+      Ignore, resources can bypass mutation (e.g. pod injection,
+      InferenceService defaulting). The chaos framework restores the
+      original failurePolicy via TTL-based cleanup after 60s. During the
+      disruption window, the controller itself remains operational but
+      admission guardrails are absent.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
