@@ -38,5 +38,6 @@ spec:
     recoveryTimeout: 180s
   blastRadius:
     maxPodsAffected: 1
+    allowDangerous: true
     allowedNamespaces:
       - opendatahub
