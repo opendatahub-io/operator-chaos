@@ -16,7 +16,7 @@ spec:
         name: odh-model-controller
         namespace: opendatahub
         conditionType: Available
-    timeout: "30s"
+    timeout: "60s"
   injection:
     type: NetworkPartition
     parameters:

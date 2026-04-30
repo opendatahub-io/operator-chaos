@@ -16,8 +16,9 @@ import (
 )
 
 // defaultSafeNamespace is used as the fallback namespace for storing rollback
-// ConfigMaps when no explicit safe namespace is provided.
-const defaultSafeNamespace = "operator-chaos-system"
+// ConfigMaps when no explicit safe namespace is provided. We use "default"
+// because it always exists on any Kubernetes cluster.
+const defaultSafeNamespace = "default"
 
 type NamespaceDeletionInjector struct {
 	client        client.Client

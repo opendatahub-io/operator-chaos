@@ -7,7 +7,7 @@ spec:
   target:
     operator: odh-model-controller
     component: odh-model-controller
-    resource: InferenceService
+    resource: ConfigMap/inferenceservice-config
   steadyState:
     checks:
       - type: conditionTrue
@@ -19,29 +19,25 @@ spec:
     timeout: "30s"
   injection:
     type: CRDMutation
-    # NOTE: InferenceService has no scalar top-level spec fields that can be
-    # trivially patched. Instead we inject an unknown field ("chaosTest") into
-    # spec to trigger reconciliation. The controller should treat the unknown
-    # field gracefully and not propagate it to downstream resources.
-    #
-    # IMPORTANT: Replace "test-isvc" with the name of an actual InferenceService
-    # resource deployed in the target namespace before running this experiment.
+    dangerLevel: high
+    # Target the inferenceservice-config ConfigMap which always exists when
+    # odh-model-controller is deployed. We corrupt the data.ingress field
+    # with invalid JSON to test how the controller handles config corruption.
     parameters:
-      apiVersion: "serving.kserve.io/v1beta1"
-      kind: "InferenceService"
-      name: "test-isvc"
-      field: "chaosTest"
-      value: "injected"
+      apiVersion: "v1"
+      kind: "ConfigMap"
+      name: "inferenceservice-config"
+      path: "data.ingress"
+      value: "corrupted-by-chaos"
     ttl: "300s"
   hypothesis:
     description: >-
-      InferenceService has no scalar top-level spec fields, so this
-      experiment injects an unknown field ("chaosTest") via merge patch.
-      The controller should reconcile without error and not propagate
-      the unknown field to downstream resources. The expected verdict is
-      Resilient — the controller ignores unknown fields gracefully.
-      The chaos framework removes the injected field via TTL-based cleanup
-      after 300s.
+      Mutating the inferenceservice-config ConfigMap's data.ingress field
+      with a corrupted value tests whether the controller handles config
+      corruption gracefully. The controller should detect the invalid
+      config, log errors, and continue operating without crashing.
+      The chaos framework restores the original value via TTL-based
+      cleanup after 300s.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
