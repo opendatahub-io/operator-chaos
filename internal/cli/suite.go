@@ -42,6 +42,7 @@ func newSuiteCommand() *cobra.Command {
 		lockNamespace   string
 		maxTier         int32
 		cooldown        time.Duration
+		setOverrides    []string
 	)
 
 	cmd := &cobra.Command{
@@ -111,9 +112,9 @@ func newSuiteCommand() *cobra.Command {
 				if cooldown > 0 {
 					fmt.Fprintf(os.Stderr, "Warning: --cooldown is ignored when --parallel > 1\n")
 				}
-				results = runParallel(cmd.Context(), experimentFiles, deps, timeout, parallel, namespace, maxTier)
+				results = runParallel(cmd.Context(), experimentFiles, deps, timeout, parallel, namespace, maxTier, setOverrides)
 			} else {
-				results = runSequential(cmd.Context(), experimentFiles, deps, dryRun, timeout, namespace, maxTier, cooldown)
+				results = runSequential(cmd.Context(), experimentFiles, deps, dryRun, timeout, namespace, maxTier, cooldown, setOverrides)
 			}
 
 			// Print results and count verdicts
@@ -186,17 +187,18 @@ func newSuiteCommand() *cobra.Command {
 	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
 	cmd.Flags().Int32Var(&maxTier, "max-tier", 0, "skip experiments above this tier (0 = no filter)")
 	cmd.Flags().DurationVar(&cooldown, "cooldown", 0, "delay between sequential experiments to allow cluster recovery (e.g. 30s)")
+	cmd.Flags().StringArrayVar(&setOverrides, "set", nil, "override experiment fields (dot-path=value, repeatable)")
 
 	return cmd
 }
 
 // runSequential executes experiments one at a time with an optional cooldown
 // between experiments to allow the cluster to stabilize after disruptive injections.
-func runSequential(parentCtx context.Context, files []string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32, cooldown time.Duration) []suiteResult {
+func runSequential(parentCtx context.Context, files []string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32, cooldown time.Duration, setOverrides []string) []suiteResult {
 	results := make([]suiteResult, 0, len(files))
 
 	for i, file := range files {
-		r := runSingleExperiment(parentCtx, file, deps, dryRun, timeout, namespace, maxTier)
+		r := runSingleExperiment(parentCtx, file, deps, dryRun, timeout, namespace, maxTier, setOverrides)
 		results = append(results, r)
 
 		if cooldown > 0 && i < len(files)-1 && !dryRun && r.status != "skip" {
@@ -213,7 +215,7 @@ func runSequential(parentCtx context.Context, files []string, deps *orchestrator
 }
 
 // runParallel executes experiments concurrently with a semaphore limiting concurrency.
-func runParallel(parentCtx context.Context, files []string, deps *orchestratorDeps, timeout time.Duration, maxConcurrent int, namespace string, maxTier int32) []suiteResult {
+func runParallel(parentCtx context.Context, files []string, deps *orchestratorDeps, timeout time.Duration, maxConcurrent int, namespace string, maxTier int32, setOverrides []string) []suiteResult {
 	results := make([]suiteResult, len(files))
 	sem := make(chan struct{}, maxConcurrent)
 	var wg sync.WaitGroup
@@ -225,7 +227,7 @@ func runParallel(parentCtx context.Context, files []string, deps *orchestratorDe
 			sem <- struct{}{}        // acquire
 			defer func() { <-sem }() // release
 
-			results[idx] = runSingleExperiment(parentCtx, f, deps, false, timeout, namespace, maxTier)
+			results[idx] = runSingleExperiment(parentCtx, f, deps, false, timeout, namespace, maxTier, setOverrides)
 		}(i, file)
 	}
 
@@ -234,7 +236,7 @@ func runParallel(parentCtx context.Context, files []string, deps *orchestratorDe
 }
 
 // runSingleExperiment loads, validates, and optionally executes a single experiment file.
-func runSingleExperiment(parentCtx context.Context, file string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32) suiteResult {
+func runSingleExperiment(parentCtx context.Context, file string, deps *orchestratorDeps, dryRun bool, timeout time.Duration, namespace string, maxTier int32, setOverrides []string) suiteResult {
 	r := suiteResult{file: file}
 
 	exp, err := experiment.Load(file)
@@ -245,6 +247,18 @@ func runSingleExperiment(parentCtx context.Context, file string, deps *orchestra
 		r.err = err
 		return r
 	}
+
+	// Apply --set overrides before validation
+	if len(setOverrides) > 0 {
+		if err := applyOverrides(exp, setOverrides); err != nil {
+			r.name = exp.Name
+			r.verdict = fmt.Sprintf("SKIP  %s: override error: %v", exp.Name, err)
+			r.status = "skip"
+			r.err = err
+			return r
+		}
+	}
+
 	r.name = exp.Name
 	r.target = exp.Spec.Target
 	r.tier = exp.Spec.Tier

@@ -22,6 +22,7 @@ func newRunCommand() *cobra.Command {
 		distributedLock bool
 		lockNamespace   string
 		maxTier         int32
+		setOverrides    []string
 	)
 
 	cmd := &cobra.Command{
@@ -50,6 +51,13 @@ func newRunCommand() *cobra.Command {
 			exp, err := experiment.Load(args[0])
 			if err != nil {
 				return fmt.Errorf("loading experiment: %w", err)
+			}
+
+			// Apply --set overrides before validation
+			if len(setOverrides) > 0 {
+				if err := applyOverrides(exp, setOverrides); err != nil {
+					return fmt.Errorf("applying overrides: %w", err)
+				}
 			}
 
 			// Validate
@@ -123,6 +131,7 @@ func newRunCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&distributedLock, "distributed-lock", false, "use Kubernetes Lease-based distributed locking")
 	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
 	cmd.Flags().Int32Var(&maxTier, "max-tier", 0, "skip experiments above this tier (0 = no filter)")
+	cmd.Flags().StringArrayVar(&setOverrides, "set", nil, "override experiment fields (dot-path=value, repeatable)")
 
 	return cmd
 }
