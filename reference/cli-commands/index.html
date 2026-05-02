@@ -5650,14 +5650,24 @@ fault injection, not just that pods restart.</p>
 </code></pre></div>
 <h1 id="_9"><a class="headerlink" href="#_9" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-generate-fuzz-targets">operator-chaos generate fuzz-targets<a class="headerlink" href="#operator-chaos-generate-fuzz-targets" title="Permanent link">¶</a></h2>
-<p>Generate fuzz test targets from a knowledge model</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>operator-chaos generate fuzz-targets [flags]
+<h2 id="operator-chaos-generate-experiments">operator-chaos generate experiments<a class="headerlink" href="#operator-chaos-generate-experiments" title="Permanent link">¶</a></h2>
+<p>Generate experiment YAML from templates and a profile</p>
+<h3 id="synopsis_4">Synopsis<a class="headerlink" href="#synopsis_4" title="Permanent link">¶</a></h3>
+<p>Resolve parameterized experiment templates against a named profile to produce
+concrete experiment YAML files. Each template uses ${VAR} placeholders that
+are replaced with values from the profile's per-component definitions.</p>
+<p>Templates are read from the templates/ directory. Output is organized as
+<output-dir>/<component>/<template-name>.yaml.</template-name></component></output-dir></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>operator-chaos generate experiments [flags]
 </code></pre></div>
 <h3 id="options_9">Options<a class="headerlink" href="#options_9" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>  -h, --help               help for fuzz-targets
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>      --knowledge string   path to knowledge YAML file (required)
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>      --output string      output file path (defaults to stdout)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>      --component string      generate for a single component only
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>      --dry-run               list what would be generated without writing files
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  -h, --help                  help for experiments
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  -o, --output string         output directory for generated experiments
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>      --profile string        profile name (resolves to profiles/&lt;name&gt;/profile.yaml)
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>      --set-var stringArray   override profile variable (component:field=value, repeatable)
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>      --template string       generate from a single template only
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_8">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_8" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5666,35 +5676,34 @@ fault injection, not just that pods restart.</p>
 </code></pre></div>
 <h1 id="_10"><a class="headerlink" href="#_10" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-generate-upgrade">operator-chaos generate upgrade<a class="headerlink" href="#operator-chaos-generate-upgrade" title="Permanent link">¶</a></h2>
-<p>Generate an upgrade playbook from knowledge directories</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>operator-chaos generate upgrade [flags]
+<h2 id="operator-chaos-generate-fuzz-targets">operator-chaos generate fuzz-targets<a class="headerlink" href="#operator-chaos-generate-fuzz-targets" title="Permanent link">¶</a></h2>
+<p>Generate fuzz test targets from a knowledge model</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>operator-chaos generate fuzz-targets [flags]
 </code></pre></div>
 <h3 id="options_10">Options<a class="headerlink" href="#options_10" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>      --discover           try to discover OLM channels from cluster (default true)
-<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  -h, --help               help for upgrade
-<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>      --namespace string   operator namespace (defaults to first model's namespace)
-<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>      --operator string    operator name (defaults to first model's operator)
-<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>      --output string      output file path (defaults to stdout)
-<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>      --source string      source knowledge directory (required)
-<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>      --target string      target knowledge directory (required)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>  -h, --help               help for fuzz-targets
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>      --knowledge string   path to knowledge YAML file (required)
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>      --output string      output file path (defaults to stdout)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_9">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_9" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>  -v, --verbose             verbose output
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>      --namespace string    target namespace (default "default")
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_11"><a class="headerlink" href="#_11" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-init">operator-chaos init<a class="headerlink" href="#operator-chaos-init" title="Permanent link">¶</a></h2>
-<p>Generate a skeleton experiment YAML</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>operator-chaos init [flags]
+<h2 id="operator-chaos-generate-upgrade">operator-chaos generate upgrade<a class="headerlink" href="#operator-chaos-generate-upgrade" title="Permanent link">¶</a></h2>
+<p>Generate an upgrade playbook from knowledge directories</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>operator-chaos generate upgrade [flags]
 </code></pre></div>
 <h3 id="options_11">Options<a class="headerlink" href="#options_11" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>      --component string   target component name (required)
-<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  -h, --help               help for init
-<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>      --namespace string   target namespace (default "default")
-<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>      --operator string    target operator (required)
-<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency|NamespaceDeletion|LabelStomping) (default "PodKill")
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>      --discover           try to discover OLM channels from cluster (default true)
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  -h, --help               help for upgrade
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>      --namespace string   operator namespace (defaults to first model's namespace)
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>      --operator string    operator name (defaults to first model's operator)
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>      --output string      output file path (defaults to stdout)
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>      --source string      source knowledge directory (required)
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>      --target string      target knowledge directory (required)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_10">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_10" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5702,36 +5711,30 @@ fault injection, not just that pods restart.</p>
 </code></pre></div>
 <h1 id="_12"><a class="headerlink" href="#_12" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-playbook">operator-chaos playbook<a class="headerlink" href="#operator-chaos-playbook" title="Permanent link">¶</a></h2>
-<p>Execute upgrade and chaos playbooks</p>
-<h3 id="synopsis_4">Synopsis<a class="headerlink" href="#synopsis_4" title="Permanent link">¶</a></h3>
-<p>Run multi-step playbooks that orchestrate upgrades, chaos experiments,
-and validation steps. Supports both UpgradePlaybook and ChaosPlaybook kinds.</p>
+<h2 id="operator-chaos-init">operator-chaos init<a class="headerlink" href="#operator-chaos-init" title="Permanent link">¶</a></h2>
+<p>Generate a skeleton experiment YAML</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>operator-chaos init [flags]
+</code></pre></div>
 <h3 id="options_12">Options<a class="headerlink" href="#options_12" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>  -h, --help   help for playbook
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>      --component string   target component name (required)
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>  -h, --help               help for init
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>      --namespace string   target namespace (default "default")
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>      --operator string    target operator (required)
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>      --type string        injection type (PodKill|NetworkPartition|CRDMutation|ConfigDrift|WebhookDisrupt|RBACRevoke|FinalizerBlock|ClientFault|OwnerRefOrphan|QuotaExhaustion|WebhookLatency|NamespaceDeletion|LabelStomping) (default "PodKill")
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_11">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_11" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>      --namespace string    target namespace (default "default")
-<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>  -v, --verbose             verbose output
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>      --kubeconfig string   path to kubeconfig file
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_13"><a class="headerlink" href="#_13" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-playbook-run">operator-chaos playbook run<a class="headerlink" href="#operator-chaos-playbook-run" title="Permanent link">¶</a></h2>
-<p>Execute a playbook (UpgradePlaybook or ChaosPlaybook)</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>operator-chaos playbook run [flags]
-</code></pre></div>
+<h2 id="operator-chaos-playbook">operator-chaos playbook<a class="headerlink" href="#operator-chaos-playbook" title="Permanent link">¶</a></h2>
+<p>Execute upgrade and chaos playbooks</p>
+<h3 id="synopsis_5">Synopsis<a class="headerlink" href="#synopsis_5" title="Permanent link">¶</a></h3>
+<p>Run multi-step playbooks that orchestrate upgrades, chaos experiments,
+and validation steps. Supports both UpgradePlaybook and ChaosPlaybook kinds.</p>
 <h3 id="options_13">Options<a class="headerlink" href="#options_13" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>      --allow-shell          Allow kubectl steps with shell commands
-<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>      --dry-run              Print execution plan without running
-<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>      --force-resume         Allow resume without state file
-<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>  -h, --help                 help for run
-<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>      --playbook string      Path to playbook YAML (required)
-<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>      --report-dir string    Directory for reports
-<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>      --resume-from string   Resume from failed step
-<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>      --skip-manual          Use autoCheck for manual steps in CI
-<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a>      --state-dir string     Directory for state files
-<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a>      --timeout duration     Overall timeout (default 1h0m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>  -h, --help   help for playbook
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_12">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_12" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5740,18 +5743,21 @@ and validation steps. Supports both UpgradePlaybook and ChaosPlaybook kinds.</p>
 </code></pre></div>
 <h1 id="_14"><a class="headerlink" href="#_14" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-preflight">operator-chaos preflight<a class="headerlink" href="#operator-chaos-preflight" title="Permanent link">¶</a></h2>
-<p>Check cluster readiness before running chaos experiments</p>
-<h3 id="synopsis_5">Synopsis<a class="headerlink" href="#synopsis_5" title="Permanent link">¶</a></h3>
-<p>Preflight verifies that all resources declared in an operator knowledge
-file exist and are healthy on the cluster. Use --local to validate the
-knowledge file structure without connecting to a cluster.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>operator-chaos preflight [flags]
+<h2 id="operator-chaos-playbook-run">operator-chaos playbook run<a class="headerlink" href="#operator-chaos-playbook-run" title="Permanent link">¶</a></h2>
+<p>Execute a playbook (UpgradePlaybook or ChaosPlaybook)</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>operator-chaos playbook run [flags]
 </code></pre></div>
 <h3 id="options_14">Options<a class="headerlink" href="#options_14" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>  -h, --help               help for preflight
-<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>      --knowledge string   path to operator knowledge YAML (required)
-<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>      --local              skip cluster checks, only validate knowledge file
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>      --allow-shell          Allow kubectl steps with shell commands
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>      --dry-run              Print execution plan without running
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>      --force-resume         Allow resume without state file
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>  -h, --help                 help for run
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>      --playbook string      Path to playbook YAML (required)
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>      --report-dir string    Directory for reports
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>      --resume-from string   Resume from failed step
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>      --skip-manual          Use autoCheck for manual steps in CI
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>      --state-dir string     Directory for state files
+<a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>      --timeout duration     Overall timeout (default 1h0m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_13">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_13" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5760,16 +5766,18 @@ knowledge file structure without connecting to a cluster.</p>
 </code></pre></div>
 <h1 id="_15"><a class="headerlink" href="#_15" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-report">operator-chaos report<a class="headerlink" href="#operator-chaos-report" title="Permanent link">¶</a></h2>
-<p>Generate reports from experiment results</p>
+<h2 id="operator-chaos-preflight">operator-chaos preflight<a class="headerlink" href="#operator-chaos-preflight" title="Permanent link">¶</a></h2>
+<p>Check cluster readiness before running chaos experiments</p>
 <h3 id="synopsis_6">Synopsis<a class="headerlink" href="#synopsis_6" title="Permanent link">¶</a></h3>
-<p>Reads JSON experiment results from a directory and generates reports in the specified format.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>operator-chaos report &lt;results-directory&gt; [flags]
+<p>Preflight verifies that all resources declared in an operator knowledge
+file exist and are healthy on the cluster. Use --local to validate the
+knowledge file structure without connecting to a cluster.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>operator-chaos preflight [flags]
 </code></pre></div>
 <h3 id="options_15">Options<a class="headerlink" href="#options_15" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>      --format string   output format (summary, json, junit, html, markdown) (default "summary")
-<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>  -h, --help            help for report
-<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>      --output string   output file path (default: stdout for summary/markdown, auto-named file for json/junit/html)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>  -h, --help               help for preflight
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>      --knowledge string   path to operator knowledge YAML (required)
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>      --local              skip cluster checks, only validate knowledge file
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_14">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_14" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5778,22 +5786,16 @@ knowledge file structure without connecting to a cluster.</p>
 </code></pre></div>
 <h1 id="_16"><a class="headerlink" href="#_16" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-run">operator-chaos run<a class="headerlink" href="#operator-chaos-run" title="Permanent link">¶</a></h2>
-<p>Run a chaos experiment</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>operator-chaos run &lt;experiment.yaml&gt; [flags]
+<h2 id="operator-chaos-report">operator-chaos report<a class="headerlink" href="#operator-chaos-report" title="Permanent link">¶</a></h2>
+<p>Generate reports from experiment results</p>
+<h3 id="synopsis_7">Synopsis<a class="headerlink" href="#synopsis_7" title="Permanent link">¶</a></h3>
+<p>Reads JSON experiment results from a directory and generates reports in the specified format.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>operator-chaos report &lt;results-directory&gt; [flags]
 </code></pre></div>
 <h3 id="options_16">Options<a class="headerlink" href="#options_16" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>      --distributed-lock        use Kubernetes Lease-based distributed locking
-<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>      --dry-run                 validate without injecting
-<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>  -h, --help                    help for run
-<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>      --knowledge stringArray   path to operator knowledge YAML (repeatable)
-<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>      --knowledge-dir string    directory of operator knowledge YAMLs
-<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>      --lock-namespace string   namespace for distributed lock leases (default "default")
-<a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>      --max-tier int32          skip experiments above this tier (0 = no filter)
-<a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a>      --profile string          named profile (resolves knowledge directory automatically)
-<a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>      --report-dir string       directory for report output
-<a id="__codelineno-44-10" name="__codelineno-44-10" href="#__codelineno-44-10"></a>      --set stringArray         override experiment fields (dot-path=value, repeatable)
-<a id="__codelineno-44-11" name="__codelineno-44-11" href="#__codelineno-44-11"></a>      --timeout duration        total experiment timeout (default 10m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>      --format string   output format (summary, json, junit, html, markdown) (default "summary")
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>  -h, --help            help for report
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>      --output string   output file path (default: stdout for summary/markdown, auto-named file for json/junit/html)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_15">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_15" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5802,27 +5804,22 @@ knowledge file structure without connecting to a cluster.</p>
 </code></pre></div>
 <h1 id="_17"><a class="headerlink" href="#_17" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-simulate-upgrade">operator-chaos simulate-upgrade<a class="headerlink" href="#operator-chaos-simulate-upgrade" title="Permanent link">¶</a></h2>
-<p>Simulate an upgrade by computing diff and generating experiments</p>
-<h3 id="synopsis_7">Synopsis<a class="headerlink" href="#synopsis_7" title="Permanent link">¶</a></h3>
-<p>Compares source and target versioned knowledge directories, computes
-the structural diff, and generates chaos experiments that simulate the
-effects of each detected change. Use --dry-run to preview the generated
-experiments without executing them.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>operator-chaos simulate-upgrade [flags]
+<h2 id="operator-chaos-run">operator-chaos run<a class="headerlink" href="#operator-chaos-run" title="Permanent link">¶</a></h2>
+<p>Run a chaos experiment</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>operator-chaos run &lt;experiment.yaml&gt; [flags]
 </code></pre></div>
 <h3 id="options_17">Options<a class="headerlink" href="#options_17" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>      --component string        limit to a specific component
-<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>      --distributed-lock        use Kubernetes Lease-based distributed locking
-<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>      --dry-run                 output generated experiments without executing
-<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>  -h, --help                    help for simulate-upgrade
-<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>      --knowledge stringArray   path to operator knowledge YAML (for live execution)
-<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>      --knowledge-dir string    directory of operator knowledge YAMLs (for live execution)
-<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>      --lock-namespace string   namespace for distributed lock leases (default "default")
-<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>      --report-dir string       directory for reports
-<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>      --source string           path to source version knowledge directory (required)
-<a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a>      --target string           path to target version knowledge directory (required)
-<a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a>      --timeout duration        timeout per experiment (default 10m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>      --distributed-lock        use Kubernetes Lease-based distributed locking
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>      --dry-run                 validate without injecting
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>  -h, --help                    help for run
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>      --knowledge stringArray   path to operator knowledge YAML (repeatable)
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>      --knowledge-dir string    directory of operator knowledge YAMLs
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>      --lock-namespace string   namespace for distributed lock leases (default "default")
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>      --max-tier int32          skip experiments above this tier (0 = no filter)
+<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>      --profile string          named profile (resolves knowledge directory automatically)
+<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>      --report-dir string       directory for report output
+<a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a>      --set stringArray         override experiment fields (dot-path=value, repeatable)
+<a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a>      --timeout duration        total experiment timeout (default 10m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_16">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_16" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5831,24 +5828,27 @@ experiments without executing them.</p>
 </code></pre></div>
 <h1 id="_18"><a class="headerlink" href="#_18" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-suite">operator-chaos suite<a class="headerlink" href="#operator-chaos-suite" title="Permanent link">¶</a></h2>
-<p>Run all experiments in a directory</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>operator-chaos suite &lt;experiments-directory&gt; [flags]
+<h2 id="operator-chaos-simulate-upgrade">operator-chaos simulate-upgrade<a class="headerlink" href="#operator-chaos-simulate-upgrade" title="Permanent link">¶</a></h2>
+<p>Simulate an upgrade by computing diff and generating experiments</p>
+<h3 id="synopsis_8">Synopsis<a class="headerlink" href="#synopsis_8" title="Permanent link">¶</a></h3>
+<p>Compares source and target versioned knowledge directories, computes
+the structural diff, and generates chaos experiments that simulate the
+effects of each detected change. Use --dry-run to preview the generated
+experiments without executing them.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>operator-chaos simulate-upgrade [flags]
 </code></pre></div>
 <h3 id="options_18">Options<a class="headerlink" href="#options_18" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>      --cooldown duration       delay between sequential experiments to allow cluster recovery (e.g. 30s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>      --component string        limit to a specific component
 <a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>      --distributed-lock        use Kubernetes Lease-based distributed locking
-<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>      --dry-run                 validate without running
-<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>  -h, --help                    help for suite
-<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>      --knowledge stringArray   path to operator knowledge YAML (repeatable)
-<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>      --knowledge-dir string    directory of operator knowledge YAMLs
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>      --dry-run                 output generated experiments without executing
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>  -h, --help                    help for simulate-upgrade
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>      --knowledge stringArray   path to operator knowledge YAML (for live execution)
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>      --knowledge-dir string    directory of operator knowledge YAMLs (for live execution)
 <a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>      --lock-namespace string   namespace for distributed lock leases (default "default")
-<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>      --max-tier int32          skip experiments above this tier (0 = no filter)
-<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a>      --parallel int            max concurrent experiments (default 1)
-<a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a>      --profile string          named profile (resolves knowledge directory automatically)
-<a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a>      --report-dir string       directory for report output
-<a id="__codelineno-50-12" name="__codelineno-50-12" href="#__codelineno-50-12"></a>      --set stringArray         override experiment fields (dot-path=value, repeatable)
-<a id="__codelineno-50-13" name="__codelineno-50-13" href="#__codelineno-50-13"></a>      --timeout duration        timeout per experiment (default 10m0s)
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>      --report-dir string       directory for reports
+<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a>      --source string           path to source version knowledge directory (required)
+<a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a>      --target string           path to target version knowledge directory (required)
+<a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a>      --timeout duration        timeout per experiment (default 10m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_17">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_17" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5857,12 +5857,25 @@ experiments without executing them.</p>
 </code></pre></div>
 <h1 id="_19"><a class="headerlink" href="#_19" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-types">operator-chaos types<a class="headerlink" href="#operator-chaos-types" title="Permanent link">¶</a></h2>
-<p>List available injection types</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>operator-chaos types [flags]
+<h2 id="operator-chaos-suite">operator-chaos suite<a class="headerlink" href="#operator-chaos-suite" title="Permanent link">¶</a></h2>
+<p>Run all experiments in a directory</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>operator-chaos suite &lt;experiments-directory&gt; [flags]
 </code></pre></div>
 <h3 id="options_19">Options<a class="headerlink" href="#options_19" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>  -h, --help   help for types
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>      --cooldown duration       delay between sequential experiments to allow cluster recovery (e.g. 30s)
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>      --distributed-lock        use Kubernetes Lease-based distributed locking
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>      --dry-run                 validate without running
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>  -h, --help                    help for suite
+<a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>      --knowledge stringArray   path to operator knowledge YAML (repeatable)
+<a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>      --knowledge-dir string    directory of operator knowledge YAMLs
+<a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>      --lock-namespace string   namespace for distributed lock leases (default "default")
+<a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>      --max-tier int32          skip experiments above this tier (0 = no filter)
+<a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a>      --parallel int            max concurrent experiments (default 1)
+<a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a>      --profile string          named profile (resolves knowledge directory automatically)
+<a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a>      --recursive               scan one level of subdirectories for experiments
+<a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a>      --report-dir string       directory for report output
+<a id="__codelineno-53-13" name="__codelineno-53-13" href="#__codelineno-53-13"></a>      --set stringArray         override experiment fields (dot-path=value, repeatable)
+<a id="__codelineno-53-14" name="__codelineno-53-14" href="#__codelineno-53-14"></a>      --timeout duration        timeout per experiment (default 10m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_18">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_18" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5871,47 +5884,45 @@ experiments without executing them.</p>
 </code></pre></div>
 <h1 id="_20"><a class="headerlink" href="#_20" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-upgrade">operator-chaos upgrade<a class="headerlink" href="#operator-chaos-upgrade" title="Permanent link">¶</a></h2>
-<p>OLM upgrade management and playbook execution</p>
-<h3 id="synopsis_8">Synopsis<a class="headerlink" href="#synopsis_8" title="Permanent link">¶</a></h3>
-<p>Manage operator upgrades via OLM. Subcommands cover the full upgrade lifecycle:
-discover available channels, trigger single-hop upgrades, monitor in-progress
-upgrades, and execute multi-step upgrade playbooks.</p>
+<h2 id="operator-chaos-types">operator-chaos types<a class="headerlink" href="#operator-chaos-types" title="Permanent link">¶</a></h2>
+<p>List available injection types</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>operator-chaos types [flags]
+</code></pre></div>
 <h3 id="options_20">Options<a class="headerlink" href="#options_20" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>  -h, --help   help for upgrade
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>  -h, --help   help for types
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_19">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_19" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>      --namespace string    target namespace (default "default")
-<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>  -v, --verbose             verbose output
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>      --kubeconfig string   path to kubeconfig file
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>      --namespace string    target namespace (default "default")
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_21"><a class="headerlink" href="#_21" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-upgrade-discover">operator-chaos upgrade discover<a class="headerlink" href="#operator-chaos-upgrade-discover" title="Permanent link">¶</a></h2>
-<p>Show available OLM channels and versions for an operator</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>operator-chaos upgrade discover [flags]
-</code></pre></div>
+<h2 id="operator-chaos-upgrade">operator-chaos upgrade<a class="headerlink" href="#operator-chaos-upgrade" title="Permanent link">¶</a></h2>
+<p>OLM upgrade management and playbook execution</p>
+<h3 id="synopsis_9">Synopsis<a class="headerlink" href="#synopsis_9" title="Permanent link">¶</a></h3>
+<p>Manage operator upgrades via OLM. Subcommands cover the full upgrade lifecycle:
+discover available channels, trigger single-hop upgrades, monitor in-progress
+upgrades, and execute multi-step upgrade playbooks.</p>
 <h3 id="options_21">Options<a class="headerlink" href="#options_21" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>      --format string      Output format: table, json (default "table")
-<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>  -h, --help               help for discover
-<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>      --namespace string   Subscription namespace (required)
-<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>      --operator string    OLM operator package name (required)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>  -h, --help   help for upgrade
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_20">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_20" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>  -v, --verbose             verbose output
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>      --namespace string    target namespace (default "default")
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_22"><a class="headerlink" href="#_22" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-upgrade-monitor">operator-chaos upgrade monitor<a class="headerlink" href="#operator-chaos-upgrade-monitor" title="Permanent link">¶</a></h2>
-<p>Watch an in-progress OLM upgrade</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>operator-chaos upgrade monitor [flags]
+<h2 id="operator-chaos-upgrade-discover">operator-chaos upgrade discover<a class="headerlink" href="#operator-chaos-upgrade-discover" title="Permanent link">¶</a></h2>
+<p>Show available OLM channels and versions for an operator</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>operator-chaos upgrade discover [flags]
 </code></pre></div>
 <h3 id="options_22">Options<a class="headerlink" href="#options_22" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>  -h, --help               help for monitor
-<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>      --namespace string   Subscription namespace (required)
-<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>      --operator string    OLM operator package name (required)
-<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>      --timeout duration   Max watch time (default 30m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>      --format string      Output format: table, json (default "table")
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>  -h, --help               help for discover
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>      --namespace string   Subscription namespace (required)
+<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>      --operator string    OLM operator package name (required)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_21">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_21" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5919,73 +5930,74 @@ upgrades, and execute multi-step upgrade playbooks.</p>
 </code></pre></div>
 <h1 id="_23"><a class="headerlink" href="#_23" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-upgrade-run">operator-chaos upgrade run<a class="headerlink" href="#operator-chaos-upgrade-run" title="Permanent link">¶</a></h2>
-<p>Execute an upgrade playbook</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>operator-chaos upgrade run [flags]
+<h2 id="operator-chaos-upgrade-monitor">operator-chaos upgrade monitor<a class="headerlink" href="#operator-chaos-upgrade-monitor" title="Permanent link">¶</a></h2>
+<p>Watch an in-progress OLM upgrade</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>operator-chaos upgrade monitor [flags]
 </code></pre></div>
 <h3 id="options_23">Options<a class="headerlink" href="#options_23" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>      --allow-shell          Allow kubectl steps with shell commands
-<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>      --dry-run              Print execution plan without running
-<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>      --force-resume         Allow resume without state file
-<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>  -h, --help                 help for run
-<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>      --playbook string      Path to upgrade playbook YAML (required)
-<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>      --report-dir string    Directory for reports
-<a id="__codelineno-64-7" name="__codelineno-64-7" href="#__codelineno-64-7"></a>      --resume-from string   Resume from failed step
-<a id="__codelineno-64-8" name="__codelineno-64-8" href="#__codelineno-64-8"></a>      --skip-manual          Use autoCheck for manual steps in CI
-<a id="__codelineno-64-9" name="__codelineno-64-9" href="#__codelineno-64-9"></a>      --state-dir string     Directory for state files
-<a id="__codelineno-64-10" name="__codelineno-64-10" href="#__codelineno-64-10"></a>      --timeout duration     Overall timeout (default 1h0m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>  -h, --help               help for monitor
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>      --namespace string   Subscription namespace (required)
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>      --operator string    OLM operator package name (required)
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>      --timeout duration   Max watch time (default 30m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_22">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_22" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>      --namespace string    target namespace (default "default")
-<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>  -v, --verbose             verbose output
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_24"><a class="headerlink" href="#_24" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-upgrade-trigger">operator-chaos upgrade trigger<a class="headerlink" href="#operator-chaos-upgrade-trigger" title="Permanent link">¶</a></h2>
-<p>Trigger a single OLM channel hop</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>operator-chaos upgrade trigger [flags]
+<h2 id="operator-chaos-upgrade-run">operator-chaos upgrade run<a class="headerlink" href="#operator-chaos-upgrade-run" title="Permanent link">¶</a></h2>
+<p>Execute an upgrade playbook</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>operator-chaos upgrade run [flags]
 </code></pre></div>
 <h3 id="options_24">Options<a class="headerlink" href="#options_24" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>      --channel string     Target OLM channel (required)
-<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>  -h, --help               help for trigger
-<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>      --namespace string   Subscription namespace (required)
-<a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a>      --operator string    OLM operator package name (required)
-<a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a>      --timeout duration   Max wait for CSV ready (default 20m0s)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>      --allow-shell          Allow kubectl steps with shell commands
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>      --dry-run              Print execution plan without running
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>      --force-resume         Allow resume without state file
+<a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a>  -h, --help                 help for run
+<a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a>      --playbook string      Path to upgrade playbook YAML (required)
+<a id="__codelineno-67-6" name="__codelineno-67-6" href="#__codelineno-67-6"></a>      --report-dir string    Directory for reports
+<a id="__codelineno-67-7" name="__codelineno-67-7" href="#__codelineno-67-7"></a>      --resume-from string   Resume from failed step
+<a id="__codelineno-67-8" name="__codelineno-67-8" href="#__codelineno-67-8"></a>      --skip-manual          Use autoCheck for manual steps in CI
+<a id="__codelineno-67-9" name="__codelineno-67-9" href="#__codelineno-67-9"></a>      --state-dir string     Directory for state files
+<a id="__codelineno-67-10" name="__codelineno-67-10" href="#__codelineno-67-10"></a>      --timeout duration     Overall timeout (default 1h0m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_23">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_23" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>  -v, --verbose             verbose output
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>      --namespace string    target namespace (default "default")
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_25"><a class="headerlink" href="#_25" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-validate-version">operator-chaos validate-version<a class="headerlink" href="#operator-chaos-validate-version" title="Permanent link">¶</a></h2>
-<p>Validate versioned knowledge models against a live cluster</p>
-<h3 id="synopsis_9">Synopsis<a class="headerlink" href="#synopsis_9" title="Permanent link">¶</a></h3>
-<p>Loads all knowledge models from a versioned directory and checks that
-the expected managed resources exist on the cluster. Useful for verifying
-that a knowledge directory accurately describes the current cluster state.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>operator-chaos validate-version [flags]
+<h2 id="operator-chaos-upgrade-trigger">operator-chaos upgrade trigger<a class="headerlink" href="#operator-chaos-upgrade-trigger" title="Permanent link">¶</a></h2>
+<p>Trigger a single OLM channel hop</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>operator-chaos upgrade trigger [flags]
 </code></pre></div>
 <h3 id="options_25">Options<a class="headerlink" href="#options_25" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>      --format string          output format: table or json (default "table")
-<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  -h, --help                   help for validate-version
-<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>      --knowledge-dir string   path to versioned knowledge directory (required)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>      --channel string     Target OLM channel (required)
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  -h, --help               help for trigger
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>      --namespace string   Subscription namespace (required)
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>      --operator string    OLM operator package name (required)
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>      --timeout duration   Max wait for CSV ready (default 20m0s)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_24">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_24" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>      --kubeconfig string   path to kubeconfig file
-<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>      --namespace string    target namespace (default "default")
-<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>  -v, --verbose             verbose output
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_26"><a class="headerlink" href="#_26" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-validate">operator-chaos validate<a class="headerlink" href="#operator-chaos-validate" title="Permanent link">¶</a></h2>
-<p>Validate experiment or knowledge YAML without running</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>operator-chaos validate &lt;file.yaml&gt; [flags]
+<h2 id="operator-chaos-validate-version">operator-chaos validate-version<a class="headerlink" href="#operator-chaos-validate-version" title="Permanent link">¶</a></h2>
+<p>Validate versioned knowledge models against a live cluster</p>
+<h3 id="synopsis_10">Synopsis<a class="headerlink" href="#synopsis_10" title="Permanent link">¶</a></h3>
+<p>Loads all knowledge models from a versioned directory and checks that
+the expected managed resources exist on the cluster. Useful for verifying
+that a knowledge directory accurately describes the current cluster state.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>operator-chaos validate-version [flags]
 </code></pre></div>
 <h3 id="options_26">Options<a class="headerlink" href="#options_26" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>  -h, --help        help for validate
-<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>      --knowledge   validate an OperatorKnowledge YAML file instead of an experiment
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>      --format string          output format: table or json (default "table")
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>  -h, --help                   help for validate-version
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a>      --knowledge-dir string   path to versioned knowledge directory (required)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_25">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_25" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -5994,12 +6006,13 @@ that a knowledge directory accurately describes the current cluster state.</p>
 </code></pre></div>
 <h1 id="_27"><a class="headerlink" href="#_27" title="Permanent link">¶</a></h1>
 <hr>
-<h2 id="operator-chaos-version">operator-chaos version<a class="headerlink" href="#operator-chaos-version" title="Permanent link">¶</a></h2>
-<p>Print the version</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>operator-chaos version [flags]
+<h2 id="operator-chaos-validate">operator-chaos validate<a class="headerlink" href="#operator-chaos-validate" title="Permanent link">¶</a></h2>
+<p>Validate experiment or knowledge YAML without running</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>operator-chaos validate &lt;file.yaml&gt; [flags]
 </code></pre></div>
 <h3 id="options_27">Options<a class="headerlink" href="#options_27" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>  -h, --help   help for version
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>  -h, --help        help for validate
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>      --knowledge   validate an OperatorKnowledge YAML file instead of an experiment
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands_26">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_26" title="Permanent link">¶</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>      --kubeconfig string   path to kubeconfig file
@@ -6007,6 +6020,20 @@ that a knowledge directory accurately describes the current cluster state.</p>
 <a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>  -v, --verbose             verbose output
 </code></pre></div>
 <h1 id="_28"><a class="headerlink" href="#_28" title="Permanent link">¶</a></h1>
+<hr>
+<h2 id="operator-chaos-version">operator-chaos version<a class="headerlink" href="#operator-chaos-version" title="Permanent link">¶</a></h2>
+<p>Print the version</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>operator-chaos version [flags]
+</code></pre></div>
+<h3 id="options_28">Options<a class="headerlink" href="#options_28" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>  -h, --help   help for version
+</code></pre></div>
+<h3 id="options-inherited-from-parent-commands_27">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands_27" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>      --kubeconfig string   path to kubeconfig file
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>      --namespace string    target namespace (default "default")
+<a id="__codelineno-80-3" name="__codelineno-80-3" href="#__codelineno-80-3"></a>  -v, --verbose             verbose output
+</code></pre></div>
+<h1 id="_29"><a class="headerlink" href="#_29" title="Permanent link">¶</a></h1>
 <hr>
 
 
