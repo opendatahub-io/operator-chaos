@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -43,6 +44,7 @@ func newSuiteCommand() *cobra.Command {
 		maxTier         int32
 		cooldown        time.Duration
 		setOverrides    []string
+		recursive       bool
 	)
 
 	cmd := &cobra.Command{
@@ -69,21 +71,9 @@ func newSuiteCommand() *cobra.Command {
 
 			dir := args[0]
 
-			// Find all YAML files
-			entries, err := os.ReadDir(dir)
+			experimentFiles, err := collectExperimentFiles(dir, recursive)
 			if err != nil {
-				return fmt.Errorf("reading directory %s: %w", dir, err)
-			}
-
-			var experimentFiles []string
-			for _, entry := range entries {
-				if !entry.IsDir() && (strings.HasSuffix(entry.Name(), ".yaml") || strings.HasSuffix(entry.Name(), ".yml")) {
-					experimentFiles = append(experimentFiles, filepath.Join(dir, entry.Name()))
-				}
-			}
-
-			if len(experimentFiles) == 0 {
-				return fmt.Errorf("no experiment files found in %s", dir)
+				return err
 			}
 
 			fmt.Fprintf(os.Stderr, "Found %d experiments in %s\n\n", len(experimentFiles), dir)
@@ -188,6 +178,7 @@ func newSuiteCommand() *cobra.Command {
 	cmd.Flags().Int32Var(&maxTier, "max-tier", 0, "skip experiments above this tier (0 = no filter)")
 	cmd.Flags().DurationVar(&cooldown, "cooldown", 0, "delay between sequential experiments to allow cluster recovery (e.g. 30s)")
 	cmd.Flags().StringArrayVar(&setOverrides, "set", nil, "override experiment fields (dot-path=value, repeatable)")
+	cmd.Flags().BoolVar(&recursive, "recursive", false, "scan one level of subdirectories for experiments")
 
 	return cmd
 }
@@ -445,3 +436,53 @@ func suiteResultToReport(r suiteResult) reporter.ExperimentReport {
 
 	return report
 }
+
+func collectExperimentFiles(dir string, recursive bool) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("reading directory %s: %w", dir, err)
+	}
+
+	var subDirFiles []string
+	var topLevelFiles []string
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if !recursive {
+				continue
+			}
+			subDir := filepath.Join(dir, entry.Name())
+			subEntries, err := os.ReadDir(subDir)
+			if err != nil {
+				continue
+			}
+			for _, sub := range subEntries {
+				if sub.IsDir() {
+					continue
+				}
+				name := sub.Name()
+				if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+					subDirFiles = append(subDirFiles, filepath.Join(subDir, name))
+				}
+			}
+		} else {
+			name := entry.Name()
+			if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+				topLevelFiles = append(topLevelFiles, filepath.Join(dir, name))
+			}
+		}
+	}
+
+	var files []string
+	files = append(files, subDirFiles...)
+	files = append(files, topLevelFiles...)
+
+	sort.Strings(files)
+
+	if len(files) == 0 {
+		return nil, fmt.Errorf("no experiment files found in %s", dir)
+	}
+
+	return files, nil
+}
+

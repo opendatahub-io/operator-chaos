@@ -1,0 +1,38 @@
+# requires: namespace, deployment, cluster_role_binding
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: ClusterRoleBinding/${CLUSTER_ROLE_BINDING}
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${DEPLOYMENT}
+        namespace: ${NAMESPACE}
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: ${CLUSTER_ROLE_BINDING}
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the ${COMPONENT} ClusterRoleBinding subjects are revoked, the
+      component should lose access to cluster-scoped resources. Once
+      permissions are restored, normal operation should resume.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}

@@ -1,0 +1,39 @@
+# requires: namespace, deployment, config_map_name, config_map_key
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-config-drift
+spec:
+  tier: 2
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: ConfigMap/${CONFIG_MAP_NAME}
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: v1
+        kind: ConfigMap
+        name: ${CONFIG_MAP_NAME}
+        namespace: ${NAMESPACE}
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: ${CONFIG_MAP_NAME}
+      key: ${CONFIG_MAP_KEY}
+      value: '{"corrupted":"by-chaos"}'
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the ${CONFIG_MAP_NAME} ConfigMap is corrupted, the ${COMPONENT}
+      should detect the invalid config and continue operating. The chaos
+      framework restores the original value via TTL-based cleanup.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}

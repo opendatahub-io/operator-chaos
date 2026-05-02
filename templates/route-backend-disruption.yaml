@@ -1,0 +1,44 @@
+# requires: namespace, deployment, route_name, route_namespace
+# platform: openshift
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-route-backend-disruption
+spec:
+  tier: 3
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: Route/${ROUTE_NAME}
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${DEPLOYMENT}
+        namespace: ${NAMESPACE}
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "route.openshift.io/v1"
+      kind: "Route"
+      name: ${ROUTE_NAME}
+      namespace: ${ROUTE_NAMESPACE}
+      path: "spec.to.name"
+      value: "chaos-nonexistent-service"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the ${COMPONENT} route backend is redirected to a non-existent
+      service, traffic should fail. The chaos framework restores the
+      original backend via TTL-based cleanup.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}
+      - ${ROUTE_NAMESPACE}

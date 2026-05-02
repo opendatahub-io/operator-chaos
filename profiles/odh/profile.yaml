@@ -1,0 +1,56 @@
+name: odh
+description: Open Data Hub
+version: "2.10"
+platform: kubernetes
+
+components:
+  dashboard:
+    namespace: opendatahub
+    deployment: odh-dashboard
+    component_name: odh-dashboard
+    label_selector: app=odh-dashboard
+    cluster_role_binding: odh-dashboard
+    config_map_name: odh-dashboard-config
+    config_map_key: config
+
+  model-registry:
+    namespace: opendatahub
+    deployment: model-registry-operator-controller-manager
+    component_name: model-registry-operator
+    label_selector: control-plane=model-registry-operator
+    cluster_role_binding: model-registry-operator-rolebinding
+    webhook_name: model-registry-operator-validating-webhook-configuration
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+
+  workbenches:
+    namespace: opendatahub
+    deployment: odh-notebook-controller-manager
+    component_name: odh-notebook-controller
+    label_selector: app=odh-notebook-controller
+    webhook_name: odh-notebook-controller-mutating-webhook-configuration
+    webhook_type: mutating
+    webhook_resource_kind: MutatingWebhookConfiguration
+
+  odh-model-controller:
+    namespace: opendatahub
+    deployment: odh-model-controller
+    label_selector: control-plane=odh-model-controller
+    cluster_role_binding: odh-model-controller-rolebinding-opendatahub
+    webhook_name: mutating.odh-model-controller.opendatahub.io
+    webhook_type: mutating
+    webhook_resource_kind: MutatingWebhookConfiguration
+    webhook_cert_secret: odh-model-controller-webhook-cert
+    lease_name: odh-model-controller.opendatahub.io
+    config_map_name: inferenceservice-config
+    config_map_key: ingress
+
+  kserve:
+    namespace: kserve
+    deployment: kserve-controller-manager
+    label_selector: control-plane=kserve-controller-manager
+    cluster_role_binding: kserve-controller-manager-rolebinding
+    webhook_name: inferenceservice.serving.kserve.io
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+    webhook_cert_secret: kserve-webhook-server-cert

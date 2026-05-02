@@ -1,0 +1,12 @@
+name: cert-manager
+description: cert-manager certificate controller
+version: "1.14"
+platform: kubernetes
+
+components:
+  controller:
+    namespace: cert-manager
+    deployment: cert-manager
+    component_name: cert-manager-controller
+    label_selector: app.kubernetes.io/name=cert-manager
+    cluster_role_binding: cert-manager-controller-issuers

@@ -1,0 +1,39 @@
+# requires: namespace, deployment
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-ownerref-orphan
+spec:
+  tier: 3
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: Deployment/${DEPLOYMENT}
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${DEPLOYMENT}
+        namespace: ${NAMESPACE}
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    dangerLevel: high
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: ${DEPLOYMENT}
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When owner references are removed from the ${COMPONENT} Deployment,
+      the operator should detect the orphaned resource and re-establish
+      ownership.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}

@@ -1,0 +1,40 @@
+# requires: namespace, deployment, webhook_cert_secret
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-webhook-cert-corrupt
+spec:
+  tier: 2
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: Secret/${WEBHOOK_CERT_SECRET}
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${DEPLOYMENT}
+        namespace: ${NAMESPACE}
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: ${WEBHOOK_CERT_SECRET}
+      key: tls.crt
+      value: "Y2hhb3MtY29ycnVwdGVk"
+      resourceType: Secret
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the ${COMPONENT} webhook TLS certificate is corrupted, the
+      webhook server should fail to serve and the controller should
+      detect and regenerate the certificate.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}

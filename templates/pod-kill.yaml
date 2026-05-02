@@ -1,0 +1,34 @@
+# requires: namespace, deployment, label_selector
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: Deployment/${DEPLOYMENT}
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ${DEPLOYMENT}
+        namespace: ${NAMESPACE}
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: ${LABEL_SELECTOR}
+    ttl: "30s"
+  hypothesis:
+    description: >-
+      When a ${COMPONENT} pod is killed, the Deployment controller should
+      restart it and the component should recover within the recovery timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - ${NAMESPACE}

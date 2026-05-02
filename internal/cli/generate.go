@@ -30,6 +30,7 @@ func newGenerateCommand() *cobra.Command {
 	cmd.AddCommand(newGenerateFuzzTargetsCommand())
 	cmd.AddCommand(newGenerateUpgradeCommand())
 	cmd.AddCommand(newGenerateChaosCommand())
+	cmd.AddCommand(newGenerateExperimentsCommand())
 
 	return cmd
 }

@@ -1,0 +1,39 @@
+# requires: namespace, deployment, lease_name
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ${COMPONENT}-leader-lease-corrupt
+spec:
+  tier: 3
+  target:
+    operator: ${COMPONENT}
+    component: ${COMPONENT_NAME}
+    resource: Lease/${LEASE_NAME}
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: ${LEASE_NAME}
+        namespace: ${NAMESPACE}
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "coordination.k8s.io/v1"
+      kind: "Lease"
+      name: ${LEASE_NAME}
+      field: "holderIdentity"
+      value: "chaos-fake-leader"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the leader lease holder identity is corrupted, the ${COMPONENT}
+      should detect the lease conflict and re-acquire leadership.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - ${NAMESPACE}

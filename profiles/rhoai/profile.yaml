@@ -1,0 +1,58 @@
+name: rhoai
+description: Red Hat OpenShift AI
+version: "3.3"
+platform: openshift
+
+components:
+  dashboard:
+    namespace: redhat-ods-applications
+    deployment: rhods-dashboard
+    component_name: odh-dashboard
+    label_selector: app=rhods-dashboard
+    cluster_role_binding: rhods-dashboard
+    route_name: rhods-dashboard
+    route_namespace: rhoai-security
+
+  model-registry:
+    namespace: redhat-ods-applications
+    deployment: model-registry-operator-controller-manager
+    component_name: model-registry-operator
+    label_selector: control-plane=model-registry-operator
+    cluster_role_binding: model-registry-operator-rolebinding
+    webhook_name: model-registry-operator-validating-webhook-configuration
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+    route_name: model-catalog-https
+    route_namespace: rhoai-model-registries
+
+  workbenches:
+    namespace: redhat-ods-applications
+    deployment: odh-notebook-controller-manager
+    component_name: odh-notebook-controller
+    label_selector: app=odh-notebook-controller
+    webhook_name: odh-notebook-controller-mutating-webhook-configuration
+    webhook_type: mutating
+    webhook_resource_kind: MutatingWebhookConfiguration
+
+  odh-model-controller:
+    namespace: redhat-ods-applications
+    deployment: odh-model-controller
+    label_selector: control-plane=odh-model-controller
+    cluster_role_binding: odh-model-controller-rolebinding-opendatahub
+    webhook_name: mutating.odh-model-controller.opendatahub.io
+    webhook_type: mutating
+    webhook_resource_kind: MutatingWebhookConfiguration
+    webhook_cert_secret: odh-model-controller-webhook-cert
+    lease_name: odh-model-controller.opendatahub.io
+    config_map_name: kube-rbac-proxy-config
+    config_map_key: config-file.yaml
+
+  kserve:
+    namespace: redhat-ods-applications
+    deployment: kserve-controller-manager
+    label_selector: control-plane=kserve-controller-manager
+    cluster_role_binding: kserve-controller-manager-rolebinding
+    webhook_name: inferenceservice.serving.kserve.io
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+    webhook_cert_secret: kserve-webhook-server-cert

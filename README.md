@@ -702,6 +702,7 @@ Safety: hardcoded deny-list prevents targeting `kube-system`, `default`, `kube-p
 | `run` | Run a chaos experiment |
 | `validate` | Validate experiment or knowledge YAML without running |
 | `init` | Generate a skeleton experiment YAML |
+| `generate experiments` | Generate experiment YAML from templates and a profile |
 | `clean` | Remove all chaos artifacts from the cluster (emergency stop) |
 | `analyze` | Analyze Go source code for fault injection candidates |
 | `suite` | Run all experiments in a directory |
@@ -776,6 +777,7 @@ operator-chaos suite <experiments-directory> [flags]
 | `--cooldown` | Delay between sequential experiments for cluster recovery (e.g. `30s`) | `0` |
 | `--distributed-lock` | Use Kubernetes Lease-based distributed locking | `false` |
 | `--lock-namespace` | Namespace for distributed lock leases | `default` |
+| `--recursive` | Scan one level of subdirectories for experiments | `false` |
 
 ### analyze
 
@@ -850,6 +852,21 @@ operator-chaos init [flags]
 | `--namespace` | Target namespace | `default` |
 
 Generates a skeleton experiment YAML to stdout. Customize the output for your operator and injection type.
+
+### generate experiments
+
+```bash
+operator-chaos generate experiments --profile <name> -o <output-dir> [flags]
+```
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--profile` | Profile name (resolves to profiles/<name>/profile.yaml) | (required) |
+| `-o`, `--output` | Output directory for generated experiments | (required unless `--dry-run`) |
+| `--component` | Generate for a single component only | |
+| `--template` | Generate from a single template only | |
+| `--set-var` | Override profile variable (component:field=value, repeatable) | |
+| `--dry-run` | List what would be generated without writing files | `false` |
 
 ### types
 
@@ -1000,9 +1017,86 @@ experiments/            Pre-built experiment suites (116 experiments, tiered 1-5
 profiles/               Third-party operator profiles (e.g. cert-manager)
 ```
 
-## Profiles
+## Profiles and Templates
 
-A profile is a set of knowledge models and experiments for a specific operator. The framework ships with built-in profiles for ODH and RHOAI, and includes a cert-manager example showing how to target any Kubernetes operator.
+Experiments use `${VAR}` placeholders that are resolved against named profiles. This makes the same chaos patterns portable across any Kubernetes operator.
+
+### Quick Start
+
+```bash
+# Generate experiments for RHOAI
+operator-chaos generate experiments --profile rhoai -o /tmp/rhoai-experiments/
+
+# Run all generated experiments
+operator-chaos suite /tmp/rhoai-experiments/ --recursive \
+  --knowledge-dir profiles/rhoai/knowledge/v3.3/ \
+  --report-dir results/
+
+# Generate for a single component
+operator-chaos generate experiments --profile rhoai --component dashboard -o /tmp/dashboard/
+
+# Dry run: see what would be generated
+operator-chaos generate experiments --profile rhoai --dry-run
+
+# Override a profile variable at generation time
+operator-chaos generate experiments --profile rhoai \
+  --set-var "dashboard:namespace=custom-ns" -o /tmp/experiments/
+```
+
+### Built-in Profiles
+
+| Profile | Description | Components |
+|---------|-------------|------------|
+| `rhoai` | Red Hat OpenShift AI | dashboard, model-registry, workbenches, odh-model-controller, kserve |
+| `odh` | Open Data Hub | dashboard, model-registry, workbenches, odh-model-controller, kserve |
+| `cert-manager` | cert-manager | controller |
+
+### Creating a Custom Profile
+
+Create `profiles/<name>/profile.yaml`:
+
+```yaml
+name: my-operator
+description: My Custom Operator
+platform: kubernetes
+
+components:
+  controller:
+    namespace: my-operator-system
+    deployment: my-operator-controller-manager
+    label_selector: control-plane=controller-manager
+    cluster_role_binding: my-operator-manager-rolebinding
+```
+
+Then generate: `operator-chaos generate experiments --profile my-operator -o experiments/`
+
+The generator creates one experiment per template for each component, but only when the component defines all variables that template requires. For example, a `webhook-disrupt` template requires `webhook_name`, `webhook_type`, and `webhook_resource_kind`. Components that don't define these fields are skipped for that template.
+
+### Templates
+
+Templates live in `templates/` and cover 13 injection patterns. Each template declares its required variables via a `# requires:` comment header.
+
+| Template | Requires | Tier |
+|----------|----------|------|
+| pod-kill | namespace, deployment, label_selector | 1 |
+| network-partition | namespace, deployment, label_selector | 2 |
+| config-drift | namespace, deployment, config_map_name, config_map_key | 2 |
+| webhook-cert-corrupt | namespace, deployment, webhook_cert_secret | 2 |
+| label-stomping | namespace, deployment | 3 |
+| leader-lease-corrupt | namespace, deployment, lease_name | 3 |
+| ownerref-orphan | namespace, deployment | 3 |
+| route-backend-disruption | namespace, deployment, route_name, route_namespace | 3 |
+| route-host-collision | namespace, deployment, route_name, route_namespace | 3 |
+| route-tls-mutation | namespace, deployment, route_name, route_namespace | 3 |
+| rbac-revoke | namespace, deployment, cluster_role_binding | 4 |
+| webhook-disrupt | namespace, deployment, webhook_name, webhook_type, webhook_resource_kind | 4 |
+| quota-exhaustion | namespace, deployment | 5 |
+
+Route templates (`route-*`) additionally require `# platform: openshift` and are only generated for profiles with `platform: openshift`.
+
+### Using Profiles with Suite
+
+The `--profile` flag on `suite` and `run` commands searches `profiles/<name>/knowledge/` first, then falls back to `knowledge/<name>/`. Explicit `--knowledge` or `--knowledge-dir` flags take precedence.
 
 ```bash
 # Use the RHOAI profile (resolves knowledge from knowledge/rhoai/)
@@ -1011,10 +1105,6 @@ operator-chaos suite experiments/rhoai/dashboard/ --profile rhoai
 # Use a self-contained profile (resolves from profiles/cert-manager/)
 operator-chaos suite profiles/cert-manager/experiments/ --profile cert-manager
 ```
-
-The `--profile` flag searches `profiles/<name>/knowledge/` first, then falls back to `knowledge/<name>/`. Explicit `--knowledge` or `--knowledge-dir` flags take precedence.
-
-See the [Profiles Guide](https://ugiordan.github.io/operator-chaos/guides/profiles/) for how to write a profile for your own operator.
 
 ## Dashboard
 
