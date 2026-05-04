@@ -318,6 +318,77 @@ func TestCheckReconciliation_NamespaceFallback(t *testing.T) {
 	assert.True(t, result.AllReconciled, "should find resource using fallback namespace")
 }
 
+func TestCheckReconciliation_ResourceSpecificNamespace(t *testing.T) {
+	// Resource exists in its own namespace, different from the outer namespace.
+	// The checker should use the per-resource namespace, not the outer one.
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"})
+	obj.SetName("model-catalog-https")
+	obj.SetNamespace("model-registries")
+
+	scheme := runtime.NewScheme()
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(obj).Build()
+	rc := NewReconciliationChecker(fakeClient)
+
+	component := &model.ComponentModel{
+		Name: "test-component",
+		ManagedResources: []model.ManagedResource{
+			{
+				APIVersion: "route.openshift.io/v1",
+				Kind:       "Route",
+				Name:       "model-catalog-https",
+				Namespace:  "model-registries",
+			},
+		},
+	}
+
+	result, err := rc.CheckReconciliation(context.Background(), component, "operator-ns", 100*time.Millisecond)
+	require.NoError(t, err)
+	assert.True(t, result.AllReconciled, "should find resource in its own namespace, not the outer namespace")
+	require.Len(t, result.Resources, 1)
+	assert.Equal(t, "model-registries", result.Resources[0].Namespace)
+}
+
+func TestCheckReconciliation_MixedNamespaces(t *testing.T) {
+	// Two resources: one with a specific namespace, one using the fallback.
+	deploy := &unstructured.Unstructured{}
+	deploy.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	deploy.SetName("controller-manager")
+	deploy.SetNamespace("operator-ns")
+
+	route := &unstructured.Unstructured{}
+	route.SetGroupVersionKind(schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"})
+	route.SetName("api-route")
+	route.SetNamespace("workload-ns")
+
+	scheme := runtime.NewScheme()
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(deploy, route).Build()
+	rc := NewReconciliationChecker(fakeClient)
+
+	component := &model.ComponentModel{
+		Name: "test-component",
+		ManagedResources: []model.ManagedResource{
+			{
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       "controller-manager",
+				Namespace:  "", // uses fallback
+			},
+			{
+				APIVersion: "route.openshift.io/v1",
+				Kind:       "Route",
+				Name:       "api-route",
+				Namespace:  "workload-ns", // specific namespace
+			},
+		},
+	}
+
+	result, err := rc.CheckReconciliation(context.Background(), component, "operator-ns", 100*time.Millisecond)
+	require.NoError(t, err)
+	assert.True(t, result.AllReconciled, "should find both resources in their respective namespaces")
+	require.Len(t, result.Resources, 2)
+}
+
 func TestCheckReconciliation_ContextTimeout(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()

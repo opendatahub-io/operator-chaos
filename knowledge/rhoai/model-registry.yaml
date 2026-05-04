@@ -30,8 +30,8 @@ components:
         namespace: redhat-ods-applications
       - apiVersion: route.openshift.io/v1
         kind: Route
-        name: model-registry-operator-rest
-        namespace: redhat-ods-applications
+        name: model-catalog-https
+        namespace: rhoai-model-registries
     webhooks:
       - name: model-registry-operator-validating-webhook-configuration
         type: validating

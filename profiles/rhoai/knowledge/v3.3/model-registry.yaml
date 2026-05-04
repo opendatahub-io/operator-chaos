@@ -15,7 +15,7 @@ components:
         name: model-registry-operator-controller-manager
         namespace: redhat-ods-applications
         labels:
-          control-plane: controller-manager
+          control-plane: model-registry-operator
           app.kubernetes.io/name: model-registry-operator
         expectedSpec:
           replicas: 1
@@ -34,6 +34,10 @@ components:
         kind: Service
         name: model-registry-operator-controller-manager-metrics-service
         namespace: redhat-ods-applications
+      - apiVersion: route.openshift.io/v1
+        kind: Route
+        name: model-catalog-https
+        namespace: rhoai-model-registries
     webhooks:
       - name: vmodelregistry.opendatahub.io
         type: validating

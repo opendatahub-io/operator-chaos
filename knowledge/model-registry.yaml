@@ -12,7 +12,7 @@ components:
         name: model-registry-operator-controller-manager
         namespace: opendatahub
         labels:
-          control-plane: controller-manager
+          control-plane: model-registry-operator
           app.kubernetes.io/name: model-registry-operator
         expectedSpec:
           replicas: 1
