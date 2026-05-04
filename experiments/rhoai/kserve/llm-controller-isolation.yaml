@@ -29,6 +29,10 @@ spec:
       resources. The main kserve-controller-manager must remain unaffected.
       Once the partition is lifted after 60s, the LLM controller should
       re-acquire its lease and resume normal operation within 120s.
+      PREREQUISITES: Requires modelsAsService enabled in DSC AND Red Hat
+      Connectivity Link operator (commercial Kuadrant) installed. The
+      llmisvc-controller-manager deployment is only created when both
+      dependencies are satisfied.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1

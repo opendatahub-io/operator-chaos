@@ -26,18 +26,19 @@ spec:
       apiVersion: "route.openshift.io/v1"
       kind: "Route"
       name: "kserve-isvc-route"
-      path: "spec.tls.termination"
-      value: "passthrough"
+      path: "spec.tls"
+      value: '{"termination": "passthrough", "insecureEdgeTerminationPolicy": null}'
     ttl: "300s"
   hypothesis:
     description: >-
-      Changing TLS termination on a KServe InferenceService Route from
-      edge/reencrypt to passthrough breaks HTTPS inference endpoints.
-      The KServe controller or RHOAI operator should detect the TLS
-      drift and restore the correct termination mode. NOTE: The Route
-      name must be customized for each InferenceService deployment.
-      Expected verdict: Resilient if restored, Vulnerable if inference
-      endpoints stay broken.
+      Mutates the entire spec.tls block on a KServe InferenceService
+      Route: changes termination to passthrough and removes
+      insecureEdgeTerminationPolicy (which is only valid with edge
+      termination). This breaks HTTPS inference endpoints. The KServe
+      controller or RHOAI operator should detect the TLS drift and
+      restore the correct termination mode. NOTE: The Route name must
+      be customized per InferenceService deployment.
+      Expected verdict: Resilient if restored, Vulnerable if broken.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
