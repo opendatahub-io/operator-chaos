@@ -1272,3 +1272,119 @@ func TestValidateExperimentErrorChainBlastRadius(t *testing.T) {
 	unwrapped := err
 	assert.NotNil(t, unwrapped)
 }
+
+func TestOrchestratorTTLAwareObservation(t *testing.T) {
+	// Verify that when an injection has a TTL, the orchestrator waits for the
+	// TTL to expire and cleans up the fault BEFORE the recovery observation
+	// period starts. This prevents the post-check from running while the
+	// fault (e.g. NetworkPolicy) is still active.
+	obs := &mockObserver{result: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}}
+
+	var cleanupTime time.Time
+	inj := &mockInjector{
+		cleanupFunc: func(ctx context.Context) error {
+			cleanupTime = time.Now()
+			return nil
+		},
+	}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 50 * time.Millisecond}
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 1 * time.Millisecond}
+
+	startTime := time.Now()
+	result, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, result.Phase)
+	assert.True(t, inj.cleanupCalled, "cleanup should have been called after TTL expiry")
+
+	// Cleanup should have happened after at least the TTL duration
+	assert.True(t, cleanupTime.Sub(startTime) >= 50*time.Millisecond,
+		"cleanup should happen after TTL expires, elapsed: %v", cleanupTime.Sub(startTime))
+}
+
+func TestOrchestratorTTLCleanupBeforeRecoveryWait(t *testing.T) {
+	// Verify the fault is cleaned up BEFORE the recovery timeout wait,
+	// not after. The post-check observer records the time it runs; cleanup
+	// must have been called before that point.
+	var cleanupTime, postCheckTime time.Time
+
+	postCheckObs := &timestampObserver{
+		result: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()},
+		onCheck: func() { postCheckTime = time.Now() },
+	}
+
+	inj := &mockInjector{
+		cleanupFunc: func(ctx context.Context) error {
+			cleanupTime = time.Now()
+			return nil
+		},
+	}
+
+	registry := injection.NewRegistry()
+	registry.Register(v1alpha1.PodKill, inj)
+
+	orch := New(OrchestratorConfig{
+		Registry:  registry,
+		Observer:  postCheckObs,
+		Evaluator: evaluator.New(10),
+		Lock:      safety.NewLocalExperimentLock(),
+		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	})
+
+	exp := newTestExperiment()
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 10 * time.Millisecond}
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 1 * time.Millisecond}
+
+	result, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, result.Phase)
+	assert.True(t, inj.cleanupCalled)
+
+	assert.False(t, cleanupTime.IsZero(), "cleanup should have been called")
+	assert.False(t, postCheckTime.IsZero(), "post-check should have been called")
+	assert.True(t, cleanupTime.Before(postCheckTime),
+		"cleanup (%v) should happen before post-check (%v)", cleanupTime, postCheckTime)
+}
+
+func TestOrchestratorNoTTLSkipsTTLWait(t *testing.T) {
+	// When no TTL is set (e.g. PodKill), the orchestrator should NOT wait
+	// for a TTL and should proceed directly to recovery observation. Cleanup
+	// happens in the deferred function at the end.
+	obs := &mockObserver{result: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}}
+	inj := &mockInjector{}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	// No TTL set (zero value)
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 1 * time.Millisecond}
+
+	startTime := time.Now()
+	result, err := orch.Run(context.Background(), exp)
+	elapsed := time.Since(startTime)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, result.Phase)
+	assert.True(t, inj.cleanupCalled, "cleanup should still be called via defer")
+	assert.True(t, elapsed < 1*time.Second,
+		"without TTL, experiment should complete quickly, but took %v", elapsed)
+}
+
+// timestampObserver records the time CheckSteadyState is called.
+type timestampObserver struct {
+	result  *v1alpha1.CheckResult
+	onCheck func()
+	calls   int
+}
+
+func (m *timestampObserver) CheckSteadyState(ctx context.Context, checks []v1alpha1.SteadyStateCheck, namespace string) (*v1alpha1.CheckResult, error) {
+	m.calls++
+	if m.onCheck != nil && m.calls > 1 {
+		// Only record the post-check call, not the pre-check
+		m.onCheck()
+	}
+	if m.result != nil {
+		return m.result, nil
+	}
+	return &v1alpha1.CheckResult{Passed: true, ChecksRun: 0, Timestamp: metav1.Now()}, nil
+}

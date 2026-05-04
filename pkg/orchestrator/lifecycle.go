@@ -516,11 +516,42 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 
 	o.logger.Info("injection complete", "events", len(events))
 
-	// 4. Observe — wait for recovery timeout before post-check.
-	o.logger.Info("phase transition", "phase", "OBSERVING", "action", "waiting for recovery")
+	// 4. Observe — wait for injection TTL (fault active period), then clean up
+	// the fault, then wait for recovery timeout before post-check.
+	//
+	// For injection types with a TTL (e.g. NetworkPartition), the fault must
+	// remain active for the TTL duration, then be removed so the system can
+	// attempt recovery. Without this, the post-check runs while the fault is
+	// still active (e.g. NetworkPolicy still blocking traffic), making recovery
+	// impossible and causing spurious failures.
 	result.Phase = v1alpha1.PhaseObserving
+	injectionTTL := exp.Spec.Injection.TTL.Duration
+	if injectionTTL > 0 {
+		o.logger.Info("phase transition", "phase", "OBSERVING", "action", "waiting for injection TTL to expire", "ttl", injectionTTL)
+		select {
+		case <-time.After(injectionTTL):
+		case <-ctx.Done():
+			o.logger.Warn("context cancelled during injection TTL wait, aborting experiment")
+			result.Phase = v1alpha1.PhaseAborted
+			result.Error = "experiment interrupted: context cancelled during injection TTL wait"
+			return result, ctx.Err()
+		}
 
-	o.logger.Info("OBSERVING", "recoveryTimeout", recoveryTimeout)
+		// Remove the fault before the recovery observation period
+		if cleanup != nil {
+			o.logger.Info("removing injected fault after TTL expiry")
+			cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), defaultCleanupTimeout)
+			cleanErr := cleanup(cleanupCtx)
+			cleanupCancel()
+			if cleanErr != nil {
+				o.logger.Warn("fault cleanup after TTL failed", "error", cleanErr)
+				result.CleanupError = cleanErr.Error()
+			}
+			cleanup = nil // prevent deferred cleanup from running again
+		}
+	}
+
+	o.logger.Info("phase transition", "phase", "OBSERVING", "action", "waiting for recovery", "recoveryTimeout", recoveryTimeout)
 	select {
 	case <-time.After(recoveryTimeout):
 	case <-ctx.Done():
