@@ -6,33 +6,32 @@ spec:
   tier: 2
   target:
     operator: kserve
-    component: llmisvc-controller-manager
-    resource: Deployment/llmisvc-controller-manager
+    component: kserve-controller-manager
+    resource: Deployment/kserve-controller-manager
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
-        name: llmisvc-controller-manager
+        name: kserve-controller-manager
         namespace: redhat-ods-applications
         conditionType: Available
     timeout: "30s"
   injection:
     type: NetworkPartition
     parameters:
-      labelSelector: control-plane=llmisvc-controller-manager
+      labelSelector: control-plane=kserve-controller-manager
     ttl: "60s"
   hypothesis:
     description: >-
-      When the llmisvc-controller-manager is network-partitioned from the
-      API server, it should lose its leader lease and stop reconciling LLM
-      resources. The main kserve-controller-manager must remain unaffected.
-      Once the partition is lifted after 60s, the LLM controller should
-      re-acquire its lease and resume normal operation within 120s.
-      PREREQUISITES: Requires modelsAsService enabled in DSC AND Red Hat
-      Connectivity Link operator (commercial Kuadrant) installed. The
-      llmisvc-controller-manager deployment is only created when both
-      dependencies are satisfied.
+      In RHOAI 3.3.2+, LLMInferenceService reconciliation is handled by
+      the main kserve-controller-manager (not a separate deployment).
+      When the controller is network-partitioned from the API server, it
+      should lose its leader lease and stop reconciling both ISVC and
+      LLM resources. Once the partition is lifted after 60s, the
+      controller should re-acquire its lease and resume normal operation
+      within 120s. Requires modelsAsService enabled in DSC and Red Hat
+      Connectivity Link operator installed.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
