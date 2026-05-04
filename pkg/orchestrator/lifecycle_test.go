@@ -1272,3 +1272,49 @@ func TestValidateExperimentErrorChainBlastRadius(t *testing.T) {
 	unwrapped := err
 	assert.NotNil(t, unwrapped)
 }
+
+func TestOrchestratorTTLRevertsBeforePostCheck(t *testing.T) {
+	// When TTL < recoveryTimeout, the fault should be reverted at TTL time
+	// (not at recoveryTimeout), and cleanup should be called exactly once.
+	cleanupCallCount := 0
+	obs := &mockObserver{result: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}}
+	inj := &mockInjector{
+		cleanupFunc: func(ctx context.Context) error {
+			cleanupCallCount++
+			return nil
+		},
+	}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 1 * time.Millisecond}
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 2 * time.Millisecond}
+
+	result, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, result.Phase)
+	assert.True(t, inj.cleanupCalled, "cleanup should be called during revert phase")
+	assert.Equal(t, 1, cleanupCallCount, "cleanup should be called exactly once (during revert, not again in defer)")
+}
+
+func TestOrchestratorTTLRevertErrorSurfacedInReport(t *testing.T) {
+	// When the fault revert fails, the error should appear in both result and report.
+	obs := &mockObserver{result: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}}
+	inj := &mockInjector{
+		cleanupFunc: func(ctx context.Context) error {
+			return fmt.Errorf("revert: permission denied")
+		},
+	}
+	orch := newTestOrchestrator(obs, inj)
+
+	exp := newTestExperiment()
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 1 * time.Millisecond}
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 2 * time.Millisecond}
+
+	result, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, result.Phase)
+	assert.Contains(t, result.CleanupError, "revert: permission denied")
+	require.NotNil(t, result.Report)
+	assert.Contains(t, result.Report.CleanupError, "revert: permission denied")
+}

@@ -516,20 +516,52 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 
 	o.logger.Info("injection complete", "events", len(events))
 
-	// 4. Observe — wait for recovery timeout before post-check.
+	// 4. Observe — wait for fault TTL to expire, revert, then wait for recovery.
 	o.logger.Info("phase transition", "phase", "OBSERVING", "action", "waiting for recovery")
 	result.Phase = v1alpha1.PhaseObserving
 
-	o.logger.Info("OBSERVING", "recoveryTimeout", recoveryTimeout)
+	// When TTL is set and shorter than recoveryTimeout, the fault is reverted
+	// at TTL so the system has (recoveryTimeout - TTL) to recover before the
+	// post-check. This matches the controller's reconcileObserve behavior.
+	injectionTTL := exp.Spec.Injection.TTL.Duration
+	faultDuration := recoveryTimeout
+	if injectionTTL > 0 && injectionTTL < recoveryTimeout {
+		faultDuration = injectionTTL
+	}
+
+	o.logger.Info("OBSERVING", "faultDuration", faultDuration, "recoveryTimeout", recoveryTimeout)
 	select {
-	case <-time.After(recoveryTimeout):
+	case <-time.After(faultDuration):
 	case <-ctx.Done():
-		// Context cancelled during observation — abort cleanly rather than
-		// passing a dead context to RunPostCheck which would produce confusing errors.
 		o.logger.Warn("context cancelled during observation, aborting experiment")
 		result.Phase = v1alpha1.PhaseAborted
 		result.Error = "experiment interrupted: context cancelled during observation"
 		return result, ctx.Err()
+	}
+
+	// Revert the fault before post-check so the system can recover.
+	if cleanup != nil {
+		o.logger.Info("phase transition", "phase", "REVERTING", "action", "reverting fault after observation")
+		revertCtx, revertCancel := context.WithTimeout(context.Background(), defaultCleanupTimeout)
+		if revertErr := cleanup(revertCtx); revertErr != nil {
+			o.logger.Warn("fault revert warning", "error", revertErr)
+			result.CleanupError = revertErr.Error()
+		}
+		revertCancel()
+		cleanup = nil
+	}
+
+	// Wait for remaining recovery time after fault revert.
+	if remaining := recoveryTimeout - faultDuration; remaining > 0 {
+		o.logger.Info("OBSERVING", "action", "waiting for recovery after revert", "remaining", remaining)
+		select {
+		case <-time.After(remaining):
+		case <-ctx.Done():
+			o.logger.Warn("context cancelled during recovery observation, aborting experiment")
+			result.Phase = v1alpha1.PhaseAborted
+			result.Error = "experiment interrupted: context cancelled during recovery observation"
+			return result, ctx.Err()
+		}
 	}
 
 	// 5. Steady State Post-Check
@@ -606,6 +638,11 @@ func (o *Orchestrator) Run(ctx context.Context, exp *v1alpha1.ChaosExperiment) (
 		Collateral:     collateralFindings,
 	}
 	result.Report = &report
+
+	// Propagate cleanup error from fault revert phase to the report.
+	if result.CleanupError != "" {
+		result.Report.CleanupError = result.CleanupError
+	}
 
 	// Write JSON report if reportDir specified
 	if o.reportDir != "" {
