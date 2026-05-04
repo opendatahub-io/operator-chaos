@@ -154,6 +154,6 @@ Knowledge models have environment-specific overlays in `knowledge/rhoai/` for RH
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/ugiordan/operator-chaos/issues) for bug reports
+- [GitHub Issues](https://github.com/opendatahub-io/operator-chaos/issues) for bug reports
 - [CLI Commands Reference](reference/cli-commands.md) for command syntax
 - [Failure Modes Reference](failure-modes/index.md) for injection type parameters

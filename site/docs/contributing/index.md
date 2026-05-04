@@ -11,8 +11,8 @@ Operator Chaos is open to contributions. This section covers how to set up a dev
 
 ## Quick Links
 
-- **Repository**: [github.com/ugiordan/operator-chaos](https://github.com/ugiordan/operator-chaos)
-- **Issues**: [github.com/ugiordan/operator-chaos/issues](https://github.com/ugiordan/operator-chaos/issues)
+- **Repository**: [github.com/opendatahub-io/operator-chaos](https://github.com/opendatahub-io/operator-chaos)
+- **Issues**: [github.com/opendatahub-io/operator-chaos/issues](https://github.com/opendatahub-io/operator-chaos/issues)
 - **Language**: Go 1.22+
 - **Framework**: controller-runtime, kubebuilder
 

@@ -592,6 +592,6 @@ blastRadius:
 ## Next Steps
 
 - Browse [built-in failure modes](index.md) for examples
-- Explore [experiments directory](https://github.com/ugiordan/operator-chaos/tree/main/experiments) for production-tested experiments
+- Explore [experiments directory](https://github.com/opendatahub-io/operator-chaos/tree/main/experiments) for production-tested experiments
 - Read [Adding Failure Modes](../contributing/adding-failure-modes.md) to write Go plugins
 - Check [Architecture: Injection Engine](../architecture/injection-engine.md) to understand internals

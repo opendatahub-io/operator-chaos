@@ -1161,7 +1161,7 @@ All endpoints are read-only (`GET`), prefixed with `/api/v1/`.
 | `/suites/:runId` | Experiments in a suite run |
 | `/suites/compare?suite=X&runA=Y&runB=Z` | Version comparison |
 
-For full dashboard documentation, see the [Dashboard Guide](https://ugiordan.github.io/operator-chaos/guides/dashboard-operator/).
+For full dashboard documentation, see the [Dashboard Guide](https://opendatahub-io.github.io/operator-chaos/guides/dashboard-operator/).
 
 ## Quick Start
 
@@ -1219,11 +1219,11 @@ go test ./... -fuzz=FuzzMyReconciler -fuzztime=30s
 
 ## Further Reading
 
-- [Documentation Site](https://ugiordan.github.io/operator-chaos/) - Full documentation with guides, architecture, and API reference
-- [E2E Testing Guide](https://ugiordan.github.io/operator-chaos/guides/e2e-testing/) - Full walkthrough with knowledge models, all injection types, suite execution, and expected verdicts
-- [Dashboard Guide](https://ugiordan.github.io/operator-chaos/guides/dashboard-operator/) - Dashboard setup, views, API reference, and deployment options
-- [CI Integration Guide](https://ugiordan.github.io/operator-chaos/guides/ci-integration/) - GitHub Actions, Tekton, JUnit reporting, and exit code conventions
-- [Upgrade Testing Guide](https://ugiordan.github.io/operator-chaos/guides/upgrade-testing/) - Version diff engine, upgrade playbooks, and simulation
+- [Documentation Site](https://opendatahub-io.github.io/operator-chaos/) - Full documentation with guides, architecture, and API reference
+- [E2E Testing Guide](https://opendatahub-io.github.io/operator-chaos/guides/e2e-testing/) - Full walkthrough with knowledge models, all injection types, suite execution, and expected verdicts
+- [Dashboard Guide](https://opendatahub-io.github.io/operator-chaos/guides/dashboard-operator/) - Dashboard setup, views, API reference, and deployment options
+- [CI Integration Guide](https://opendatahub-io.github.io/operator-chaos/guides/ci-integration/) - GitHub Actions, Tekton, JUnit reporting, and exit code conventions
+- [Upgrade Testing Guide](https://opendatahub-io.github.io/operator-chaos/guides/upgrade-testing/) - Version diff engine, upgrade playbooks, and simulation
 - [Go Fuzz Testing](https://go.dev/doc/security/fuzz/) - Go's native fuzz testing documentation (required for understanding `testing.F`)
 
 ## Contributing

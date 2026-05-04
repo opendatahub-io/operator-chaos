@@ -87,7 +87,7 @@ stateDiagram-v2
 ### Step 1: Install the controller
 
 ```bash
-$ git clone https://github.com/ugiordan/operator-chaos.git
+$ git clone https://github.com/opendatahub-io/operator-chaos.git
 $ cd operator-chaos
 $ kubectl apply -k config/default
 namespace/operator-chaos-system created

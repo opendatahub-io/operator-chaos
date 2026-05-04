@@ -1,7 +1,7 @@
 site_name: Operator Chaos
-site_url: https://ugiordan.github.io/operator-chaos
-repo_url: https://github.com/ugiordan/operator-chaos
-repo_name: ugiordan/operator-chaos
+site_url: https://opendatahub-io.github.io/operator-chaos
+repo_url: https://github.com/opendatahub-io/operator-chaos
+repo_name: opendatahub-io/operator-chaos
 edit_uri: edit/main/site/docs/
 
 theme:

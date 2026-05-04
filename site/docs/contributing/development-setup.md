@@ -20,7 +20,7 @@ This guide walks you through setting up a local development environment for Oper
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/ugiordan/operator-chaos.git
+git clone https://github.com/opendatahub-io/operator-chaos.git
 cd operator-chaos
 ```
 

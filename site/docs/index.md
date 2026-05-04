@@ -13,7 +13,7 @@ hide:
   </p>
   <p>
     <a href="getting-started/installation/" class="md-button md-button--primary">Get Started</a>
-    <a href="https://github.com/ugiordan/operator-chaos" class="md-button">GitHub</a>
+    <a href="https://github.com/opendatahub-io/operator-chaos" class="md-button">GitHub</a>
   </p>
 </div>
 

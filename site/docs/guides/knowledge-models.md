@@ -763,4 +763,4 @@ See [Upgrade Testing Guide](upgrade-testing.md) for full workflow.
 - Learn about [Controller Mode](../modes/controller.md) to run experiments as CRDs
 - Generate fuzz tests with [Fuzz Quick Start](../modes/fuzz.md)
 - Test operator upgrades with [Upgrade Testing Guide](upgrade-testing.md)
-- Explore the [knowledge/](https://github.com/ugiordan/operator-chaos/tree/main/knowledge) directory for real-world examples
+- Explore the [knowledge/](https://github.com/opendatahub-io/operator-chaos/tree/main/knowledge) directory for real-world examples
