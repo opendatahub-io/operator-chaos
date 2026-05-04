@@ -54,6 +54,69 @@ func TestValidateK8sName_TooLong(t *testing.T) {
 	assert.Contains(t, err.Error(), "exceeds maximum length")
 }
 
+func TestValidateK8sResourceName_Valid(t *testing.T) {
+	validNames := []string{
+		"my-resource",
+		"foo.bar",
+		"a",
+		"test-123",
+		"rhods-operator.3.3.2-aD1Yzlmi2CnLw2t7BBo3a5nWzRk2bj9JbeqVM6",
+		"datasciencecluster-v1-validator.opendatahub.io-sd9d8",
+		"My-MixedCase-Resource",
+	}
+
+	for _, name := range validNames {
+		t.Run(name, func(t *testing.T) {
+			err := validateK8sResourceName("name", name)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestValidateK8sResourceName_Invalid(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{"empty", ""},
+		{"underscore", "foo_bar"},
+		{"leading dash", "-leading-dash"},
+		{"trailing dash", "trailing-dash-"},
+		{"has spaces", "has spaces"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateK8sResourceName("name", tt.value)
+			assert.Error(t, err)
+		})
+	}
+}
+
+func TestValidateRBACRevokeAcceptsOLMGeneratedNames(t *testing.T) {
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.RBACRevoke,
+		Parameters: map[string]string{
+			"bindingName": "rhods-operator.3.3.2-aD1Yzlmi2CnLw2t7BBo3a5nWzRk2bj9JbeqVM6",
+			"bindingType": "ClusterRoleBinding",
+		},
+	}
+	err := validateRBACRevokeParams(spec)
+	assert.NoError(t, err)
+}
+
+func TestValidateWebhookDisruptAcceptsOLMGeneratedNames(t *testing.T) {
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.WebhookDisrupt,
+		Parameters: map[string]string{
+			"webhookName": "datasciencecluster-v1-validator.opendatahub.io-sd9d8",
+			"action":      "setFailurePolicy",
+		},
+	}
+	err := validateWebhookDisruptParams(spec)
+	assert.NoError(t, err)
+}
+
 func TestValidateFieldName_Valid(t *testing.T) {
 	validFields := []string{
 		"replicas",

@@ -96,7 +96,7 @@ func TestWebhookDisruptValidate(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "not a valid Kubernetes name",
+			errMsg:  "not a valid Kubernetes resource name",
 		},
 	}
 

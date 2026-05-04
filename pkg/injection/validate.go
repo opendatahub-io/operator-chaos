@@ -26,6 +26,13 @@ const chaosConfigMapPrefix = "operator-chaos-"
 var chaosManagedPrefixes = []string{"chaos-rollback-", "chaos-result-", "operator-chaos-", "chaos-controller-"}
 
 var validNamePattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9.\-]*[a-z0-9])?$`)
+
+// validResourceNamePattern is a more permissive pattern for Kubernetes resource
+// names that are not restricted to RFC 1123 DNS subdomains. ClusterRoleBindings
+// and ValidatingWebhookConfigurations allow uppercase letters in names (e.g.
+// OLM-generated names like "rhods-operator.3.3.2-aD1Yzlmi2CnLw2t7BBo3a5nWzRk").
+var validResourceNamePattern = regexp.MustCompile(`^[a-zA-Z0-9]([a-zA-Z0-9.\-]*[a-zA-Z0-9])?$`)
+
 var validFieldPattern = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_\-]*$`)
 var validPathSegmentPattern = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_\-]*$`)
 
@@ -49,6 +56,22 @@ func validateK8sName(paramName, value string) error {
 	}
 	if !validNamePattern.MatchString(value) {
 		return fmt.Errorf("%s %q is not a valid Kubernetes name (must match RFC 1123 DNS subdomain)", paramName, value)
+	}
+	return nil
+}
+
+// validateK8sResourceName validates names for Kubernetes resource types that
+// allow uppercase letters (ClusterRoleBindings, webhook configurations). OLM
+// generates names with version hashes containing mixed case.
+func validateK8sResourceName(paramName, value string) error {
+	if len(value) == 0 {
+		return fmt.Errorf("%s must not be empty", paramName)
+	}
+	if len(value) > maxNameLength {
+		return fmt.Errorf("%s exceeds maximum length of %d characters", paramName, maxNameLength)
+	}
+	if !validResourceNamePattern.MatchString(value) {
+		return fmt.Errorf("%s %q is not a valid Kubernetes resource name", paramName, value)
 	}
 	return nil
 }
@@ -426,7 +449,7 @@ func validateWebhookDisruptParams(spec v1alpha1.InjectionSpec) error {
 		return fmt.Errorf("targeting OpenShift webhook %q is not allowed", webhookName)
 	}
 
-	if err := validateK8sName("webhookName", webhookName); err != nil {
+	if err := validateK8sResourceName("webhookName", webhookName); err != nil {
 		return err
 	}
 	action, ok := spec.Parameters["action"]
@@ -481,7 +504,7 @@ func validateRBACRevokeParams(spec v1alpha1.InjectionSpec) error {
 		return fmt.Errorf("targeting system binding %q is not allowed", bindingName)
 	}
 
-	if err := validateK8sName("bindingName", bindingName); err != nil {
+	if err := validateK8sResourceName("bindingName", bindingName); err != nil {
 		return err
 	}
 	if err := rejectChaosManagedResource("RBACRevoke", bindingName); err != nil {
