@@ -1336,6 +1336,11 @@ func TestOrchestratorTTLCleanupBeforeRecoveryWait(t *testing.T) {
 	exp := newTestExperiment()
 	exp.Spec.Injection.TTL = metav1.Duration{Duration: 10 * time.Millisecond}
 	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: 1 * time.Millisecond}
+	exp.Spec.SteadyState = v1alpha1.SteadyStateSpec{
+		Checks: []v1alpha1.SteadyStateCheck{
+			{Type: v1alpha1.CheckResourceExists, Kind: "Deployment", Name: "test-deploy", Namespace: "test-ns"},
+		},
+	}
 
 	result, err := orch.Run(context.Background(), exp)
 	require.NoError(t, err)
