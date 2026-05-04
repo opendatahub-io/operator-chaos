@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-odh-model-controller-leader-lease-corrupt
+spec:
+  tier: 3
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: Lease/odh-model-controller.opendatahub.io
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: odh-model-controller.opendatahub.io
+        namespace: redhat-ods-applications
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "coordination.k8s.io/v1"
+      kind: "Lease"
+      name: "odh-model-controller.opendatahub.io"
+      field: "holderIdentity"
+      value: "chaos-injected-invalid"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Controller detects corrupted leader lease holderIdentity and
+      re-elects leader within 60s, resuming reconciliation.
+      CLEANUP RISK: The TTL-based cleanup restores the original
+      holderIdentity value, which may overwrite a legitimately
+      re-elected leader and cause a brief second disruption. The
+      controller should recover from this via a second re-election.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

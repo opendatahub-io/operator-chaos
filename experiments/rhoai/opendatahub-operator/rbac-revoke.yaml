@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-operator-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: opendatahub-operator
+    component: rhods-operator
+    # NOTE: The CRB name is OLM-generated and includes the CSV version + hash.
+    # It changes per install. Find it with: oc get clusterrolebinding | grep rhods-operator
+    # Override with: --set injection.parameters.bindingName=<actual-name>
+    resource: ClusterRoleBinding/rhods-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-operator
+        namespace: redhat-ods-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: rhods-operator
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the operator ClusterRoleBinding subjects are revoked, the
+      controller should lose its ability to manage component deployments
+      across namespaces and surface permission-denied errors. Once
+      permissions are restored, reconciliation should resume without
+      manual intervention.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 3
+    allowDangerous: true

@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-operator-network-partition
+spec:
+  tier: 2
+  target:
+    operator: opendatahub-operator
+    component: rhods-operator
+    resource: Deployment/rhods-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-operator
+        namespace: redhat-ods-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: name=rhods-operator
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the operator pods are network-partitioned, the leader should
+      lose its lease and stop reconciling DSCInitialization and
+      DataScienceCluster resources. Once connectivity is restored, a new
+      leader election should occur and reconciliation should resume.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 3
+    allowedNamespaces:
+      - redhat-ods-operator

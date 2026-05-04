@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-odh-model-controller-ingress-config-corruption
+spec:
+  tier: 2
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: ConfigMap/inferenceservice-config
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: v1
+        kind: ConfigMap
+        name: inferenceservice-config
+        namespace: redhat-ods-applications
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: "inferenceservice-config"
+      key: "ingress"
+      value: "{}"
+      resourceType: "ConfigMap"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the ingress key in inferenceservice-config is emptied, the
+      odh-model-controller should detect the invalid configuration and
+      surface error conditions rather than silently failing. The ConfigMap
+      is not owned by this controller, so recovery depends on the
+      DSCI/DSC operator or manual restoration. The chaos framework
+      restores the original value via TTL-based cleanup after 300s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

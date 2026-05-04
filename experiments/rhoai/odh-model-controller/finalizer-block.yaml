@@ -1,0 +1,43 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-odh-model-controller-finalizer-block
+spec:
+  tier: 3
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: ConfigMap/inferenceservice-config
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    dangerLevel: high
+    # Target the inferenceservice-config ConfigMap which always exists when
+    # odh-model-controller is deployed. This tests how the controller handles
+    # a stuck finalizer on its configuration resource.
+    parameters:
+      apiVersion: v1
+      kind: ConfigMap
+      name: inferenceservice-config
+      finalizer: chaos.operatorchaos.io/finalizer-block
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents the inferenceservice-config ConfigMap
+      from being deleted, the odh-model-controller should handle the
+      Terminating state gracefully and continue operating without crashing
+      or leaking resources.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications

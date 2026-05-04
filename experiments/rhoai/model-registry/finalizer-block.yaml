@@ -1,7 +1,7 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: model-registry-finalizer-block
+  name: rhoai-model-registry-finalizer-block
 spec:
   tier: 3
   target:
@@ -14,7 +14,7 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         name: model-registry-operator-controller-manager
-        namespace: opendatahub
+        namespace: redhat-ods-applications
         conditionType: Available
     timeout: "30s"
   injection:
@@ -35,4 +35,4 @@ spec:
   blastRadius:
     maxPodsAffected: 1
     allowedNamespaces:
-      - opendatahub
+      - redhat-ods-applications

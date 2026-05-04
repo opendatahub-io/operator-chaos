@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-model-registry-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: model-registry
+    component: model-registry-operator
+    resource: ClusterRoleBinding/model-registry-operator-manager-rolebinding
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: model-registry-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: model-registry-operator-manager-rolebinding
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the model-registry-operator ClusterRoleBinding subjects are
+      revoked, the operator should lose its ability to manage ModelRegistry
+      instances and surface permission-denied errors. Once permissions are
+      restored, reconciliation should resume without manual intervention.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
