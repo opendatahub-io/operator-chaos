@@ -5792,6 +5792,12 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Tier</code></td>
+<td><code>int32</code></td>
+<td><code>tier</code></td>
+<td>Fidelity tier (1-6). Controls graduated execution via <code>--max-tier</code>. +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=6 +kubebuilder:default=1</td>
+</tr>
+<tr>
 <td><code>Target</code></td>
 <td><code>TargetSpec</code></td>
 <td><code>target</code></td>
@@ -5820,12 +5826,6 @@
 <td><code>HypothesisSpec</code></td>
 <td><code>hypothesis</code></td>
 <td></td>
-</tr>
-<tr>
-<td><code>Tier</code></td>
-<td><code>int32</code></td>
-<td><code>tier</code></td>
-<td>Tier indicates the fidelity tier of this experiment (1-6). Tier 1: basic recovery (PodKill), safe for CI/kind. Tier 2: config/network faults (ConfigDrift, NetworkPartition). Tier 3: resource mutation (CRDMutation, FinalizerBlock, OwnerRefOrphan, LabelStomping, ClientFault). Tier 4: cluster-wide impact (WebhookDisrupt, RBACRevoke, WebhookLatency). Tier 5: destructive (NamespaceDeletion, QuotaExhaustion). Tier 6: multi-fault and upgrade scenarios. +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=6 +kubebuilder:default=1</td>
 </tr>
 </tbody>
 </table>
