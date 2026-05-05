@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: trustyai-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: trustyai
+    component: trustyai-service-operator-controller-manager
+    resource: ValidatingWebhookConfiguration/vtrustyaiservice.trustyai.opendatahub.io
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: trustyai-service-operator-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: vtrustyaiservice.trustyai.opendatahub.io
+      webhookType: validating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the TrustyAIService validating webhook failurePolicy is weakened
+      from Fail to Ignore, invalid TrustyAIService resources may be admitted
+      to the cluster. The chaos framework restores the original failurePolicy
+      via TTL-based cleanup after 60s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

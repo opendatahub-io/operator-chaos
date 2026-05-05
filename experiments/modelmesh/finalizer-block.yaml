@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: modelmesh-finalizer-block
+spec:
+  tier: 3
+  target:
+    operator: modelmesh
+    component: modelmesh-controller
+    resource: Deployment/modelmesh-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: modelmesh-controller
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: modelmesh-controller
+      finalizer: chaos.operatorchaos.io/block-test
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents the modelmesh-controller Deployment
+      from being deleted, the operator lifecycle should handle the Terminating
+      state gracefully. The chaos framework removes the finalizer via
+      TTL-based cleanup after 300s.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
