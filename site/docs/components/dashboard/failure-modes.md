@@ -14,6 +14,8 @@
 | CRDMutation | high | route-host-deletion.yaml | Deleting the Route host field via null merge patch removes the host assignment f... |
 | CRDMutation | high | route-shard-mismatch.yaml | Setting spec.host to a domain that does not match any configured IngressControll... |
 | CRDMutation | high | route-tls-mutation.yaml | Changing the TLS termination mode from "edge" or "reencrypt" to "passthrough" fo... |
+| WebhookDisrupt | high | webhook-disrupt-acceleratorprofile.yaml | When the accelerator-profile ValidatingWebhookConfiguration failurePolicy is wea... |
+| WebhookDisrupt | high | webhook-disrupt-hardwareprofile.yaml | When the hardware-profile ValidatingWebhookConfiguration failurePolicy is weaken... |
 
 ## Experiment Details
 
@@ -578,6 +580,121 @@ spec:
     allowedNamespaces:
       - opendatahub
     allowDangerous: true
+```
+
+</details>
+
+
+### rhoai-dashboard-webhook-disrupt-acceleratorprofile
+
+- **Type:** WebhookDisrupt
+- **Danger Level:** high
+- **Component:** rhods-dashboard
+
+When the accelerator-profile ValidatingWebhookConfiguration failurePolicy is weakened from Fail to Ignore, invalid AcceleratorProfile CRs can bypass admission validation. The chaos framework restores the original failurePolicy via TTL-based cleanup after 60s. This experiment uses label-based webhook discovery because OLM appends dynamic suffixes to the webhook configuration name.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-webhook-disrupt-acceleratorprofile
+spec:
+  tier: 2
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Deployment/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    parameters:
+      webhookLabelSelector: olm.webhook-description-generate-name=dashboard-acceleratorprofile-validator.opendatahub.io
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the accelerator-profile ValidatingWebhookConfiguration
+      failurePolicy is weakened from Fail to Ignore, invalid
+      AcceleratorProfile CRs can bypass admission validation. The chaos
+      framework restores the original failurePolicy via TTL-based cleanup
+      after 60s. This experiment uses label-based webhook discovery
+      because OLM appends dynamic suffixes to the webhook configuration
+      name.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications
+```
+
+</details>
+
+### rhoai-dashboard-webhook-disrupt-hardwareprofile
+
+- **Type:** WebhookDisrupt
+- **Danger Level:** high
+- **Component:** rhods-dashboard
+
+When the hardware-profile ValidatingWebhookConfiguration failurePolicy is weakened from Fail to Ignore, invalid HardwareProfile CRs can bypass admission validation. The chaos framework restores the original failurePolicy via TTL-based cleanup after 60s. This experiment uses label-based webhook discovery because OLM appends dynamic suffixes to the webhook configuration name.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: rhoai-dashboard-webhook-disrupt-hardwareprofile
+spec:
+  tier: 2
+  target:
+    operator: dashboard
+    component: rhods-dashboard
+    resource: Deployment/rhods-dashboard
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: rhods-dashboard
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    parameters:
+      webhookLabelSelector: olm.webhook-description-generate-name=dashboard-hardwareprofile-validator.opendatahub.io
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the hardware-profile ValidatingWebhookConfiguration
+      failurePolicy is weakened from Fail to Ignore, invalid
+      HardwareProfile CRs can bypass admission validation. The chaos
+      framework restores the original failurePolicy via TTL-based cleanup
+      after 60s. This experiment uses label-based webhook discovery
+      because OLM appends dynamic suffixes to the webhook configuration
+      name.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications
 ```
 
 </details>

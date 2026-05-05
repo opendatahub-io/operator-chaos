@@ -117,68 +117,47 @@ nav:
       - Grafana Dashboard: guides/dashboard-grafana.md
   - Components:
     - components/index.md
-    - Core:
-      - odh-model-controller:
-        - components/odh-model-controller/index.md
-        - Failure Modes: components/odh-model-controller/failure-modes.md
-        - Validation Results: components/odh-model-controller/validation-results.md
-        - Custom Experiments: components/odh-model-controller/custom-experiments.md
+    - Active (RHOAI 3.x / ODH):
       - ODH Dashboard:
         - components/dashboard/index.md
         - Failure Modes: components/dashboard/failure-modes.md
         - Validation Results: components/dashboard/validation-results.md
         - Custom Experiments: components/dashboard/custom-experiments.md
-      - KServe:
-        - components/kserve/index.md
-        - Failure Modes: components/kserve/failure-modes.md
-        - Validation Results: components/kserve/validation-results.md
-        - Custom Experiments: components/kserve/custom-experiments.md
-      - Model Registry:
-        - components/model-registry/index.md
-        - Failure Modes: components/model-registry/failure-modes.md
-        - Validation Results: components/model-registry/validation-results.md
-        - Custom Experiments: components/model-registry/custom-experiments.md
-      - Workbenches:
-        - components/workbenches/index.md
-        - Failure Modes: components/workbenches/failure-modes.md
-        - Validation Results: components/workbenches/validation-results.md
-        - Custom Experiments: components/workbenches/custom-experiments.md
       - Data Science Pipelines:
         - components/data-science-pipelines/index.md
         - Failure Modes: components/data-science-pipelines/failure-modes.md
         - Validation Results: components/data-science-pipelines/validation-results.md
         - Custom Experiments: components/data-science-pipelines/custom-experiments.md
-      - OpenDataHub Operator:
-        - components/opendatahub-operator/index.md
-        - Failure Modes: components/opendatahub-operator/failure-modes.md
-        - Validation Results: components/opendatahub-operator/validation-results.md
-        - Custom Experiments: components/opendatahub-operator/custom-experiments.md
-    - Optional:
-      - CodeFlare:
-        - components/codeflare/index.md
-        - Failure Modes: components/codeflare/failure-modes.md
-        - Validation Results: components/codeflare/validation-results.md
-        - Custom Experiments: components/codeflare/custom-experiments.md
-      - ModelMesh:
-        - components/modelmesh/index.md
-        - Failure Modes: components/modelmesh/failure-modes.md
-        - Validation Results: components/modelmesh/validation-results.md
-        - Custom Experiments: components/modelmesh/custom-experiments.md
       - Feast:
         - components/feast/index.md
         - Failure Modes: components/feast/failure-modes.md
         - Validation Results: components/feast/validation-results.md
         - Custom Experiments: components/feast/custom-experiments.md
-      - Kueue:
-        - components/kueue/index.md
-        - Failure Modes: components/kueue/failure-modes.md
-        - Validation Results: components/kueue/validation-results.md
-        - Custom Experiments: components/kueue/custom-experiments.md
+      - KServe:
+        - components/kserve/index.md
+        - Failure Modes: components/kserve/failure-modes.md
+        - Validation Results: components/kserve/validation-results.md
+        - Custom Experiments: components/kserve/custom-experiments.md
       - LlamaStack:
         - components/llamastack/index.md
         - Failure Modes: components/llamastack/failure-modes.md
         - Validation Results: components/llamastack/validation-results.md
         - Custom Experiments: components/llamastack/custom-experiments.md
+      - Model Registry:
+        - components/model-registry/index.md
+        - Failure Modes: components/model-registry/failure-modes.md
+        - Validation Results: components/model-registry/validation-results.md
+        - Custom Experiments: components/model-registry/custom-experiments.md
+      - odh-model-controller:
+        - components/odh-model-controller/index.md
+        - Failure Modes: components/odh-model-controller/failure-modes.md
+        - Validation Results: components/odh-model-controller/validation-results.md
+        - Custom Experiments: components/odh-model-controller/custom-experiments.md
+      - OpenDataHub Operator:
+        - components/opendatahub-operator/index.md
+        - Failure Modes: components/opendatahub-operator/failure-modes.md
+        - Validation Results: components/opendatahub-operator/validation-results.md
+        - Custom Experiments: components/opendatahub-operator/custom-experiments.md
       - Ray:
         - components/ray/index.md
         - Failure Modes: components/ray/failure-modes.md
@@ -194,6 +173,27 @@ nav:
         - Failure Modes: components/trustyai/failure-modes.md
         - Validation Results: components/trustyai/validation-results.md
         - Custom Experiments: components/trustyai/custom-experiments.md
+      - Workbenches:
+        - components/workbenches/index.md
+        - Failure Modes: components/workbenches/failure-modes.md
+        - Validation Results: components/workbenches/validation-results.md
+        - Custom Experiments: components/workbenches/custom-experiments.md
+    - Removed/Replaced (RHOAI 3.x):
+      - CodeFlare:
+        - components/codeflare/index.md
+        - Failure Modes: components/codeflare/failure-modes.md
+        - Validation Results: components/codeflare/validation-results.md
+        - Custom Experiments: components/codeflare/custom-experiments.md
+      - Kueue:
+        - components/kueue/index.md
+        - Failure Modes: components/kueue/failure-modes.md
+        - Validation Results: components/kueue/validation-results.md
+        - Custom Experiments: components/kueue/custom-experiments.md
+      - ModelMesh:
+        - components/modelmesh/index.md
+        - Failure Modes: components/modelmesh/failure-modes.md
+        - Validation Results: components/modelmesh/validation-results.md
+        - Custom Experiments: components/modelmesh/custom-experiments.md
   - Reference:
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md

@@ -1,5 +1,8 @@
 # modelmesh
 
+!!! warning "Removed in RHOAI 3.x"
+    ModelMesh has been removed from RHOAI starting with version 3.0. These experiments are only applicable to ODH deployments or RHOAI 2.x.
+
 ## Overview
 
 | Property | Value |

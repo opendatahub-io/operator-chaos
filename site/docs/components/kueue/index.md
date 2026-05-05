@@ -1,5 +1,8 @@
 # kueue
 
+!!! warning "Replaced in RHOAI 3.x"
+    Starting with RHOAI 3.x, Kueue is no longer managed as a DSC component. It has been replaced by the [Red Hat Build of Kueue Operator](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/managing_openshift_ai/managing-workloads-with-kueue), an OLM-managed operator installed separately. These experiments target the legacy DSC-managed Kueue and are only applicable to ODH deployments or RHOAI 2.x.
+
 ## Overview
 
 | Property | Value |

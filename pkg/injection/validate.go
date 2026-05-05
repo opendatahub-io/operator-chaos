@@ -432,26 +432,39 @@ func validateConfigDriftParams(spec v1alpha1.InjectionSpec) error {
 }
 
 func validateWebhookDisruptParams(spec v1alpha1.InjectionSpec) error {
-	webhookName, ok := spec.Parameters["webhookName"]
-	if !ok {
-		return fmt.Errorf("WebhookDisrupt requires 'webhookName' parameter")
+	webhookName := spec.Parameters["webhookName"]
+	labelSelector := spec.Parameters["webhookLabelSelector"]
+
+	hasName := webhookName != ""
+	hasSelector := labelSelector != ""
+
+	if !hasName && !hasSelector {
+		return fmt.Errorf("WebhookDisrupt requires either 'webhookName' or 'webhookLabelSelector' parameter")
+	}
+	if hasName && hasSelector {
+		return fmt.Errorf("WebhookDisrupt accepts either 'webhookName' or 'webhookLabelSelector', not both")
 	}
 
-	// Check deny-lists and prefix blocks BEFORE K8s name validation, because
-	// some system webhook names may contain characters invalid for DNS subdomains.
-	if systemCriticalWebhooks[webhookName] {
-		return fmt.Errorf("targeting system-critical webhook %q is not allowed", webhookName)
-	}
-	if strings.HasPrefix(webhookName, "system:") {
-		return fmt.Errorf("targeting system webhook %q is not allowed", webhookName)
-	}
-	if strings.HasPrefix(webhookName, "openshift-") {
-		return fmt.Errorf("targeting OpenShift webhook %q is not allowed", webhookName)
+	if hasName {
+		if err := checkResolvedWebhookDenyList(webhookName); err != nil {
+			return err
+		}
+		if err := validateK8sResourceName("webhookName", webhookName); err != nil {
+			return err
+		}
 	}
 
-	if err := validateK8sResourceName("webhookName", webhookName); err != nil {
-		return err
+	if hasSelector {
+		parsed, err := labels.Parse(labelSelector)
+		if err != nil {
+			return fmt.Errorf("invalid webhookLabelSelector %q: %w", labelSelector, err)
+		}
+		reqs, _ := parsed.Requirements()
+		if len(reqs) == 0 {
+			return fmt.Errorf("webhookLabelSelector must have at least one requirement")
+		}
 	}
+
 	action, ok := spec.Parameters["action"]
 	if !ok {
 		return fmt.Errorf("WebhookDisrupt requires 'action' parameter")

@@ -2,27 +2,41 @@
 
 **Danger Level:** :material-shield-remove: High
 
-Modifies failure policies on a ValidatingWebhookConfiguration to test webhook resilience.
+Modifies failure policies on a ValidatingWebhookConfiguration or MutatingWebhookConfiguration to test webhook resilience. Supports both exact-name and label-based webhook discovery.
 
 ## Spec Fields
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `webhookName` | `string` | Yes | - | Name of the ValidatingWebhookConfiguration resource |
-| `value` | `string` | Yes | - | New failure policy: Fail or Ignore |
+| `webhookName` | `string` | One of `webhookName` or `webhookLabelSelector` | - | Exact name of the webhook configuration resource |
+| `webhookLabelSelector` | `string` | One of `webhookName` or `webhookLabelSelector` | - | Label selector to discover the webhook configuration at runtime (must match exactly one) |
+| `webhookType` | `string` | No | `validating` | Type of webhook configuration: `validating` or `mutating` |
+| `value` | `string` | No | `Fail` | New failure policy: `Fail` or `Ignore` |
 | `ttl` | `duration` | No | `300s` | Auto-cleanup duration |
+
+`webhookName` and `webhookLabelSelector` are mutually exclusive. Exactly one must be specified.
 
 ## How It Works
 
-WebhookDisrupt reads the target ValidatingWebhookConfiguration, saves the original `failurePolicy` for each webhook entry, and sets all entries to the specified value. This is a cluster-scoped operation.
+WebhookDisrupt reads the target webhook configuration (ValidatingWebhookConfiguration or MutatingWebhookConfiguration), saves the original `failurePolicy` for each webhook entry, and sets all entries to the specified value. This is a cluster-scoped operation.
+
+**Target resolution:**
+
+- **By name:** `webhookName` directly references the webhook configuration resource.
+- **By label:** `webhookLabelSelector` discovers the webhook configuration at runtime using a Kubernetes label selector. The selector must match exactly one configuration. This is useful when operators like OLM generate webhook configuration names with random suffixes (e.g., `dashboard-acceleratorprofile-validator.opendatahub.io-wcd5w`), making exact-name targeting unreliable. The stable identity is typically in labels like `olm.webhook-description-generate-name`.
 
 **API calls:**
-1. `Get` the ValidatingWebhookConfiguration (cluster-scoped)
-2. Store original per-webhook failure policies in rollback annotation
-3. `Update` all webhook entries with new `failurePolicy`
-4. On cleanup: restore original per-webhook policies from rollback annotation
+1. Resolve the target webhook name (direct or via label selector `List`)
+2. Verify the target is not on the system-critical deny-list
+3. `Get` the webhook configuration (cluster-scoped)
+4. Check for existing rollback annotation (prevents double-inject)
+5. Store original per-webhook failure policies in rollback annotation
+6. `Update` all webhook entries with new `failurePolicy`
+7. On cleanup: restore original per-webhook policies from rollback annotation
 
-**Cleanup:** Restores each webhook's original `failurePolicy`. Idempotent (safe to call multiple times).
+**Double-inject protection:** If a webhook configuration already has a chaos rollback annotation, injection is refused. This prevents overwriting the original failure policies with already-modified values, which would make revert restore to the wrong state. Revert the existing injection before re-injecting.
+
+**Cleanup:** Restores each webhook's original `failurePolicy`. Idempotent (safe to call multiple times). When using label-based discovery, if the webhook configuration was deleted between inject and revert, cleanup returns successfully since there is nothing to restore. The cleanup function captures the resolved webhook name at inject time, so label changes after injection don't affect cleanup.
 
 **Crash safety:** Rollback annotation persists on the resource. `Revert` restores original policies.
 
@@ -51,6 +65,8 @@ Setting `failurePolicy: Ignore` means webhook validation is skipped. The operato
 
 | Component | Experiment | Danger | Description |
 |-----------|------------|--------|-------------|
+| dashboard | rhoai-dashboard-webhook-disrupt-acceleratorprofile | high | When the accelerator-profile ValidatingWebhookConfiguration failurePolicy is wea... |
+| dashboard | rhoai-dashboard-webhook-disrupt-hardwareprofile | high | When the hardware-profile ValidatingWebhookConfiguration failurePolicy is weaken... |
 | data-science-pipelines | data-science-pipelines-webhook-disrupt | high | When the pipeline version validating webhook failurePolicy is weakened from Fail... |
 | kserve | kserve-isvc-validator-disrupt | high | When the ValidatingWebhookConfiguration for InferenceService has its failurePoli... |
 | kueue | kueue-webhook-disrupt | high | When the kueue validating webhook failurePolicy is weakened from Fail to Ignore,... |

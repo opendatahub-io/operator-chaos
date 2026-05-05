@@ -2,14 +2,20 @@ package injection
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var errNoValidatingMatch = errors.New("no ValidatingWebhookConfiguration found")
+var errNoMutatingMatch = errors.New("no MutatingWebhookConfiguration found")
 
 // WebhookDisruptInjector disrupts Kubernetes admission webhooks by modifying
 // their configuration (e.g., changing FailurePolicy from Ignore to Fail).
@@ -34,10 +40,17 @@ func (w *WebhookDisruptInjector) Validate(spec v1alpha1.InjectionSpec, blast v1a
 // 3. Sets the failure policy on all webhooks to the specified value
 // 4. Returns a cleanup function that restores the original failure policies
 func (w *WebhookDisruptInjector) Inject(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) (CleanupFunc, []v1alpha1.InjectionEvent, error) {
-	webhookName := spec.Parameters["webhookName"]
 	webhookType := resolveWebhookType(spec.Parameters["webhookType"])
 
-	// Determine target failure policy
+	webhookName, err := w.resolveWebhookName(ctx, spec.Parameters, webhookType)
+	if err != nil {
+		return nil, nil, fmt.Errorf("resolving webhook target: %w", err)
+	}
+
+	if err := checkResolvedWebhookDenyList(webhookName); err != nil {
+		return nil, nil, err
+	}
+
 	targetPolicyStr := spec.Parameters["value"]
 	if targetPolicyStr == "" {
 		targetPolicyStr = "Fail"
@@ -72,7 +85,7 @@ func (w *WebhookDisruptInjector) Inject(ctx context.Context, spec v1alpha1.Injec
 	}
 
 	cleanup := func(ctx context.Context) error {
-		return w.Revert(ctx, spec, namespace)
+		return w.revertResolved(ctx, webhookName, webhookType)
 	}
 
 	return cleanup, events, nil
@@ -82,6 +95,10 @@ func (w *WebhookDisruptInjector) injectValidating(ctx context.Context, webhookNa
 	webhookConfig := &admissionv1.ValidatingWebhookConfiguration{}
 	if err := w.client.Get(ctx, client.ObjectKey{Name: webhookName}, webhookConfig); err != nil {
 		return nil, 0, fmt.Errorf("getting ValidatingWebhookConfiguration %q: %w", webhookName, err)
+	}
+
+	if _, hasRollback := webhookConfig.GetAnnotations()[safety.RollbackAnnotationKey]; hasRollback {
+		return nil, 0, fmt.Errorf("ValidatingWebhookConfiguration %q already has a chaos rollback annotation; revert the existing injection before re-injecting", webhookName)
 	}
 
 	originalPolicies := make(map[string]string, len(webhookConfig.Webhooks))
@@ -118,6 +135,10 @@ func (w *WebhookDisruptInjector) injectMutating(ctx context.Context, webhookName
 		return nil, 0, fmt.Errorf("getting MutatingWebhookConfiguration %q: %w", webhookName, err)
 	}
 
+	if _, hasRollback := webhookConfig.GetAnnotations()[safety.RollbackAnnotationKey]; hasRollback {
+		return nil, 0, fmt.Errorf("MutatingWebhookConfiguration %q already has a chaos rollback annotation; revert the existing injection before re-injecting", webhookName)
+	}
+
 	originalPolicies := make(map[string]string, len(webhookConfig.Webhooks))
 	for _, wh := range webhookConfig.Webhooks {
 		if wh.FailurePolicy != nil {
@@ -148,10 +169,23 @@ func (w *WebhookDisruptInjector) injectMutating(ctx context.Context, webhookName
 
 // Revert restores the original failure policies on the webhook configuration.
 // It is idempotent: if no rollback annotation is present, it returns nil.
+// When using label-based discovery, if the webhook was already deleted (no match
+// found), Revert returns nil since there is nothing left to restore.
 func (w *WebhookDisruptInjector) Revert(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) error {
-	webhookName := spec.Parameters["webhookName"]
 	webhookType := resolveWebhookType(spec.Parameters["webhookType"])
 
+	webhookName, err := w.resolveWebhookName(ctx, spec.Parameters, webhookType)
+	if err != nil {
+		if spec.Parameters["webhookLabelSelector"] != "" && isNoMatchError(err) {
+			return nil
+		}
+		return fmt.Errorf("resolving webhook target for revert: %w", err)
+	}
+
+	return w.revertResolved(ctx, webhookName, webhookType)
+}
+
+func (w *WebhookDisruptInjector) revertResolved(ctx context.Context, webhookName, webhookType string) error {
 	if webhookType == "mutating" {
 		return w.revertMutating(ctx, webhookName)
 	}
@@ -224,6 +258,77 @@ func (w *WebhookDisruptInjector) revertMutating(ctx context.Context, webhookName
 
 	safety.RemoveChaosMetadata(webhookConfig, string(v1alpha1.WebhookDisrupt))
 	return w.client.Update(ctx, webhookConfig)
+}
+
+// resolveWebhookName returns the target webhook configuration name, either from
+// the explicit webhookName parameter or by listing configurations matching the
+// webhookLabelSelector. When using a label selector, exactly one matching
+// configuration must exist.
+func (w *WebhookDisruptInjector) resolveWebhookName(ctx context.Context, params map[string]string, webhookType string) (string, error) {
+	if name := params["webhookName"]; name != "" {
+		return name, nil
+	}
+
+	selector, err := labels.Parse(params["webhookLabelSelector"])
+	if err != nil {
+		return "", fmt.Errorf("parsing webhookLabelSelector: %w", err)
+	}
+
+	listOpts := &client.ListOptions{LabelSelector: selector}
+
+	if webhookType == "mutating" {
+		list := &admissionv1.MutatingWebhookConfigurationList{}
+		if err := w.client.List(ctx, list, listOpts); err != nil {
+			return "", fmt.Errorf("listing MutatingWebhookConfigurations: %w", err)
+		}
+		if len(list.Items) == 0 {
+			return "", fmt.Errorf("%w matching label selector %q", errNoMutatingMatch, params["webhookLabelSelector"])
+		}
+		if len(list.Items) > 1 {
+			names := make([]string, len(list.Items))
+			for i, item := range list.Items {
+				names[i] = item.Name
+			}
+			return "", fmt.Errorf("label selector %q matched %d MutatingWebhookConfigurations %v; must match exactly one", params["webhookLabelSelector"], len(list.Items), names)
+		}
+		return list.Items[0].Name, nil
+	}
+
+	list := &admissionv1.ValidatingWebhookConfigurationList{}
+	if err := w.client.List(ctx, list, listOpts); err != nil {
+		return "", fmt.Errorf("listing ValidatingWebhookConfigurations: %w", err)
+	}
+	if len(list.Items) == 0 {
+		return "", fmt.Errorf("%w matching label selector %q", errNoValidatingMatch, params["webhookLabelSelector"])
+	}
+	if len(list.Items) > 1 {
+		names := make([]string, len(list.Items))
+		for i, item := range list.Items {
+			names[i] = item.Name
+		}
+		return "", fmt.Errorf("label selector %q matched %d ValidatingWebhookConfigurations %v; must match exactly one", params["webhookLabelSelector"], len(list.Items), names)
+	}
+	return list.Items[0].Name, nil
+}
+
+// checkResolvedWebhookDenyList checks whether a resolved webhook name is
+// in the system-critical deny-list. This is needed because label-based
+// discovery bypasses the name-based deny-list checks in validation.
+func checkResolvedWebhookDenyList(name string) error {
+	if systemCriticalWebhooks[name] {
+		return fmt.Errorf("targeting system-critical webhook %q is not allowed", name)
+	}
+	if strings.HasPrefix(name, "system:") {
+		return fmt.Errorf("targeting system webhook %q is not allowed", name)
+	}
+	if strings.HasPrefix(name, "openshift-") {
+		return fmt.Errorf("targeting OpenShift webhook %q is not allowed", name)
+	}
+	return nil
+}
+
+func isNoMatchError(err error) bool {
+	return errors.Is(err, errNoValidatingMatch) || errors.Is(err, errNoMutatingMatch)
 }
 
 // resolveWebhookType returns the webhook type, defaulting to "validating".

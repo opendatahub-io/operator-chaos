@@ -52,23 +52,32 @@ graph TD
 
 ## Coverage by Component
 
-| Component | CRDMutation | ClientFault | ConfigDrift | FinalizerBlock | LabelStomping | NamespaceDeletion | NetworkPartition | OwnerRefOrphan | PodKill | QuotaExhaustion | RBACRevoke | WebhookDisrupt | WebhookLatency | Total |
-|-----------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|-------|
-| codeflare | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 |
-| dashboard | :material-check: | - | :material-check: | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | - | - | 6 |
+### Active Components (RHOAI 3.x / ODH)
+
+| Component | CRDMut | Client | CfgDrift | Finalizer | LblStomp | NsDel | NetPart | OwnerRef | PodKill | Quota | RBAC | WebhookD | WebhookL | Total |
+|-----------|:------:|:------:|:--------:|:---------:|:--------:|:-----:|:-------:|:--------:|:-------:|:-----:|:----:|:--------:|:--------:|:-----:|
+| dashboard | :material-check: | - | :material-check: | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | - | 7 |
 | data-science-pipelines | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 |
-| feast | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 3 |
+| feast | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 |
 | kserve | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | - | - | :material-check: | - | 6 |
-| kueue | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 |
 | llamastack | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 |
 | model-registry | :material-check: | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 6 |
-| modelmesh | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 |
 | odh-model-controller | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 13 |
 | opendatahub-operator | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 |
 | ray | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 |
 | training-operator | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 |
 | trustyai | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 3 |
 | workbenches | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 4 |
+
+### Removed/Replaced (RHOAI 3.x)
+
+Experiments still available for ODH or RHOAI 2.x testing.
+
+| Component | CRDMut | Client | CfgDrift | Finalizer | LblStomp | NsDel | NetPart | OwnerRef | PodKill | Quota | RBAC | WebhookD | WebhookL | Total | Status |
+|-----------|:------:|:------:|:--------:|:---------:|:--------:|:-----:|:-------:|:--------:|:-------:|:-----:|:----:|:--------:|:--------:|:-----:|--------|
+| codeflare | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | 4 | Removed in 3.0 |
+| kueue | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 | Replaced by RH Kueue |
+| modelmesh | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | 5 | Removed in 3.0 |
 
 <!-- custom-start: notes -->
 <!-- custom-end: notes -->
