@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: feast-rbac-revoke
+spec:
+  tier: 3
+  target:
+    operator: feast
+    component: feast-operator-controller-manager
+    resource: ClusterRoleBinding/feast-operator-manager-rolebinding
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: feast-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: feast-operator-manager-rolebinding
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the feast-operator ClusterRoleBinding is revoked, the
+      operator loses permissions to manage FeatureStore resources.
+      After the binding is restored via TTL cleanup, the operator
+      should resume normal reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

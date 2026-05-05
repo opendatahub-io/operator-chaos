@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: Deployment/data-science-pipelines-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: data-science-pipelines-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/name=data-science-pipelines-operator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the data-science-pipelines-operator pod is killed, the
+      Deployment controller should restart it and the operator should
+      resume reconciliation of DSP resources.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

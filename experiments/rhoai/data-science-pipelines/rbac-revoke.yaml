@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-rbac-revoke
+spec:
+  tier: 3
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: ClusterRoleBinding/data-science-pipelines-operator-manager-rolebinding
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: data-science-pipelines-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: data-science-pipelines-operator-manager-rolebinding
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the data-science-pipelines-operator ClusterRoleBinding is
+      revoked, the operator loses permissions to manage DSP resources.
+      After the binding is restored via TTL cleanup, the operator should
+      resume normal reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

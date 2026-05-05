@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ray-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: ray
+    component: kuberay-operator
+    resource: Deployment/kuberay-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kuberay-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/name=kuberay
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the kuberay-operator pod is killed, the Deployment controller
+      should restart it and the operator should resume reconciliation of
+      RayCluster resources.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ray-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: ray
+    component: kuberay-operator
+    resource: MutatingWebhookConfiguration/kuberay-mutating-webhook-configuration
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kuberay-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: kuberay-mutating-webhook-configuration
+      webhookType: mutating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the kuberay mutating webhook failurePolicy is weakened from
+      Fail to Ignore, RayCluster resources may be admitted without
+      proper defaults. The chaos framework restores the original
+      failurePolicy via TTL-based cleanup after 60s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

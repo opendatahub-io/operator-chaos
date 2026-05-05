@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ray-finalizer-block
+spec:
+  tier: 3
+  target:
+    operator: ray
+    component: kuberay-operator
+    resource: Deployment/kuberay-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kuberay-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: kuberay-operator
+      finalizer: chaos.operatorchaos.io/block-test
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents the kuberay-operator Deployment
+      from being deleted, the operator lifecycle should handle the
+      Terminating state gracefully. The chaos framework removes the
+      finalizer via TTL-based cleanup after 300s.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

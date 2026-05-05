@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: training-operator-rbac-revoke
+spec:
+  tier: 3
+  target:
+    operator: training-operator
+    component: kubeflow-training-operator
+    resource: ClusterRoleBinding/kubeflow-training-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kubeflow-training-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: kubeflow-training-operator
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the training-operator ClusterRoleBinding is revoked, the operator
+      loses permissions to manage training job resources. After the binding
+      is restored via TTL cleanup, the operator should resume normal
+      reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

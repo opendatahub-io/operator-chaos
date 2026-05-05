@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: feast-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: feast
+    component: feast-operator-controller-manager
+    resource: Deployment/feast-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: feast-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: control-plane=controller-manager,app.kubernetes.io/part-of=feastoperator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the feast-operator pod is killed, the Deployment controller
+      should restart it and the operator should resume reconciliation
+      of FeatureStore resources.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-config-drift
+spec:
+  tier: 2
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: ConfigMap/data-science-pipelines-operator-dspo-config
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: v1
+        kind: ConfigMap
+        name: data-science-pipelines-operator-dspo-config
+        namespace: redhat-ods-applications
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: data-science-pipelines-operator-dspo-config
+      key: config
+      value: '{"INVALID_KEY":"INVALID_VALUE"}'
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the dspo-config ConfigMap is corrupted with invalid
+      configuration, the data-science-pipelines operator should detect
+      the misconfiguration and either fall back to defaults or surface
+      clear error conditions rather than silently failing.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
+    allowDangerous: true

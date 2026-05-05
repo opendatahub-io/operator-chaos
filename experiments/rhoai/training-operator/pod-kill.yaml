@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: training-operator-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: training-operator
+    component: kubeflow-training-operator
+    resource: Deployment/kubeflow-training-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kubeflow-training-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: control-plane=kubeflow-training-operator,app.kubernetes.io/name=training-operator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the training-operator pod is killed, running training jobs
+      continue via worker pods. New job submissions queue until the
+      controller recovers within the recovery timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: llamastack-network-partition
+spec:
+  tier: 2
+  target:
+    operator: llamastack
+    component: llama-stack-k8s-operator-controller-manager
+    resource: Deployment/llama-stack-k8s-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: llama-stack-k8s-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: control-plane=controller-manager,app.kubernetes.io/name=llama-stack-k8s-operator
+      duration: "60s"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the llama-stack-k8s-operator is network-partitioned from
+      the API server, it cannot reconcile LlamaStack resources. After
+      the partition is removed, the operator should resume normal
+      reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications

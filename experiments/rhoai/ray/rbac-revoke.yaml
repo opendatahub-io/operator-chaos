@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ray-rbac-revoke
+spec:
+  tier: 3
+  target:
+    operator: ray
+    component: kuberay-operator
+    resource: ClusterRoleBinding/kuberay-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kuberay-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: kuberay-operator
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the kuberay-operator ClusterRoleBinding is revoked, the
+      operator loses permissions to manage RayCluster resources. After
+      the binding is restored via TTL cleanup, the operator should
+      resume normal reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

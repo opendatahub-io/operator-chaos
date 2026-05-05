@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: training-operator-network-partition
+spec:
+  tier: 2
+  target:
+    operator: training-operator
+    component: kubeflow-training-operator
+    resource: Deployment/kubeflow-training-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kubeflow-training-operator
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: control-plane=kubeflow-training-operator,app.kubernetes.io/name=training-operator
+      duration: "60s"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the training-operator is network-partitioned, it cannot
+      communicate with the API server. After the partition is removed,
+      the operator should resume reconciliation and process any queued
+      training jobs.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - redhat-ods-applications
