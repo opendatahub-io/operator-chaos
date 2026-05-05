@@ -25,6 +25,19 @@ Existing chaos tools (Krkn, Litmus, Chaos Mesh) test infrastructure resilience: 
 
 Operator Chaos answers this by testing reconciliation: verifying operators restore resources to their intended state after operator-semantic faults like CRD mutation, config drift, and RBAC revocation.
 
+## How It Compares to Other Chaos Tools
+
+| | Operator Chaos | [Krkn](https://github.com/krkn-chaos/krkn) | [LitmusChaos](https://litmuschaos.io/) | [Chaos Mesh](https://chaos-mesh.org/) |
+|---|---|---|---|---|
+| **Focus** | Operator reconciliation logic | Cluster/infrastructure resilience | Application and infrastructure resilience | Kubernetes-native fault injection |
+| **Core question** | "Did the operator restore the correct state?" | "Does the cluster survive this failure?" | "Does the application recover?" | "How does the system behave under fault?" |
+| **Fault types** | Operator-semantic: config drift, CRD mutation, RBAC revocation, webhook disruption, finalizer injection, leader lease corruption | Infrastructure: node kill, network chaos, etcd split, zone outage, CPU/memory hog | Mixed: pod kill, node drain, disk fill, HTTP chaos, cloud provider faults | Kubernetes-native: pod kill, network delay/loss, IO stress, time skew, JVM faults |
+| **Verdict model** | Resilient / Degraded / Failed with recovery time | Pass / Fail based on cluster health | Pass / Fail based on probe checks | Observational (metrics, logs) |
+| **Operator awareness** | Knowledge models describe operator topology (deployments, webhooks, RBAC, CRDs) | No operator-specific modeling | No operator-specific modeling | No operator-specific modeling |
+| **Best for** | Operator developers validating reconciliation correctness | SRE teams validating cluster resilience | Platform teams testing application resilience at scale | Teams needing fine-grained Kubernetes fault injection |
+
+These tools are **complementary, not competing**. Krkn, Litmus, and Chaos Mesh test whether the platform and applications survive infrastructure failures. Operator Chaos tests whether the operator's reconciliation logic correctly restores managed resources after operator-level faults. A pod-kill test in Krkn checks if Kubernetes reschedules the pod. A pod-kill test in Operator Chaos checks if the operator re-reconciles all the resources that pod was managing.
+
 ## How It Works
 
 ```mermaid
