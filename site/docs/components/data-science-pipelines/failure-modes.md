@@ -4,6 +4,7 @@
 
 | Injection Type | Danger | Experiment | Description |
 |----------------|--------|------------|-------------|
+| ConfigDrift | high | config-drift.yaml | When the dspo-config ConfigMap is corrupted with invalid configuration, the data... |
 | FinalizerBlock | low | finalizer-block.yaml | When a stuck finalizer prevents a DataSciencePipelinesApplication from being del... |
 | NetworkPartition | medium | network-partition.yaml | When the DSPO pod is network-partitioned from the API server, it should lose its... |
 | PodKill | low | pod-kill.yaml | When the data-science-pipelines-operator pod is killed, Kubernetes should recrea... |
@@ -11,6 +12,61 @@
 | WebhookDisrupt | high | webhook-disrupt.yaml | When the pipeline version validating webhook failurePolicy is weakened from Fail... |
 
 ## Experiment Details
+
+### data-science-pipelines-config-drift
+
+- **Type:** ConfigDrift
+- **Danger Level:** high
+- **Component:** data-science-pipelines-operator
+
+When the dspo-config ConfigMap is corrupted with invalid configuration, the data-science-pipelines operator should detect the misconfiguration and either fall back to defaults or surface clear error conditions rather than silently failing.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: data-science-pipelines-config-drift
+spec:
+  tier: 2
+  target:
+    operator: data-science-pipelines
+    component: data-science-pipelines-operator
+    resource: ConfigMap/dspo-config
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: v1
+        kind: ConfigMap
+        name: dspo-config
+        namespace: opendatahub
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: dspo-config
+      key: config
+      value: '{"INVALID_KEY":"INVALID_VALUE"}'
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When the dspo-config ConfigMap is corrupted with invalid configuration,
+      the data-science-pipelines operator should detect the misconfiguration
+      and either fall back to defaults or surface clear error conditions
+      rather than silently failing.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
+    allowDangerous: true
+```
+
+</details>
 
 ### data-science-pipelines-finalizer-block
 

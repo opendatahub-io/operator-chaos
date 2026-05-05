@@ -8,6 +8,7 @@
 | NetworkPartition | medium | network-partition.yaml | When the training-operator is network-partitioned from the API server, job statu... |
 | PodKill | low | pod-kill.yaml | When the training-operator pod is killed, running training jobs continue via wor... |
 | RBACRevoke | high | rbac-revoke.yaml | When the training-operator ClusterRoleBinding subjects are revoked, the controll... |
+| WebhookDisrupt | high | webhook-disrupt.yaml | When the PyTorchJob validating webhook failurePolicy is weakened from Fail to Ig... |
 
 ## Experiment Details
 
@@ -211,6 +212,61 @@ spec:
       the controller can no longer manage PyTorchJob resources. API calls
       return 403 errors. Once permissions are restored, normal operation
       resumes without restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+```
+
+</details>
+
+
+### training-operator-webhook-disrupt
+
+- **Type:** WebhookDisrupt
+- **Danger Level:** high
+- **Component:** training-operator-controller-manager
+
+When the PyTorchJob validating webhook failurePolicy is weakened from Fail to Ignore, invalid PyTorchJob resources may be admitted to the cluster. The chaos framework restores the original failurePolicy via TTL-based cleanup after 60s.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: training-operator-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: training-operator
+    component: training-operator-controller-manager
+    resource: ValidatingWebhookConfiguration/vpytorchjob.kubeflow.org
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: training-operator-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: vpytorchjob.kubeflow.org
+      webhookType: validating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the PyTorchJob validating webhook failurePolicy is weakened from
+      Fail to Ignore, invalid PyTorchJob resources may be admitted to the
+      cluster. The chaos framework restores the original failurePolicy via
+      TTL-based cleanup after 60s.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1

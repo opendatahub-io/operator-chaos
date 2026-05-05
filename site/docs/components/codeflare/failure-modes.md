@@ -5,9 +5,11 @@
 | Injection Type | Danger | Experiment | Description |
 |----------------|--------|------------|-------------|
 | ConfigDrift | high | config-drift.yaml | When the codeflare operator configuration is corrupted, new cluster configuratio... |
+| FinalizerBlock | low | finalizer-block.yaml | When a stuck finalizer prevents the codeflare-operator Deployment from being del... |
 | NetworkPartition | medium | network-partition.yaml | When the codeflare-operator is network-partitioned from the API server, AppWrapp... |
 | PodKill | low | pod-kill.yaml | When the codeflare-operator pod is killed, existing Ray clusters remain unaffect... |
 | RBACRevoke | high | rbac-revoke.yaml | When the codeflare-operator ClusterRoleBinding subjects are revoked, the operato... |
+| WebhookDisrupt | high | webhook-disrupt.yaml | When the AppWrapper validating webhook failurePolicy is weakened from Fail to Ig... |
 
 ## Experiment Details
 
@@ -62,6 +64,60 @@ spec:
     allowedNamespaces:
       - opendatahub
     allowDangerous: true
+```
+
+</details>
+
+### codeflare-finalizer-block
+
+- **Type:** FinalizerBlock
+- **Danger Level:** low
+- **Component:** codeflare-operator-manager
+
+When a stuck finalizer prevents the codeflare-operator Deployment from being deleted, the operator lifecycle should handle the Terminating state gracefully. The chaos framework removes the finalizer via TTL-based cleanup after 300s.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: codeflare-finalizer-block
+spec:
+  tier: 3
+  target:
+    operator: codeflare
+    component: codeflare-operator-manager
+    resource: Deployment/codeflare-operator-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: codeflare-operator-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: codeflare-operator-manager
+      finalizer: chaos.operatorchaos.io/block-test
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a stuck finalizer prevents the codeflare-operator Deployment
+      from being deleted, the operator lifecycle should handle the Terminating
+      state gracefully. The chaos framework removes the finalizer via
+      TTL-based cleanup after 300s.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub
 ```
 
 </details>
@@ -212,6 +268,61 @@ spec:
       the operator can no longer manage AppWrapper resources. API calls
       return 403 errors. Once permissions are restored, normal operation
       resumes without restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+```
+
+</details>
+
+
+### codeflare-webhook-disrupt
+
+- **Type:** WebhookDisrupt
+- **Danger Level:** high
+- **Component:** codeflare-operator-manager
+
+When the AppWrapper validating webhook failurePolicy is weakened from Fail to Ignore, invalid AppWrapper resources may be admitted to the cluster. The chaos framework restores the original failurePolicy via TTL-based cleanup after 60s.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: codeflare-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: codeflare
+    component: codeflare-operator-manager
+    resource: ValidatingWebhookConfiguration/vappwrapper.codeflare.dev
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: codeflare-operator-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: vappwrapper.codeflare.dev
+      webhookType: validating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the AppWrapper validating webhook failurePolicy is weakened from
+      Fail to Ignore, invalid AppWrapper resources may be admitted to the
+      cluster. The chaos framework restores the original failurePolicy via
+      TTL-based cleanup after 60s.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1

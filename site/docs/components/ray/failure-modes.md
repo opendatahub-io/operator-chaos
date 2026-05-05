@@ -8,6 +8,7 @@
 | NetworkPartition | medium | network-partition.yaml | When the ray-operator is network-partitioned from the API server, cluster scalin... |
 | PodKill | low | pod-kill.yaml | When the ray-operator pod is killed, existing RayClusters keep running and servi... |
 | RBACRevoke | high | rbac-revoke.yaml | When the ray-operator ClusterRoleBinding subjects are revoked, the controller ca... |
+| WebhookDisrupt | high | webhook-disrupt.yaml | When the RayCluster validating webhook failurePolicy is weakened from Fail to Ig... |
 
 ## Experiment Details
 
@@ -211,6 +212,61 @@ spec:
       controller can no longer manage RayCluster resources. API calls
       return 403 errors. Once permissions are restored, normal operation
       resumes without restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+```
+
+</details>
+
+
+### ray-webhook-disrupt
+
+- **Type:** WebhookDisrupt
+- **Danger Level:** high
+- **Component:** ray-operator-controller-manager
+
+When the RayCluster validating webhook failurePolicy is weakened from Fail to Ignore, invalid RayCluster resources may be admitted to the cluster. The chaos framework restores the original failurePolicy via TTL-based cleanup after 60s.
+
+<details>
+<summary>Experiment YAML</summary>
+
+```yaml
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: ray-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: ray
+    component: ray-operator-controller-manager
+    resource: ValidatingWebhookConfiguration/vraycluster.ray.io
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: ray-operator-controller-manager
+        namespace: opendatahub
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: vraycluster.ray.io
+      webhookType: validating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the RayCluster validating webhook failurePolicy is weakened from
+      Fail to Ignore, invalid RayCluster resources may be admitted to the
+      cluster. The chaos framework restores the original failurePolicy via
+      TTL-based cleanup after 60s.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
