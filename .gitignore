@@ -19,3 +19,4 @@ operator-chaos
 docs/superpowers/
 dashboard.db*
 test-results/
+kubeconfig-*

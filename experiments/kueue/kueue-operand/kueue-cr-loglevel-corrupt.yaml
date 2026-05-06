@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-cr-loglevel-corrupt
+spec:
+  tier: 5
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: Kueue/cluster
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kueue-controller-manager
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "60s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "kueue.openshift.io/v1"
+      kind: "Kueue"
+      name: "cluster"
+      path: "spec.logLevel"
+      value: "TraceAll"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Setting the Kueue CR's logLevel to TraceAll forces maximum verbosity
+      on the operand. The kueue operator should detect the config change
+      and reconfigure the controller-manager. This tests whether live
+      config changes cause operand instability or restarts. After rollback,
+      the original log level is restored.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

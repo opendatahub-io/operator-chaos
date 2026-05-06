@@ -1,0 +1,44 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-deployment-scale-zero
+spec:
+  tier: 5
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: Deployment/openshift-kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "apps/v1"
+      kind: "Deployment"
+      name: "openshift-kueue-operator"
+      namespace: "openshift-kueue-operator"
+      path: "spec.replicas"
+      value: "0"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Scaling the kueue operator deployment to zero replicas removes all
+      operator pods. OLM should detect the unavailable deployment and
+      potentially restart it. Without the operator, no reconciliation of
+      the Kueue CR occurs, but existing operand (kueue-controller-manager)
+      continues running. After rollback, replicas are restored and the
+      operator resumes reconciliation.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

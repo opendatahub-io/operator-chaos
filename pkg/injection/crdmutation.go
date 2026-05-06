@@ -116,7 +116,11 @@ func (m *CRDMutationInjector) Inject(ctx context.Context, spec v1alpha1.Injectio
 			}),
 	}
 
-	// Cleanup restores original field value and removes rollback metadata
+	// Cleanup restores original field value and removes rollback metadata.
+	// Uses a two-step approach: first nullify the mutated path via merge
+	// patch (to remove any nested keys the injection added), then set the
+	// original value. This avoids the JSON merge patch limitation where
+	// restoring an object value leaves injected nested keys intact.
 	cleanup := func(ctx context.Context) error {
 		// Re-fetch the resource to get current state as patch target
 		current := &unstructured.Unstructured{}
@@ -126,9 +130,6 @@ func (m *CRDMutationInjector) Inject(ctx context.Context, spec v1alpha1.Injectio
 			return fmt.Errorf("re-fetching resource for cleanup: %w", err)
 		}
 
-		// Build a merge patch that restores the mutated field and removes
-		// the rollback annotation and chaos labels. In merge patch, setting
-		// a key to null removes it.
 		restoreAnnotations := map[string]any{
 			safety.RollbackAnnotationKey: nil,
 		}
@@ -137,21 +138,40 @@ func (m *CRDMutationInjector) Inject(ctx context.Context, spec v1alpha1.Injectio
 			restoreLabels[k] = nil
 		}
 
-		// When originalValue is nil, JSON merge patch serializes it as null,
-		// which removes the key.
-		restoreValueMap := buildNestedMap(pathSegments, originalValue)
-		restorePatchMap := deepMerge(restoreValueMap, map[string]any{
+		// Step 1: null out the mutated path to remove any injected nested
+		// keys, and remove chaos metadata in the same patch.
+		nullMap := buildNestedMap(pathSegments, nil)
+		nullPatchMap := deepMerge(nullMap, map[string]any{
 			"metadata": map[string]any{
 				"annotations": restoreAnnotations,
 				"labels":      restoreLabels,
 			},
 		})
-		restorePatch, err := json.Marshal(restorePatchMap)
+		nullPatch, err := json.Marshal(nullPatchMap)
 		if err != nil {
-			return fmt.Errorf("building restore patch: %w", err)
+			return fmt.Errorf("building null patch: %w", err)
+		}
+		if err := m.client.Patch(ctx, current, client.RawPatch(types.MergePatchType, nullPatch)); err != nil {
+			return fmt.Errorf("applying null patch for cleanup: %w", err)
 		}
 
-		return m.client.Patch(ctx, current, client.RawPatch(types.MergePatchType, restorePatch))
+		// Step 2: if the original value was non-nil, re-set it.
+		// (If nil, step 1 already removed the field entirely.)
+		if originalValue != nil {
+			if err := m.client.Get(ctx, key, current); err != nil {
+				return fmt.Errorf("re-fetching resource after null patch: %w", err)
+			}
+			restoreMap := buildNestedMap(pathSegments, originalValue)
+			restorePatch, err := json.Marshal(restoreMap)
+			if err != nil {
+				return fmt.Errorf("building restore patch: %w", err)
+			}
+			if err := m.client.Patch(ctx, current, client.RawPatch(types.MergePatchType, restorePatch)); err != nil {
+				return fmt.Errorf("applying restore patch: %w", err)
+			}
+		}
+
+		return nil
 	}
 
 	return cleanup, events, nil
@@ -209,19 +229,39 @@ func (m *CRDMutationInjector) Revert(ctx context.Context, spec v1alpha1.Injectio
 		restoreLabels[k] = nil
 	}
 
-	restoreValueMap := buildNestedMap(pathSegments, originalValue)
-	restorePatchMap := deepMerge(restoreValueMap, map[string]any{
+	// Step 1: null out the mutated path to remove injected nested keys,
+	// and remove chaos metadata in the same patch.
+	nullMap := buildNestedMap(pathSegments, nil)
+	nullPatchMap := deepMerge(nullMap, map[string]any{
 		"metadata": map[string]any{
 			"annotations": restoreAnnotations,
 			"labels":      restoreLabels,
 		},
 	})
-	restorePatch, err := json.Marshal(restorePatchMap)
+	nullPatch, err := json.Marshal(nullPatchMap)
 	if err != nil {
-		return fmt.Errorf("building restore patch: %w", err)
+		return fmt.Errorf("building null patch for revert: %w", err)
+	}
+	if err := m.client.Patch(ctx, obj, client.RawPatch(types.MergePatchType, nullPatch)); err != nil {
+		return fmt.Errorf("applying null patch for revert: %w", err)
 	}
 
-	return m.client.Patch(ctx, obj, client.RawPatch(types.MergePatchType, restorePatch))
+	// Step 2: if the original value was non-nil, re-set it.
+	if originalValue != nil {
+		if err := m.client.Get(ctx, key, obj); err != nil {
+			return fmt.Errorf("re-fetching resource after null revert: %w", err)
+		}
+		restoreMap := buildNestedMap(pathSegments, originalValue)
+		restorePatch, err := json.Marshal(restoreMap)
+		if err != nil {
+			return fmt.Errorf("building restore patch for revert: %w", err)
+		}
+		if err := m.client.Patch(ctx, obj, client.RawPatch(types.MergePatchType, restorePatch)); err != nil {
+			return fmt.Errorf("applying restore patch for revert: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // resolveMutationPath returns the path segments for the mutation target.

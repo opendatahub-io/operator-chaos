@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-all-pods-kill
+spec:
+  tier: 4
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: Deployment/kueue-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: kueue-controller-manager
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "60s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: control-plane=controller-manager
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing all kueue controller pods simultaneously (both replicas)
+      causes complete loss of the workload admission control plane.
+      The Deployment controller should recreate both pods. During the
+      outage window, pending workloads are not admitted but existing
+      admitted workloads continue running. After recovery, leader
+      election completes and admission resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

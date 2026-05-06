@@ -171,6 +171,7 @@ var clusterScopedKinds = map[string]bool{
 	"MutatingWebhookConfiguration":        true,
 	"APIService":                          true,
 	// Kueue cluster-scoped resources
+	"Kueue":                               true,
 	"ClusterQueue":                        true,
 	"ResourceFlavor":                      true,
 	"WorkloadPriorityClass":               true,
