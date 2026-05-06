@@ -184,16 +184,27 @@ nav:
         - Failure Modes: components/codeflare/failure-modes.md
         - Validation Results: components/codeflare/validation-results.md
         - Custom Experiments: components/codeflare/custom-experiments.md
-      - Kueue:
-        - components/kueue/index.md
-        - Failure Modes: components/kueue/failure-modes.md
-        - Validation Results: components/kueue/validation-results.md
-        - Custom Experiments: components/kueue/custom-experiments.md
       - ModelMesh:
         - components/modelmesh/index.md
         - Failure Modes: components/modelmesh/failure-modes.md
         - Validation Results: components/modelmesh/validation-results.md
         - Custom Experiments: components/modelmesh/custom-experiments.md
+    - External Dependencies:
+      - Kueue:
+        - components/kueue/index.md
+        - Failure Modes: components/kueue/failure-modes.md
+        - Validation Results: components/kueue/validation-results.md
+        - Custom Experiments: components/kueue/custom-experiments.md
+      - Knative Serving:
+        - components/knative-serving/index.md
+        - Failure Modes: components/knative-serving/failure-modes.md
+        - Validation Results: components/knative-serving/validation-results.md
+        - Custom Experiments: components/knative-serving/custom-experiments.md
+      - cert-manager:
+        - components/cert-manager/index.md
+        - Failure Modes: components/cert-manager/failure-modes.md
+        - Validation Results: components/cert-manager/validation-results.md
+        - Custom Experiments: components/cert-manager/custom-experiments.md
   - Reference:
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md
