@@ -56,3 +56,29 @@ components:
     webhook_type: validating
     webhook_resource_kind: ValidatingWebhookConfiguration
     webhook_cert_secret: kserve-webhook-server-cert
+
+  feast:
+    namespace: redhat-ods-applications
+    deployment: feast-operator-controller-manager
+    label_selector: control-plane=controller-manager,app.kubernetes.io/part-of=feastoperator
+
+  ray:
+    namespace: redhat-ods-applications
+    deployment: kuberay-operator
+    component_name: kuberay-operator
+    label_selector: app.kubernetes.io/component=kuberay-operator
+
+  trustyai:
+    namespace: redhat-ods-applications
+    deployment: trustyai-service-operator-controller-manager
+    label_selector: control-plane=controller-manager,app.kubernetes.io/part-of=trustyai
+
+  training-operator:
+    namespace: redhat-ods-applications
+    deployment: kubeflow-training-operator
+    label_selector: app.kubernetes.io/name=training-operator
+
+  llamastack:
+    namespace: redhat-ods-applications
+    deployment: llama-stack-k8s-operator-controller-manager
+    label_selector: control-plane=controller-manager,app.kubernetes.io/name=llama-stack-k8s-operator
