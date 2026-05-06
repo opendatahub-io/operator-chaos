@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: cainjector-ownerref-orphan
+spec:
+  tier: 3
+  target:
+    operator: cert-manager
+    component: cainjector
+    resource: Deployment/cert-manager-cainjector
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-cainjector
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    dangerLevel: high
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: cert-manager-cainjector
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When owner references are removed from the cainjector Deployment,
+      the operator should detect the orphaned resource and re-establish
+      ownership.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

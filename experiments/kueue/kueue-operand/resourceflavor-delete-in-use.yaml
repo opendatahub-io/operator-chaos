@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-resourceflavor-delete-in-use
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ResourceFlavor/chaos-test-flavor
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ResourceFlavor"
+      name: "chaos-test-flavor"
+      path: "metadata.labels"
+      value: "{\"chaos.operatorchaos.io/corrupted\": \"true\"}"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting a ResourceFlavor that is actively referenced by ClusterQueues
+      tests whether the controller handles modified flavor metadata gracefully.
+      The ClusterQueue should continue operating with the existing flavor
+      configuration. After rollback, normal flavor resolution resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

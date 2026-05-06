@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-olm-subscription-approval-flip
+spec:
+  tier: 3
+  target:
+    operator: kueue-operator
+    component: kueue-operator
+    resource: Subscription/kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "Subscription"
+      name: "kueue-operator"
+      namespace: "openshift-kueue-operator"
+      path: "spec.installPlanApproval"
+      value: "Manual"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Flipping installPlanApproval from Automatic to Manual should block
+      any pending upgrades but not affect the currently running operator.
+      The operator deployment should remain available. After rollback,
+      the approval mode is restored to Automatic and OLM resumes
+      auto-approving InstallPlans.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

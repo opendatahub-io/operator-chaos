@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-clusterqueue-stop-policy
+spec:
+  tier: 2
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ClusterQueue/chaos-test-cq
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ClusterQueue"
+      name: "chaos-test-cq"
+      path: "spec.stopPolicy"
+      value: "HoldAndDrain"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Setting a ClusterQueue's stopPolicy to HoldAndDrain should immediately
+      stop new workload admissions and evict admitted workloads. The kueue
+      controller should drain gracefully without crashing. After rollback
+      (stopPolicy removed), admission resumes and evicted workloads are
+      re-queued.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

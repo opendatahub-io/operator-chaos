@@ -6,7 +6,7 @@ metadata:
 spec:
   tier: 2
   target:
-    operator: ${COMPONENT}
+    operator: ${OPERATOR}
     component: ${COMPONENT_NAME}
     resource: Deployment/${DEPLOYMENT}
   steadyState:

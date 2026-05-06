@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-configmap-corrupt
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ConfigMap/kueue-manager-config
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: kueue-manager-config
+      namespace: openshift-kueue-operator
+      key: controller_manager_config.yaml
+      value: "corrupted-by-chaos"
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the kueue-manager-config ConfigMap with invalid content
+      tests crash resilience. The controller manager should either continue
+      running with cached config or restart and fall back to defaults.
+      It should not enter CrashLoopBackOff. After rollback, normal
+      configuration is restored.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

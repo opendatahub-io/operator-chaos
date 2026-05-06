@@ -6,7 +6,7 @@ metadata:
 spec:
   tier: 3
   target:
-    operator: ${COMPONENT}
+    operator: ${OPERATOR}
     component: ${COMPONENT_NAME}
     resource: Lease/${LEASE_NAME}
   steadyState:

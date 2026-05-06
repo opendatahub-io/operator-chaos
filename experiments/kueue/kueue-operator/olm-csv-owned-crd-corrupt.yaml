@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-olm-csv-owned-crd-corrupt
+spec:
+  tier: 3
+  target:
+    operator: kueue-operator
+    component: kueue-operator
+    resource: ClusterServiceVersion/kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "ClusterServiceVersion"
+      name: "kueue-operator.v1.3.1"
+      namespace: "openshift-kueue-operator"
+      path: "spec.customresourcedefinitions.owned"
+      value: "[]"
+    dangerLevel: high
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the CSV's owned CRD list to an empty array should cause
+      OLM to report the CSV as invalid. The operator deployment should
+      remain running since OLM does not delete pods when CSV metadata
+      is corrupted. After rollback, the CSV should return to Succeeded.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

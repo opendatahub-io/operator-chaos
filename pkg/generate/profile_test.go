@@ -133,8 +133,9 @@ func TestComponentVariables(t *testing.T) {
 		ClusterRoleBinding: "my-crb",
 	}
 
-	vars := comp.Variables("my-key")
+	vars := comp.Variables("my-key", "test-operator")
 	assert.Equal(t, "my-key", vars["COMPONENT"])
+	assert.Equal(t, "test-operator", vars["OPERATOR"])
 	assert.Equal(t, "my-component", vars["COMPONENT_NAME"])
 	assert.Equal(t, "my-ns", vars["NAMESPACE"])
 	assert.Equal(t, "my-deploy", vars["DEPLOYMENT"])
@@ -162,7 +163,7 @@ components:
 	assert.Equal(t, "test", p.Name)
 	assert.Equal(t, "default", p.Components["ctrl"].Namespace)
 
-	vars := p.Components["ctrl"].Variables("ctrl")
+	vars := p.Components["ctrl"].Variables("ctrl", "test")
 	_, hasFutureField := vars["FUTURE_FIELD"]
 	assert.False(t, hasFutureField, "unknown fields should not leak into Variables()")
 
@@ -202,9 +203,10 @@ func TestLoadProfile_RealProfiles(t *testing.T) {
 		path       string
 		components int
 	}{
-		{"../../profiles/rhoai/profile.yaml", 5},
+		{"../../profiles/rhoai/profile.yaml", 10},
 		{"../../profiles/odh/profile.yaml", 5},
-		{"../../profiles/cert-manager/profile.yaml", 1},
+		{"../../profiles/cert-manager/profile.yaml", 3},
+		{"../../profiles/rh-kueue/profile.yaml", 1},
 	}
 
 	for _, tt := range profiles {

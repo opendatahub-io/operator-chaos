@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: webhook-webhook-cert-corrupt
+spec:
+  tier: 2
+  target:
+    operator: cert-manager
+    component: webhook
+    resource: Secret/cert-manager-webhook-ca
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-webhook
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: cert-manager-webhook-ca
+      key: tls.crt
+      value: "Y2hhb3MtY29ycnVwdGVk"
+      resourceType: Secret
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the webhook webhook TLS certificate is corrupted, the
+      webhook server should fail to serve and the controller should
+      detect and regenerate the certificate.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

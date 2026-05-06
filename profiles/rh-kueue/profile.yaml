@@ -1,0 +1,11 @@
+name: rh-kueue
+description: Red Hat Build of Kueue
+version: "1.3"
+platform: openshift
+
+components:
+  kueue-operator:
+    namespace: openshift-kueue-operator
+    deployment: openshift-kueue-operator
+    label_selector: name=openshift-kueue-operator
+    lease_name: openshift-kueue-operator-lock

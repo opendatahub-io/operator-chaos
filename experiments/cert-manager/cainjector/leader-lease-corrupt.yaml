@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: cainjector-leader-lease-corrupt
+spec:
+  tier: 3
+  target:
+    operator: cert-manager
+    component: cainjector
+    resource: Lease/cert-manager-cainjector-leader-election
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: cert-manager-cainjector-leader-election
+        namespace: cert-manager
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "coordination.k8s.io/v1"
+      kind: "Lease"
+      name: cert-manager-cainjector-leader-election
+      field: "holderIdentity"
+      value: "chaos-fake-leader"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the leader lease holder identity is corrupted, the cainjector
+      should detect the lease conflict and re-acquire leadership.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

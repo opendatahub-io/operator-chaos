@@ -39,10 +39,12 @@ type ComponentConfig struct {
 
 // Variables returns a map of template variable names to values for this component.
 // The componentKey is the map key name from the profile.
+// The profileName is the top-level profile name used as the operator identifier.
 // Only non-empty values are included.
-func (c ComponentConfig) Variables(componentKey string) map[string]string {
+func (c ComponentConfig) Variables(componentKey, profileName string) map[string]string {
 	vars := map[string]string{
 		"COMPONENT": componentKey,
+		"OPERATOR":  profileName,
 	}
 
 	compName := c.ComponentName

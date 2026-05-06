@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-network-partition
+spec:
+  tier: 2
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: Deployment/openshift-kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: name=openshift-kueue-operator
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When kueue-operator pods are network-isolated via a deny-all NetworkPolicy,
+      the component should detect the partition and recover once connectivity
+      is restored.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

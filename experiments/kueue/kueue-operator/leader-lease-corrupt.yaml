@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-leader-lease-corrupt
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: Lease/openshift-kueue-operator-lock
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: openshift-kueue-operator-lock
+        namespace: openshift-kueue-operator
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "coordination.k8s.io/v1"
+      kind: "Lease"
+      name: openshift-kueue-operator-lock
+      field: "holderIdentity"
+      value: "chaos-fake-leader"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the leader lease holder identity is corrupted, the kueue-operator
+      should detect the lease conflict and re-acquire leadership.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

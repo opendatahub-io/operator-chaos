@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-clusterqueue-namespace-selector-corrupt
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ClusterQueue/chaos-test-cq
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ClusterQueue"
+      name: "chaos-test-cq"
+      path: "spec.namespaceSelector"
+      value: "{\"matchLabels\":{\"nonexistent-label\":\"true\"}}"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the ClusterQueue's namespaceSelector to match no namespaces
+      should prevent all LocalQueues from being admitted. The controller
+      should handle this gracefully and report the queue as having no
+      matching namespaces. After rollback, normal namespace matching resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-fair-sharing-weight-zero
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ClusterQueue/chaos-test-cq
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ClusterQueue"
+      name: "chaos-test-cq"
+      path: "spec.fairSharing.weight"
+      value: "0"
+    dangerLevel: high
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Setting a ClusterQueue's fairSharing weight to zero could cause a
+      division-by-zero in the fair sharing algorithm (known upstream issue
+      #2473). The controller should either reject the invalid weight or
+      handle it gracefully without panicking. After rollback, normal fair
+      sharing resumes with the original weight.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

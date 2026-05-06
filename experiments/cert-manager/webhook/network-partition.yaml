@@ -1,0 +1,34 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: webhook-network-partition
+spec:
+  tier: 2
+  target:
+    operator: cert-manager
+    component: webhook
+    resource: Deployment/cert-manager-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-webhook
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app.kubernetes.io/name=webhook
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When webhook pods are network-isolated via a deny-all NetworkPolicy,
+      the component should detect the partition and recover once connectivity
+      is restored.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - cert-manager

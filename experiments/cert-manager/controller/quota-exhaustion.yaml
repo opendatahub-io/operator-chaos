@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: controller-quota-exhaustion
+spec:
+  tier: 5
+  target:
+    operator: cert-manager
+    component: cert-manager-controller
+    resource: ResourceQuota/chaos-quota-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    dangerLevel: high
+    parameters:
+      quotaName: chaos-quota-controller
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When a ResourceQuota with zero limits is applied to cert-manager,
+      no new pods can be created. The controller should handle quota
+      exhaustion gracefully. The chaos framework removes the quota via
+      TTL-based cleanup.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

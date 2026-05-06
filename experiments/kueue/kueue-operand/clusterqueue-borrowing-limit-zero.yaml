@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-clusterqueue-borrowing-limit-zero
+spec:
+  tier: 2
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ClusterQueue/chaos-test-cq
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ClusterQueue"
+      name: "chaos-test-cq"
+      path: "spec.resourceGroups"
+      value: '[{"coveredResources":["cpu","memory"],"flavors":[{"name":"chaos-test-flavor","resources":[{"name":"cpu","nominalQuota":"4","borrowingLimit":"0"},{"name":"memory","nominalQuota":"8Gi","borrowingLimit":"0"}]}]}]'
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Setting all borrowingLimits to zero while the ClusterQueue is in a
+      cohort should prevent all quota borrowing. The controller should
+      detect the policy tightening and handle it gracefully. After rollback,
+      normal borrowing behavior resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

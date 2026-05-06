@@ -1,0 +1,23 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: chaos-test-cq
+spec:
+  cohort: chaos-test-cohort
+  namespaceSelector: {}
+  queueingStrategy: BestEffortFIFO
+  fairSharing:
+    weight: 1
+  resourceGroups:
+    - coveredResources:
+        - cpu
+        - memory
+      flavors:
+        - name: chaos-test-flavor
+          resources:
+            - name: cpu
+              nominalQuota: "4"
+              borrowingLimit: "2"
+            - name: memory
+              nominalQuota: 8Gi
+              borrowingLimit: 4Gi

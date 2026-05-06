@@ -10,3 +10,19 @@ components:
     component_name: cert-manager-controller
     label_selector: app.kubernetes.io/name=cert-manager
     cluster_role_binding: cert-manager-controller-issuers
+    lease_name: cert-manager-controller
+
+  webhook:
+    namespace: cert-manager
+    deployment: cert-manager-webhook
+    label_selector: app.kubernetes.io/name=webhook
+    webhook_name: cert-manager-webhook
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+    webhook_cert_secret: cert-manager-webhook-ca
+
+  cainjector:
+    namespace: cert-manager
+    deployment: cert-manager-cainjector
+    label_selector: app.kubernetes.io/name=cainjector
+    lease_name: cert-manager-cainjector-leader-election

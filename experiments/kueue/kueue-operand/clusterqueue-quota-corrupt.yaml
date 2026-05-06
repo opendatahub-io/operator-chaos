@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-clusterqueue-quota-corrupt
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: ClusterQueue/chaos-test-cq
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "ClusterQueue"
+      name: "chaos-test-cq"
+      path: "spec.resourceGroups"
+      value: "[]"
+    dangerLevel: high
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting a ClusterQueue's resourceGroups to an empty array removes
+      all quota definitions. The kueue controller should detect the invalid
+      config, stop admitting workloads to this queue, and report the queue
+      as inactive. After rollback, quota is restored and admission resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

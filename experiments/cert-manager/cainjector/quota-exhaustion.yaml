@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: cainjector-quota-exhaustion
+spec:
+  tier: 5
+  target:
+    operator: cert-manager
+    component: cainjector
+    resource: ResourceQuota/chaos-quota-cainjector
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-cainjector
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    dangerLevel: high
+    parameters:
+      quotaName: chaos-quota-cainjector
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When a ResourceQuota with zero limits is applied to cert-manager,
+      no new pods can be created. The cainjector should handle quota
+      exhaustion gracefully. The chaos framework removes the quota via
+      TTL-based cleanup.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

@@ -109,7 +109,7 @@ func Generate(opts GenerateOptions) (*GenerateResult, error) {
 				continue
 			}
 
-			vars := comp.Variables(compKey)
+			vars := comp.Variables(compKey, profile.Name)
 
 			if !matchesComponent(tmpl.Header.Requires, vars) {
 				result.Skipped++

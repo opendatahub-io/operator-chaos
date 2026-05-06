@@ -1,0 +1,13 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: WorkloadPriorityClass
+metadata:
+  name: chaos-test-high-priority
+value: 1000
+description: High priority for chaos testing
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: WorkloadPriorityClass
+metadata:
+  name: chaos-test-low-priority
+value: 1
+description: Low priority for chaos testing

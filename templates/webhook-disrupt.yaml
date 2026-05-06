@@ -6,7 +6,7 @@ metadata:
 spec:
   tier: 4
   target:
-    operator: ${COMPONENT}
+    operator: ${OPERATOR}
     component: ${COMPONENT_NAME}
     resource: ${WEBHOOK_RESOURCE_KIND}/${WEBHOOK_NAME}
   steadyState:

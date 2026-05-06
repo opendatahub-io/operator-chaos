@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: kueue-operator
+    component: kueue-operator
+    resource: ClusterRoleBinding/kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      # NOTE: The CRB name includes an OLM-generated hash suffix that changes
+      # per installation. Use --set to override:
+      #   --set 'injection.parameters.bindingName=kueue-operator.v1.3.1-<hash>'
+      # Find it with: oc get clusterrolebinding | grep kueue
+      bindingName: "kueue-operator.v1.3.1-adIoh9OBFFYUD2GRfbZ3KnOAExhQw5kNCMMg3L"
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the kueue-operator ClusterRoleBinding subjects are revoked, the
+      operator loses permissions to manage Kueue CRs and operand resources.
+      OLM should detect the drift and restore the ClusterRoleBinding.
+      After restoration, the operator should resume normal operation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

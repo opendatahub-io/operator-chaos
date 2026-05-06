@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: controller-ownerref-orphan
+spec:
+  tier: 3
+  target:
+    operator: cert-manager
+    component: cert-manager-controller
+    resource: Deployment/cert-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    dangerLevel: high
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: cert-manager
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When owner references are removed from the controller Deployment,
+      the operator should detect the orphaned resource and re-establish
+      ownership.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

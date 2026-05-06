@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-priority-inversion
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: WorkloadPriorityClass/chaos-test-high-priority
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "kueue.x-k8s.io/v1beta1"
+      kind: "WorkloadPriorityClass"
+      name: "chaos-test-high-priority"
+      path: "value"
+      value: "1"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Inverting the priority ordering by setting the high-priority class
+      value to 1 (same as low-priority) tests whether the scheduler
+      caches stale priority values or reads fresh. Subsequent preemption
+      decisions should use the new values. After restoration, normal
+      priority ordering resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

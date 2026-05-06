@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: Deployment/openshift-kueue-operator
+  steadyState:
+    checks:
+      - type: resourceExists
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    dangerLevel: high
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: openshift-kueue-operator
+      labelKey: app.kubernetes.io/name
+      action: overwrite
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      When a label used for resource discovery is overwritten on the
+      kueue-operator Deployment, the operator should detect the label drift
+      and restore the correct label value.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

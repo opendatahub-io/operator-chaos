@@ -1,0 +1,34 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: Deployment/openshift-kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: name=openshift-kueue-operator
+    ttl: "30s"
+  hypothesis:
+    description: >-
+      When a kueue-operator pod is killed, the Deployment controller should
+      restart it and the component should recover within the recovery timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

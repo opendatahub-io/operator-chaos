@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: chaos-test-job
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: chaos-test-lq
+spec:
+  suspend: true
+  template:
+    spec:
+      containers:
+        - name: worker
+          image: busybox
+          command: ["sleep", "30"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 64Mi
+      restartPolicy: Never
+  backoffLimit: 0

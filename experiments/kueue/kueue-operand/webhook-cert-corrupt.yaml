@@ -1,0 +1,42 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-webhook-cert-corrupt
+spec:
+  tier: 4
+  target:
+    operator: rh-kueue
+    component: kueue-operand
+    resource: Secret/kueue-webhook-server-cert
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: kueue-webhook-server-cert
+      namespace: openshift-kueue-operator
+      key: tls.crt
+      value: "corrupted-by-chaos"
+      resourceType: Secret
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the kueue webhook TLS certificate should cause API server
+      webhook calls to fail with TLS errors. New job submissions will be
+      rejected (if failurePolicy is Fail) or bypass validation (if Ignore).
+      The internal cert manager should detect the corruption and regenerate.
+      After rollback or regeneration, webhook functionality resumes.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

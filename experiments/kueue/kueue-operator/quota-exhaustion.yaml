@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: kueue-operator-quota-exhaustion
+spec:
+  tier: 5
+  target:
+    operator: rh-kueue
+    component: kueue-operator
+    resource: ResourceQuota/chaos-quota-kueue-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-kueue-operator
+        namespace: openshift-kueue-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    dangerLevel: high
+    parameters:
+      quotaName: chaos-quota-kueue-operator
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When a ResourceQuota with zero limits is applied to openshift-kueue-operator,
+      no new pods can be created. The kueue-operator should handle quota
+      exhaustion gracefully. The chaos framework removes the quota via
+      TTL-based cleanup.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-kueue-operator

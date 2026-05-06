@@ -1,0 +1,33 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: webhook-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: cert-manager
+    component: webhook
+    resource: Deployment/cert-manager-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-webhook
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/name=webhook
+    ttl: "30s"
+  hypothesis:
+    description: >-
+      When a webhook pod is killed, the Deployment controller should
+      restart it and the component should recover within the recovery timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - cert-manager
