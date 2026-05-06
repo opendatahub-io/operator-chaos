@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-kourier-gateway-quota-exhaustion
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: kourier-gateway
+    resource: Deployment/3scale-kourier-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: 3scale-kourier-gateway
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    parameters:
+      quotaName: chaos-quota-kourier-gateway
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      A restrictive ResourceQuota prevents the kourier gateway from restarting.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

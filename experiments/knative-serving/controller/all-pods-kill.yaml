@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-controller-all-pods-kill
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=controller
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing both controller pods stops all Knative Service reconciliation.
+      Existing services continue running but new deployments, updates, and
+      route changes are not processed. After recovery, leader election
+      completes and reconciliation resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

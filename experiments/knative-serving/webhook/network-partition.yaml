@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-webhook-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: webhook
+    resource: Deployment/webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      direction: ingress
+      labelSelector: app=webhook
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating webhook pods makes the webhook Service unreachable. The API
+      server gets timeout errors when validating Knative resources. With
+      failurePolicy=Fail (default), all Knative operations are blocked.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

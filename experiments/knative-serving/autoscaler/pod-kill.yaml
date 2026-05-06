@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-pod-kill
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler
+    resource: Deployment/autoscaler
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=autoscaler
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing a single autoscaler pod temporarily pauses scale decisions.
+      The remaining replica should take over via leader election. Workloads
+      continue running but may not scale correctly during the brief outage.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

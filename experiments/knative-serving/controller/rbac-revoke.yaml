@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-controller-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: knative-serving-controller-admin
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Revoking the controller's admin ClusterRoleBinding removes its ability
+      to manage Knative resources (Services, Routes, Configurations, Revisions).
+      All reconciliation fails with authorization errors. After RBAC is
+      restored, reconciliation should resume.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

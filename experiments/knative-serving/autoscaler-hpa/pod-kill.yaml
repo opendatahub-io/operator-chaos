@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-hpa-pod-kill
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler-hpa
+    resource: Deployment/autoscaler-hpa
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler-hpa
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=autoscaler-hpa
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing an autoscaler-hpa pod temporarily pauses HPA-based scaling.
+      The other replica takes over via leader election.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-all-pods-kill
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: autoscaler
+    resource: Deployment/autoscaler
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=autoscaler
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing both autoscaler pods simultaneously stops all scale-to-zero
+      and scale-up decisions. Running inference pods continue serving but
+      no new scaling events are processed. After recovery, the autoscaler
+      reads current metrics and resumes scaling.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

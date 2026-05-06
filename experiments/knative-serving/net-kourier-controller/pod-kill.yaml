@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-net-kourier-controller-pod-kill
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: net-kourier-controller
+    resource: Deployment/net-kourier-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: net-kourier-controller
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=net-kourier-controller
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing a net-kourier-controller pod temporarily pauses Envoy route
+      programming. Existing routes continue working but new Knative Service
+      routes are not programmed. The other replica takes over.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

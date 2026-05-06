@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-quota-exhaustion
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler
+    resource: Deployment/autoscaler
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    parameters:
+      quotaName: chaos-quota-autoscaler
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      A restrictive ResourceQuota prevents the autoscaler from restarting.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

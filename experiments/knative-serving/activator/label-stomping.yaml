@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-activator-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: activator
+    resource: Deployment/activator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: activator
+      labelKey: app
+      action: overwrite
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing the app=activator label from pods disconnects them from the
+      activator Service endpoints. Traffic can no longer reach the activator.
+      The Deployment controller should recreate pods with correct labels or
+      the existing pods should be re-labeled by the operator.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

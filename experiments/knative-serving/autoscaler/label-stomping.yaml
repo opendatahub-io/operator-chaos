@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler
+    resource: Deployment/autoscaler
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: autoscaler
+      labelKey: app
+      action: overwrite
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing the app=autoscaler label disconnects pods from the autoscaler
+      Service. The Deployment controller should recreate pods with the correct
+      labels.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

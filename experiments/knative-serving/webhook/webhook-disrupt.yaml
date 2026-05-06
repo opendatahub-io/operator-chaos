@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-webhook-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: webhook
+    resource: Deployment/webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: validation.webhook.serving.knative.dev
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Changing the validating webhook's failurePolicy from Fail to Ignore
+      bypasses all Knative resource validation. Invalid resources can be
+      created. After restoration, validation resumes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

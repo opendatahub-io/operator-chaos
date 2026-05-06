@@ -67,6 +67,48 @@ components:
           conditionType: Available
       timeout: "60s"
 
+  - name: autoscaler
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        labels:
+          app: autoscaler
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: autoscaler
+          namespace: knative-serving
+          conditionType: Available
+      timeout: "60s"
+
+  - name: autoscaler-hpa
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler-hpa
+        namespace: knative-serving
+        labels:
+          app: autoscaler-hpa
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: autoscaler-hpa
+          namespace: knative-serving
+          conditionType: Available
+      timeout: "60s"
+
   - name: kourier-gateway
     controller: serverless-operator
     managedResources:
@@ -84,6 +126,27 @@ components:
           apiVersion: apps/v1
           kind: Deployment
           name: 3scale-kourier-gateway
+          namespace: knative-serving-ingress
+          conditionType: Available
+      timeout: "60s"
+
+  - name: net-kourier-controller
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: net-kourier-controller
+        namespace: knative-serving-ingress
+        labels:
+          app: net-kourier-controller
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: net-kourier-controller
           namespace: knative-serving-ingress
           conditionType: Available
       timeout: "60s"

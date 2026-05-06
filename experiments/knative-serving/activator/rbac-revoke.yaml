@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-activator-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: activator
+    resource: Deployment/activator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: knative-serving-activator-cluster
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Revoking the activator's ClusterRoleBinding removes its ability to
+      read Services, Endpoints, and other resources. The activator can't
+      proxy traffic correctly without these permissions. After RBAC is
+      restored, the activator should resume normal operation without restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

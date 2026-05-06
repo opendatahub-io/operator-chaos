@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-hpa-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler-hpa
+    resource: Deployment/autoscaler-hpa
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler-hpa
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      direction: ingress
+      labelSelector: app=autoscaler-hpa
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the HPA autoscaler blocks its ability to receive metrics
+      and update HPA resources. Existing HPA targets maintain their current
+      replica count but cannot adjust.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

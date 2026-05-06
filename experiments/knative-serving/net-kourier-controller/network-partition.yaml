@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-net-kourier-controller-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: net-kourier-controller
+    resource: Deployment/net-kourier-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: net-kourier-controller
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      direction: ingress
+      labelSelector: app=net-kourier-controller
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the net-kourier-controller prevents it from receiving API
+      server events and updating Envoy configuration. Existing routes remain
+      but new Knative Services cannot be exposed.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

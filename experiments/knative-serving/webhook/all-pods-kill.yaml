@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-webhook-all-pods-kill
+spec:
+  tier: 5
+  target:
+    operator: knative-serving
+    component: webhook
+    resource: Deployment/webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=webhook
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing both webhook pods blocks all Knative Service creation and
+      modification. The API server cannot validate or mutate Knative resources.
+      Existing services are unaffected but cannot be updated.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

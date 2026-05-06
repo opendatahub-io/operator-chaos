@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-controller-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      direction: ingress
+      labelSelector: app=controller
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the controller from the network prevents it from reading
+      or updating Knative resources. Reconciliation stalls. Existing services
+      continue running. After the partition lifts, the controller should
+      resume reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

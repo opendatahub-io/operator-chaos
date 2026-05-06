@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-net-kourier-controller-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: net-kourier-controller
+    resource: Deployment/net-kourier-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: net-kourier-controller
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: net-kourier
+      bindingType: ClusterRoleBinding
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Revoking the net-kourier ClusterRoleBinding prevents the controller
+      from reading Ingress resources and programming Envoy. New routes cannot
+      be created. After RBAC is restored, the controller should re-sync.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true

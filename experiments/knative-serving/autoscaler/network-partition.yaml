@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-autoscaler-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: autoscaler
+    resource: Deployment/autoscaler
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: autoscaler
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      direction: ingress
+      labelSelector: app=autoscaler
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the autoscaler from the network blocks metric collection
+      from activator pods and prevents scale decisions from being communicated.
+      Running pods continue but autoscaling stalls. This is particularly
+      interesting because the activator's health check depends on a WebSocket
+      to the autoscaler.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

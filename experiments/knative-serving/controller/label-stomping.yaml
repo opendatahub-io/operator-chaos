@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-controller-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: controller
+      labelKey: app
+      action: overwrite
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing the app=controller label from pods. The Deployment controller
+      should recreate pods with correct labels.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving
