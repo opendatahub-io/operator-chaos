@@ -1,0 +1,93 @@
+operator:
+  name: knative-serving
+  namespace: knative-serving
+  repository: https://github.com/openshift-knative/serverless-operator
+
+components:
+  - name: activator
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        labels:
+          app: activator
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: activator
+          namespace: knative-serving
+          conditionType: Available
+      timeout: "60s"
+
+  - name: controller
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        labels:
+          app: controller
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: controller
+          namespace: knative-serving
+          conditionType: Available
+      timeout: "60s"
+
+  - name: webhook
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        labels:
+          app: webhook
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: webhook
+          namespace: knative-serving
+          conditionType: Available
+      timeout: "60s"
+
+  - name: kourier-gateway
+    controller: serverless-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: 3scale-kourier-gateway
+        namespace: knative-serving-ingress
+        labels:
+          app: 3scale-kourier-gateway
+        expectedSpec:
+          replicas: 2
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: 3scale-kourier-gateway
+          namespace: knative-serving-ingress
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

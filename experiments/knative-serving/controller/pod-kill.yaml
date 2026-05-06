@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-controller-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=controller
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing one Knative Serving controller pod should not affect
+      existing inference services since the other replica takes over
+      leader election. New Knative Service creation may briefly stall
+      during leader transition.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - knative-serving

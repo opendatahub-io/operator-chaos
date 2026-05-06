@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-kourier-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: kourier-gateway
+    resource: Deployment/3scale-kourier-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: 3scale-kourier-gateway
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app=3scale-kourier-gateway
+      direction: ingress
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Network-isolating the Kourier gateway pods blocks all inference
+      traffic at the ingress layer. Unlike pod kill, the pods remain
+      running but cannot accept connections. This simulates a network
+      failure between the OpenShift router and the Knative ingress.
+      After the partition lifts, Envoy should resume serving traffic
+      without needing a restart.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

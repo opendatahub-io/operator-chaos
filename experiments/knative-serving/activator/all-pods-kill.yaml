@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-activator-all-pods-kill
+spec:
+  tier: 4
+  target:
+    operator: knative-serving
+    component: activator
+    resource: Deployment/activator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "60s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=activator
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing both activator pods simultaneously causes a complete
+      traffic blackout for scale-from-zero and request buffering.
+      Active inference services with running pods may still serve
+      directly, but any service in scale-to-zero state becomes
+      unreachable. After Deployment recreates both pods, traffic
+      routing should resume.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

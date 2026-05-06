@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-webhook-cert-corrupt
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: webhook
+    resource: Secret/webhook-certs
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: webhook-certs
+      key: server-cert.pem
+      value: "Y2hhb3MtY29ycnVwdGVk"
+      resourceType: Secret
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Corrupting the Knative webhook TLS certificate should cause webhook
+      validation to fail with TLS errors. This blocks creation and
+      modification of all Knative Service resources. Existing services
+      continue running but cannot be updated. The webhook or cert-manager
+      should detect and regenerate the certificate.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

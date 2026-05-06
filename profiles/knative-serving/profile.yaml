@@ -1,0 +1,27 @@
+name: knative-serving
+description: Knative Serving (OpenShift Serverless)
+version: "1.37"
+platform: openshift
+
+components:
+  activator:
+    namespace: knative-serving
+    deployment: activator
+    label_selector: app=activator
+  controller:
+    namespace: knative-serving
+    deployment: controller
+    label_selector: app=controller
+    lease_name: controller.knative.dev.serving.pkg.reconciler.configuration.reconciler.00-of-01
+  webhook:
+    namespace: knative-serving
+    deployment: webhook
+    label_selector: app=webhook
+    webhook_name: validation.webhook.serving.knative.dev
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
+    webhook_cert_secret: webhook-certs
+  kourier-gateway:
+    namespace: knative-serving-ingress
+    deployment: 3scale-kourier-gateway
+    label_selector: app=3scale-kourier-gateway

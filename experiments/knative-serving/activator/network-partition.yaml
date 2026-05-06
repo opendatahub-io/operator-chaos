@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-activator-network-partition
+spec:
+  tier: 3
+  target:
+    operator: knative-serving
+    component: activator
+    resource: Deployment/activator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app=activator
+      direction: ingress
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Isolating activator pods from the network blocks all inference
+      requests routed through the activator. This simulates a network
+      failure between the ingress layer and the activator. The
+      autoscaler loses visibility into request counts, potentially
+      causing erratic scaling decisions. After partition is lifted,
+      traffic routing should resume.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving

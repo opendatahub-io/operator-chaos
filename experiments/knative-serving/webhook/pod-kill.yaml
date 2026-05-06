@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-webhook-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: knative-serving
+    component: webhook
+    resource: Deployment/webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: webhook
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=webhook
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing one Knative webhook pod should not block Knative Service
+      operations since the other replica handles validation/mutation.
+      Existing running services are unaffected.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - knative-serving

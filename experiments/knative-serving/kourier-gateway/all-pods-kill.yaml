@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-kourier-all-pods-kill
+spec:
+  tier: 5
+  target:
+    operator: knative-serving
+    component: kourier-gateway
+    resource: Deployment/3scale-kourier-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: 3scale-kourier-gateway
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "60s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=3scale-kourier-gateway
+    count: 2
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing both Kourier gateway pods simultaneously causes a
+      complete inference traffic blackout. No external requests can
+      reach any Knative Service. This is the most impactful single
+      fault for inference availability. The Deployment controller
+      should recreate both pods and Envoy should reload its config
+      from the control plane. During the outage, all inference
+      requests fail.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-kourier-gateway-pod-kill
+spec:
+  tier: 2
+  target:
+    operator: knative-serving
+    component: kourier-gateway
+    resource: Deployment/3scale-kourier-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: 3scale-kourier-gateway
+        namespace: knative-serving-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=3scale-kourier-gateway
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      The Kourier gateway is the Envoy-based ingress proxy for all
+      Knative Serving traffic. Killing one gateway pod should shift
+      traffic to the other replica. Brief request failures may occur
+      during the transition. After pod restart, traffic routing
+      resumes normally.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving-ingress

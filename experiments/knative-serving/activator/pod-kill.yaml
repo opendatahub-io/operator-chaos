@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-activator-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: knative-serving
+    component: activator
+    resource: Deployment/activator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: activator
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app=activator
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      The activator is the request-buffering proxy that holds traffic
+      during scale-from-zero. Killing one activator pod should not
+      affect inference traffic since the other replica handles requests.
+      The Deployment controller recreates the pod.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - knative-serving
