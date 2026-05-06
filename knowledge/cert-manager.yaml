@@ -1,0 +1,84 @@
+operator:
+  name: cert-manager
+  namespace: cert-manager
+  repository: https://github.com/cert-manager/cert-manager
+
+components:
+  - name: cert-manager-controller
+    controller: cert-manager-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager
+        namespace: cert-manager
+        labels:
+          app.kubernetes.io/name: cert-manager
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: cert-manager
+        namespace: cert-manager
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: cert-manager
+          namespace: cert-manager
+          conditionType: Available
+      timeout: "60s"
+
+  - name: cert-manager-webhook
+    controller: cert-manager-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-webhook
+        namespace: cert-manager
+        labels:
+          app.kubernetes.io/name: webhook
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: cert-manager-webhook
+        namespace: cert-manager
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: cert-manager-webhook
+          namespace: cert-manager
+          conditionType: Available
+      timeout: "60s"
+
+  - name: cert-manager-cainjector
+    controller: cert-manager-operator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager-cainjector
+        namespace: cert-manager
+        labels:
+          app.kubernetes.io/name: cainjector
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: cert-manager-cainjector
+        namespace: cert-manager
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: cert-manager-cainjector
+          namespace: cert-manager
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

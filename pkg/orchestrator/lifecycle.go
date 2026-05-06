@@ -170,6 +170,16 @@ var clusterScopedKinds = map[string]bool{
 	"ValidatingWebhookConfiguration":      true,
 	"MutatingWebhookConfiguration":        true,
 	"APIService":                          true,
+	// Kueue cluster-scoped resources
+	"ClusterQueue":                        true,
+	"ResourceFlavor":                      true,
+	"WorkloadPriorityClass":               true,
+	"Cohort":                              true,
+	"AdmissionCheck":                      true,
+	"MultiKueueCluster":                   true,
+	"MultiKueueConfig":                    true,
+	"ProvisioningRequestConfig":           true,
+	"Topology":                            true,
 }
 
 // forbiddenNamespaces is the set of namespaces that must never be targeted by

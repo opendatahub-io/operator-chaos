@@ -1,7 +1,7 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: kueue-localqueue-clusterqueue-unlink
+  name: kueue-localqueue-stop-policy
 spec:
   tier: 2
   target:
@@ -23,18 +23,19 @@ spec:
       apiVersion: "kueue.x-k8s.io/v1beta1"
       kind: "LocalQueue"
       name: "chaos-test-lq"
-      namespace: "default"
-      path: "spec.clusterQueue"
-      value: "nonexistent-cq"
+      namespace: "chaos-kueue-test"
+      path: "spec.stopPolicy"
+      value: "HoldAndDrain"
     ttl: "300s"
   hypothesis:
     description: >-
-      Pointing a LocalQueue to a nonexistent ClusterQueue breaks the
-      tenant-to-quota binding. Pending workloads should remain queued
-      with appropriate error conditions. No workloads should be admitted
-      to a nonexistent queue. After restoring the correct reference,
-      pending workloads are admitted normally.
+      Setting a LocalQueue's stopPolicy to HoldAndDrain stops new workload
+      admissions and drains existing ones from this tenant queue. The kueue
+      controller should handle this gracefully without crashing. After
+      rollback (stopPolicy restored to None), admission resumes normally.
     recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 1
     allowDangerous: true
+    allowedNamespaces:
+      - chaos-kueue-test

@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: chaos-test-job
-  namespace: default
+  namespace: chaos-kueue-test
   labels:
     kueue.x-k8s.io/queue-name: chaos-test-lq
 spec:

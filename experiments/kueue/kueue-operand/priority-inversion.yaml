@@ -25,6 +25,7 @@ spec:
       name: "chaos-test-high-priority"
       path: "value"
       value: "1"
+    dangerLevel: high
     ttl: "300s"
   hypothesis:
     description: >-
