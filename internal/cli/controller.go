@@ -139,6 +139,13 @@ func startController(namespace, metricsAddr, healthAddr string, leaderElect bool
 	registry.Register(v1alpha1.WebhookLatency, injection.NewWebhookLatencyInjector(k8sClient))
 	registry.Register(v1alpha1.NamespaceDeletion, injection.NewNamespaceDeletionInjector(k8sClient, namespace))
 	registry.Register(v1alpha1.LabelStomping, injection.NewLabelStompingInjector(k8sClient))
+	registry.Register(v1alpha1.SecretDeletion, injection.NewSecretDeletionInjector(k8sClient))
+	registry.Register(v1alpha1.DeploymentScaleZero, injection.NewScaleZeroInjector(k8sClient))
+	registry.Register(v1alpha1.LeaderElectionDisrupt, injection.NewLeaseElectionInjector(k8sClient))
+	registry.Register(v1alpha1.ImageCorrupt, injection.NewImageCorruptInjector(k8sClient))
+	registry.Register(v1alpha1.CrashLoopInject, injection.NewCrashLoopInjector(k8sClient))
+	registry.Register(v1alpha1.ResourceDeletion, injection.NewResourceDeletionInjector(k8sClient))
+	registry.Register(v1alpha1.PDBBlock, injection.NewPDBBlockInjector(k8sClient))
 
 	maxCycles := 10
 	if knowledge != nil {

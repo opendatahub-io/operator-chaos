@@ -118,7 +118,7 @@ type InjectionSpec struct {
 }
 
 // InjectionType represents the type of fault injection.
-// +kubebuilder:validation:Enum=PodKill;NetworkPartition;CRDMutation;ConfigDrift;WebhookDisrupt;RBACRevoke;FinalizerBlock;ClientFault;OwnerRefOrphan;QuotaExhaustion;WebhookLatency;NamespaceDeletion;LabelStomping
+// +kubebuilder:validation:Enum=PodKill;NetworkPartition;CRDMutation;ConfigDrift;WebhookDisrupt;RBACRevoke;FinalizerBlock;ClientFault;OwnerRefOrphan;QuotaExhaustion;WebhookLatency;NamespaceDeletion;LabelStomping;SecretDeletion;DeploymentScaleZero;LeaderElectionDisrupt;CrashLoopInject;ImageCorrupt;ResourceDeletion;PDBBlock
 type InjectionType string
 
 const (
@@ -135,6 +135,13 @@ const (
 	WebhookLatency   InjectionType = "WebhookLatency"
 	NamespaceDeletion InjectionType = "NamespaceDeletion"
 	LabelStomping     InjectionType = "LabelStomping"
+	SecretDeletion      InjectionType = "SecretDeletion"
+	DeploymentScaleZero     InjectionType = "DeploymentScaleZero"
+	LeaderElectionDisrupt   InjectionType = "LeaderElectionDisrupt"
+	CrashLoopInject         InjectionType = "CrashLoopInject"
+	ImageCorrupt            InjectionType = "ImageCorrupt"
+	ResourceDeletion        InjectionType = "ResourceDeletion"
+	PDBBlock                InjectionType = "PDBBlock"
 )
 
 var validInjectionTypes = map[InjectionType]bool{
@@ -151,6 +158,13 @@ var validInjectionTypes = map[InjectionType]bool{
 	WebhookLatency:   true,
 	NamespaceDeletion: true,
 	LabelStomping:     true,
+	SecretDeletion:      true,
+	DeploymentScaleZero:     true,
+	LeaderElectionDisrupt:   true,
+	CrashLoopInject:         true,
+	ImageCorrupt:            true,
+	ResourceDeletion:        true,
+	PDBBlock:                true,
 }
 
 // ValidInjectionTypes returns all valid injection types in sorted order.

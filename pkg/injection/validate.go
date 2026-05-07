@@ -23,7 +23,7 @@ const chaosConfigMapPrefix = "operator-chaos-"
 // chaosManagedPrefixes are resource name prefixes used by the chaos framework.
 // Targeting these resources with chaos experiments is forbidden to prevent
 // self-destruction or rollback corruption.
-var chaosManagedPrefixes = []string{"chaos-rollback-", "chaos-result-", "operator-chaos-", "chaos-controller-"}
+var chaosManagedPrefixes = []string{"chaos-rollback-", "chaos-result-", "operator-chaos-", "chaos-controller-", "chaos-backup-"}
 
 var validNamePattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9.\-]*[a-z0-9])?$`)
 
@@ -127,6 +127,20 @@ func ValidateInjectionParams(spec v1alpha1.InjectionSpec, blast v1alpha1.BlastRa
 		return validateNamespaceDeletionParams(spec)
 	case v1alpha1.LabelStomping:
 		return validateLabelStompingParams(spec)
+	case v1alpha1.SecretDeletion:
+		return validateSecretDeletionParams(spec)
+	case v1alpha1.DeploymentScaleZero:
+		return validateScaleZeroParams(spec)
+	case v1alpha1.LeaderElectionDisrupt:
+		return validateLeaseElectionParams(spec)
+	case v1alpha1.CrashLoopInject:
+		return validateCrashLoopParams(spec)
+	case v1alpha1.ImageCorrupt:
+		return validateImageCorruptParams(spec)
+	case v1alpha1.ResourceDeletion:
+		return validateResourceDeletionParams(spec)
+	case v1alpha1.PDBBlock:
+		return validatePDBBlockParams(spec)
 	default:
 		return fmt.Errorf("no parameter validation implemented for injection type %q", spec.Type)
 	}
@@ -948,6 +962,282 @@ func validateNamespaceDeletionParams(spec v1alpha1.InjectionSpec) error {
 	for _, prefix := range forbiddenNamespacePrefixes {
 		if strings.HasPrefix(ns, prefix) {
 			return fmt.Errorf("NamespaceDeletion cannot target namespace %q (prefix %q is protected)", ns, prefix)
+		}
+	}
+
+	return nil
+}
+
+func validateSecretDeletionParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("SecretDeletion requires dangerLevel: high")
+	}
+
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("SecretDeletion requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("SecretDeletion", name); err != nil {
+		return err
+	}
+
+	if systemCriticalSecrets[name] {
+		return fmt.Errorf("SecretDeletion cannot target system-critical Secret %q", name)
+	}
+
+	// Check secret name against system-critical prefixes
+	for _, prefix := range systemCriticalConfigPrefixes {
+		if strings.HasPrefix(name, prefix) {
+			return fmt.Errorf("SecretDeletion cannot target Secret with system-critical prefix %q", prefix)
+		}
+	}
+
+	// Validate optional namespace parameter
+	if ns := spec.Parameters["namespace"]; ns != "" {
+		if err := validateK8sName("namespace", ns); err != nil {
+			return err
+		}
+		if forbiddenNamespaces[ns] {
+			return fmt.Errorf("SecretDeletion cannot target Secrets in protected namespace %q", ns)
+		}
+		for _, prefix := range forbiddenNamespacePrefixes {
+			if strings.HasPrefix(ns, prefix) {
+				return fmt.Errorf("SecretDeletion cannot target Secrets in namespace %q (matches forbidden prefix %q)", ns, prefix)
+			}
+		}
+	}
+
+	// Validate backup Secret name won't exceed K8s limits
+	backupName := "chaos-backup-secret-" + name
+	if len(backupName) > maxNameLength {
+		return fmt.Errorf("backup Secret name %q exceeds %d character limit", backupName, maxNameLength)
+	}
+
+	return nil
+}
+
+func validateScaleZeroParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("DeploymentScaleZero requires dangerLevel: high")
+	}
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("DeploymentScaleZero requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("DeploymentScaleZero", name); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateLeaseElectionParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("LeaderElectionDisrupt requires dangerLevel: high")
+	}
+
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("LeaderElectionDisrupt requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("LeaderElectionDisrupt", name); err != nil {
+		return err
+	}
+
+	// Validate backup ConfigMap name won't exceed K8s limits
+	backupName := "chaos-backup-lease-" + name
+	if len(backupName) > maxNameLength {
+		return fmt.Errorf("backup ConfigMap name %q exceeds %d character limit", backupName, maxNameLength)
+	}
+
+	return nil
+}
+
+func validateImageCorruptParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("ImageCorrupt requires dangerLevel: high")
+	}
+
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("ImageCorrupt requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("ImageCorrupt", name); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateCrashLoopParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("CrashLoopInject requires dangerLevel: high")
+	}
+
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("CrashLoopInject requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("CrashLoopInject", name); err != nil {
+		return err
+	}
+
+	// containerName is optional; validate if provided
+	if cn := spec.Parameters["containerName"]; cn != "" {
+		if err := validateK8sName("containerName", cn); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// systemCriticalServices is a deny-list of Services that should never be
+// targeted by ResourceDeletion experiments.
+var systemCriticalServices = map[string]bool{
+	"kubernetes":          true,
+	"openshift-apiserver": true,
+	"dns-default":         true,
+	"kube-dns":            true,
+}
+
+// systemCriticalServiceAccounts is a deny-list of ServiceAccounts that should
+// never be targeted by ResourceDeletion experiments.
+var systemCriticalServiceAccounts = map[string]bool{
+	"default":   true,
+	"deployer":  true,
+	"builder":   true,
+	"pipeline":  true,
+}
+
+// clusterScopedKinds are kinds that are cluster-scoped and cannot be targeted
+// by ResourceDeletion (which only works with namespaced resources).
+var clusterScopedKinds = map[string]bool{
+	"Namespace":               true,
+	"Node":                    true,
+	"ClusterRole":             true,
+	"ClusterRoleBinding":      true,
+	"CustomResourceDefinition": true,
+	"PersistentVolume":        true,
+}
+
+func validateResourceDeletionParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("ResourceDeletion requires dangerLevel: high")
+	}
+
+	apiVersion := spec.Parameters["apiVersion"]
+	if apiVersion == "" {
+		return fmt.Errorf("ResourceDeletion requires non-empty 'apiVersion' parameter")
+	}
+
+	kind := spec.Parameters["kind"]
+	if kind == "" {
+		return fmt.Errorf("ResourceDeletion requires non-empty 'kind' parameter")
+	}
+
+	name := spec.Parameters["name"]
+	if name == "" {
+		return fmt.Errorf("ResourceDeletion requires non-empty 'name' parameter")
+	}
+	if err := validateK8sName("name", name); err != nil {
+		return err
+	}
+	if err := rejectChaosManagedResource("ResourceDeletion", name); err != nil {
+		return err
+	}
+
+	// Reject cluster-scoped kinds
+	if clusterScopedKinds[kind] {
+		return fmt.Errorf("ResourceDeletion cannot target cluster-scoped kind %q (only namespaced resources are supported)", kind)
+	}
+
+	// Kind-specific deny-lists
+	if kind == "Secret" {
+		if systemCriticalSecrets[name] {
+			return fmt.Errorf("ResourceDeletion cannot target system-critical Secret %q", name)
+		}
+		for _, prefix := range systemCriticalConfigPrefixes {
+			if strings.HasPrefix(name, prefix) {
+				return fmt.Errorf("ResourceDeletion cannot target system-critical Secret %q (matches prefix %q)", name, prefix)
+			}
+		}
+	}
+	if kind == "Service" {
+		if systemCriticalServices[name] {
+			return fmt.Errorf("ResourceDeletion cannot target system-critical Service %q", name)
+		}
+	}
+	if kind == "ServiceAccount" {
+		if systemCriticalServiceAccounts[name] {
+			return fmt.Errorf("ResourceDeletion cannot target system-critical ServiceAccount %q", name)
+		}
+	}
+
+	// Validate optional namespace parameter
+	if ns := spec.Parameters["namespace"]; ns != "" {
+		if err := validateK8sName("namespace", ns); err != nil {
+			return err
+		}
+		if forbiddenNamespaces[ns] {
+			return fmt.Errorf("ResourceDeletion cannot target resources in protected namespace %q", ns)
+		}
+		for _, prefix := range forbiddenNamespacePrefixes {
+			if strings.HasPrefix(ns, prefix) {
+				return fmt.Errorf("ResourceDeletion cannot target resources in namespace %q (prefix %q is protected)", ns, prefix)
+			}
+		}
+	}
+
+	// Validate backup Secret name length
+	backupName := "chaos-backup-resource-" + strings.ToLower(kind) + "-" + name
+	if len(backupName) > maxNameLength {
+		return fmt.Errorf("backup Secret name %q exceeds %d character limit", backupName, maxNameLength)
+	}
+
+	return nil
+}
+
+func validatePDBBlockParams(spec v1alpha1.InjectionSpec) error {
+	if spec.DangerLevel != v1alpha1.DangerLevelHigh {
+		return fmt.Errorf("PDBBlock requires dangerLevel: high")
+	}
+
+	selectorStr := spec.Parameters["labelSelector"]
+	if selectorStr == "" {
+		return fmt.Errorf("PDBBlock requires non-empty 'labelSelector' parameter")
+	}
+
+	// Validate that labelSelector parses correctly
+	parts := strings.Split(selectorStr, ",")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		kv := strings.SplitN(part, "=", 2)
+		if len(kv) != 2 || kv[0] == "" || kv[1] == "" {
+			return fmt.Errorf("PDBBlock labelSelector part %q is not valid key=value format", part)
+		}
+	}
+
+	// Validate optional name
+	if name := spec.Parameters["name"]; name != "" {
+		if err := validateK8sName("name", name); err != nil {
+			return err
 		}
 	}
 
