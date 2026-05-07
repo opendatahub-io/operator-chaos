@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: istiod-openshift-gateway
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether the operator detects the stuck
+      rollout and takes corrective action.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

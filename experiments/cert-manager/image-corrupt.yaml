@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: cert-manager-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: cert-manager
+    component: cert-manager
+    resource: Deployment/cert-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: cert-manager
+        namespace: cert-manager
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: cert-manager
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether the operator detects the stuck
+      rollout and takes corrective action.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - cert-manager

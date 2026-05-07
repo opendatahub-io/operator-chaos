@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-crashloop-inject
+spec:
+  tier: 3
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: Deployment/odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CrashLoopInject
+    dangerLevel: high
+    parameters:
+      name: odh-model-controller
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Replacing the container command with a nonexistent binary causes
+      CrashLoopBackOff. Tests whether the operator detects the degraded
+      deployment and takes corrective action.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications

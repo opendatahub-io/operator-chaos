@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-pdb-block
+spec:
+  tier: 2
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PDBBlock
+    dangerLevel: high
+    parameters:
+      labelSelector: app=istiod
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Creating a PDB with maxUnavailable=0 blocks all voluntary
+      evictions. Tests whether the operator's pods can be drained
+      for node maintenance or cluster upgrades.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: knative-serving-controller-pdb-block
+spec:
+  tier: 2
+  target:
+    operator: knative-serving
+    component: controller
+    resource: Deployment/controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: controller
+        namespace: knative-serving
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PDBBlock
+    dangerLevel: high
+    parameters:
+      labelSelector: app=controller
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Creating a PDB with maxUnavailable=0 blocks all voluntary
+      evictions. Tests whether the operator's pods can be drained
+      for node maintenance or cluster upgrades.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - knative-serving
