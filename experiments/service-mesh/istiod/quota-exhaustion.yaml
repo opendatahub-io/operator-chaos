@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-quota-exhaustion
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: QuotaExhaustion
+    parameters:
+      quotaName: chaos-quota-istiod
+      pods: "0"
+      cpu: "0"
+      memory: "0"
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      A restrictive ResourceQuota in the openshift-ingress namespace
+      prevents istiod from restarting after a failure. Existing pods
+      continue running but new pods cannot be scheduled.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

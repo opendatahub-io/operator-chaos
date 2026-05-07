@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-webhook-latency
+spec:
+  tier: 4
+  target:
+    operator: service-mesh
+    component: istiod
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookLatency
+    dangerLevel: high
+    parameters:
+      resources: "virtualservices"
+      apiGroups: "networking.istio.io"
+      delay: "25s"
+    ttl: "180s"
+  hypothesis:
+    description: >-
+      Deploying a slow admission webhook (25s delay) intercepting
+      VirtualService resources tests whether the mesh control plane
+      handles slow API responses gracefully. Creating or modifying
+      VirtualServices should timeout rather than hang indefinitely.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

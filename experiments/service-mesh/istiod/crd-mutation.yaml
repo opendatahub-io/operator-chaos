@@ -1,0 +1,41 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-crd-mutation
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Istio/openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    dangerLevel: high
+    parameters:
+      apiVersion: "sailoperator.io/v1"
+      kind: "Istio"
+      name: "openshift-gateway"
+      path: "spec.values.meshConfig.accessLogFile"
+      value: "/dev/null"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Mutating the Istio CR's meshConfig to redirect access logs to
+      /dev/null tests whether the Sail operator detects spec drift
+      and reconciles the CR back to the expected state. The operator
+      should restore the original access log path (/dev/stdout).
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

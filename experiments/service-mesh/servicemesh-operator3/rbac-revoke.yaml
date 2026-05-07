@@ -1,0 +1,35 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: servicemesh-operator3-rbac-revoke
+spec:
+  tier: 4
+  target:
+    operator: service-mesh
+    component: servicemesh-operator3
+    resource: Deployment/servicemesh-operator3
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: servicemesh-operator3
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: RBACRevoke
+    dangerLevel: high
+    parameters:
+      bindingName: servicemeshoperator3.v3.-aHiEFB305GgxLJh65kUXKbGixX9KMy4oeU9CeQ
+      bindingType: ClusterRoleBinding
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Revoking RBAC from the Service Mesh operator tests whether OLM
+      restores the ClusterRoleBindings managed by the CSV. Without
+      permissions, the operator cannot reconcile Istio CRs.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

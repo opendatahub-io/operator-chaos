@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-config-drift
+spec:
+  tier: 2
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: ConfigMap/istio-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ConfigDrift
+    dangerLevel: high
+    parameters:
+      name: istio-openshift-gateway
+      key: mesh
+      value: '{"accessLogFile":"/dev/null","CORRUPTED":"true"}'
+      resourceType: ConfigMap
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Corrupting the istio-openshift-gateway ConfigMap's mesh config
+      tests whether istiod detects the change and whether the Sail
+      operator reconciles the ConfigMap back to the expected state.
+      istiod watches its own ConfigMap and hot-reloads on changes.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

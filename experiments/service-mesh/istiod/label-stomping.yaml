@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: istiod-openshift-gateway
+      labelKey: app
+      action: overwrite
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Removing labels from the istiod deployment tests whether the
+      Service Mesh operator restores them during reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

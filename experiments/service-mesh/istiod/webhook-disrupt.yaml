@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: istio-validator-openshift-gateway-openshift-ingress
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Disrupting the Istio validating webhook tests whether istiod
+      restores it. Without the validator, invalid Istio resources
+      (VirtualServices, DestinationRules) could be applied.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

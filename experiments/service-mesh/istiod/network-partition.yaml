@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-network-partition
+spec:
+  tier: 2
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Deployment/istiod-openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app=istiod
+      direction: both
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Isolating istiod from the API server and data plane proxies
+      tests whether the mesh remains functional during a control plane
+      outage. Envoy proxies should continue with their last-known-good
+      config. After recovery, istiod should reconnect and push updates.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

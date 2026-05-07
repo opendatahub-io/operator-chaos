@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: servicemesh-operator3-label-stomping
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: servicemesh-operator3
+    resource: Deployment/servicemesh-operator3
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: servicemesh-operator3
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LabelStomping
+    dangerLevel: high
+    parameters:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: servicemesh-operator3
+      labelKey: control-plane
+      action: overwrite
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Removing labels from the operator deployment tests whether OLM
+      or the deployment controller restores the expected labels.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

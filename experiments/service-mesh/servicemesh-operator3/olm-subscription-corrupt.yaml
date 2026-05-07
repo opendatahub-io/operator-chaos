@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: servicemesh-operator3-olm-subscription-corrupt
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: servicemesh-operator3
+    resource: Subscription/servicemeshoperator3
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: servicemesh-operator3
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CRDMutation
+    parameters:
+      apiVersion: "operators.coreos.com/v1alpha1"
+      kind: "Subscription"
+      name: "servicemeshoperator3"
+      path: "spec.channel"
+      value: "nonexistent-channel"
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Mutating the OLM subscription channel to a non-existent value
+      should cause OLM to report the subscription as unhealthy. The
+      operator deployment should remain running since channel changes
+      only affect future upgrades, not the currently installed CSV.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

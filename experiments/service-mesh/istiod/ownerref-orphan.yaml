@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-ownerref-orphan
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: OwnerRefOrphan
+    parameters:
+      apiVersion: "apps/v1"
+      kind: "Deployment"
+      name: "istiod-openshift-gateway"
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Removing ownerReferences from the istiod deployment orphans it
+      from the Istio CR's resource graph. The Sail operator should
+      detect the missing ownership and re-adopt the deployment during
+      its next reconciliation cycle.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

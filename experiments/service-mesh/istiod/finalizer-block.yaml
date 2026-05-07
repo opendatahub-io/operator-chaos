@@ -1,0 +1,40 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: istiod-finalizer-block
+spec:
+  tier: 3
+  target:
+    operator: service-mesh
+    component: istiod
+    resource: Istio/openshift-gateway
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: istiod-openshift-gateway
+        namespace: openshift-ingress
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: FinalizerBlock
+    dangerLevel: high
+    parameters:
+      apiVersion: sailoperator.io/v1
+      kind: Istio
+      name: openshift-gateway
+      finalizer: chaos.operatorchaos.io/finalizer-block
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Adding a blocking finalizer to the Istio CR tests whether the
+      operator handles a stuck-in-termination Istio instance gracefully.
+      The existing istiod deployment and data plane should continue
+      operating while the CR is in a terminating state.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-ingress

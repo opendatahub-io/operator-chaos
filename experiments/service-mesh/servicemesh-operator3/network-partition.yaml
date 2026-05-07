@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: servicemesh-operator3-network-partition
+spec:
+  tier: 2
+  target:
+    operator: service-mesh
+    component: servicemesh-operator3
+    resource: Deployment/servicemesh-operator3
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: servicemesh-operator3
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: control-plane=servicemesh-operator3
+      direction: both
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      Isolating the operator from the API server tests whether istiod
+      and gateway deployments remain operational when the operator
+      cannot reconcile. The data plane should be unaffected.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

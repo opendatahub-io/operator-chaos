@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: servicemesh-operator3-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: service-mesh
+    component: servicemesh-operator3
+    resource: Deployment/servicemesh-operator3
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: servicemesh-operator3
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: control-plane=servicemesh-operator3
+    count: 1
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Killing the Service Mesh operator pod tests OLM and Deployment
+      controller recovery. The operator manages Istio CR reconciliation
+      but existing istiod instances should remain running independently.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

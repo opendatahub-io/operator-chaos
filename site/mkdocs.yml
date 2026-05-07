@@ -205,6 +205,11 @@ nav:
         - Failure Modes: components/cert-manager/failure-modes.md
         - Validation Results: components/cert-manager/validation-results.md
         - Custom Experiments: components/cert-manager/custom-experiments.md
+      - Service Mesh:
+        - components/service-mesh/index.md
+        - Failure Modes: components/service-mesh/failure-modes.md
+        - Validation Results: components/service-mesh/validation-results.md
+        - Custom Experiments: components/service-mesh/custom-experiments.md
   - Reference:
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md
