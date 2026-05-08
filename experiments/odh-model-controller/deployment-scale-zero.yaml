@@ -1,0 +1,43 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: odh-model-controller-deployment-scale-zero
+spec:
+  tier: 5
+  target:
+    operator: odh-model-controller
+    component: odh-model-controller
+    resource: Deployment/odh-model-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        conditionType: Available
+      - type: replicaCount
+        apiVersion: apps/v1
+        kind: Deployment
+        name: odh-model-controller
+        namespace: opendatahub
+        expectedReplicas: 1
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: odh-model-controller
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      When the odh-model-controller deployment is scaled to zero replicas,
+      the DSC controller (via ModelController CR) should detect the change
+      and restore the expected replica count. Without the controller running,
+      InferenceService routing, serving runtime management, and model mesh
+      configuration stop entirely.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowedNamespaces:
+      - opendatahub

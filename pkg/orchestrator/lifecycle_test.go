@@ -1094,6 +1094,45 @@ func TestValidateSteadyStateCheckResourceExistsMissingFields(t *testing.T) {
 	}
 }
 
+func int32Ptr(i int32) *int32 { return &i }
+
+func TestValidateSteadyStateCheckReplicaCountMissingFields(t *testing.T) {
+	obs := &mockObserver{}
+	inj := &mockInjector{}
+	orch := newTestOrchestrator(obs, inj)
+
+	tests := []struct {
+		name  string
+		check v1alpha1.SteadyStateCheck
+		want  string
+	}{
+		{
+			name:  "missing kind",
+			check: v1alpha1.SteadyStateCheck{Type: v1alpha1.CheckReplicaCount, Name: "test", ExpectedReplicas: int32Ptr(1)},
+			want:  "requires kind and name",
+		},
+		{
+			name:  "missing name",
+			check: v1alpha1.SteadyStateCheck{Type: v1alpha1.CheckReplicaCount, Kind: "Deployment", ExpectedReplicas: int32Ptr(1)},
+			want:  "requires kind and name",
+		},
+		{
+			name:  "missing expectedReplicas",
+			check: v1alpha1.SteadyStateCheck{Type: v1alpha1.CheckReplicaCount, Kind: "Deployment", Name: "test"},
+			want:  "requires expectedReplicas",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			exp := newTestExperiment()
+			exp.Spec.SteadyState = v1alpha1.SteadyStateSpec{Checks: []v1alpha1.SteadyStateCheck{tt.check}}
+			err := orch.ValidateExperiment(context.Background(), exp)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.want)
+		})
+	}
+}
+
 func TestValidateSteadyStateCheckEmptyType(t *testing.T) {
 	obs := &mockObserver{}
 	inj := &mockInjector{}

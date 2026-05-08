@@ -47,6 +47,13 @@ func (o *KubernetesObserver) CheckSteadyState(ctx context.Context, checks []v1al
 			if err != nil {
 				detail.Error = err.Error()
 			}
+		case v1alpha1.CheckReplicaCount:
+			passed, value, err := o.checkReplicaCount(ctx, check, namespace)
+			detail.Passed = passed
+			detail.Value = value
+			if err != nil {
+				detail.Error = err.Error()
+			}
 		default:
 			detail.Error = fmt.Sprintf("unknown check type: %s", check.Type)
 		}
@@ -102,6 +109,57 @@ func (o *KubernetesObserver) checkCondition(ctx context.Context, check v1alpha1.
 	}
 
 	return false, fmt.Sprintf("condition %s not found", check.ConditionType), nil
+}
+
+// checkReplicaCount verifies that a Deployment or StatefulSet has the expected number
+// of spec.replicas. This catches cases where a condition like Available might be stale
+// but the actual replica count has been changed (e.g., scaled to zero).
+func (o *KubernetesObserver) checkReplicaCount(ctx context.Context, check v1alpha1.SteadyStateCheck, namespace string) (bool, string, error) {
+	ns := check.Namespace
+	if ns == "" {
+		ns = namespace
+	}
+
+	if check.ExpectedReplicas == nil {
+		return false, "", fmt.Errorf("replicaCount check requires expectedReplicas field")
+	}
+
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(check.APIVersion)
+	obj.SetKind(check.Kind)
+
+	if err := o.client.Get(ctx, types.NamespacedName{Name: check.Name, Namespace: ns}, obj); err != nil {
+		return false, "", fmt.Errorf("getting %s/%s: %w", check.Kind, check.Name, err)
+	}
+
+	replicas, found, err := unstructured.NestedFieldNoCopy(obj.Object, "spec", "replicas")
+	if err != nil {
+		return false, "", fmt.Errorf("reading spec.replicas from %s/%s: %w", check.Kind, check.Name, err)
+	}
+
+	expected := int64(*check.ExpectedReplicas)
+	if !found {
+		// When spec.replicas is not set, Kubernetes defaults to 1.
+		if expected == 1 {
+			return true, "replicas=1 (default)", nil
+		}
+		return false, fmt.Sprintf("replicas not set (default 1), expected %d", expected), nil
+	}
+
+	var actual int64
+	switch v := replicas.(type) {
+	case int64:
+		actual = v
+	case float64:
+		actual = int64(v)
+	default:
+		return false, "", fmt.Errorf("spec.replicas has unexpected type %T", replicas)
+	}
+
+	if actual == expected {
+		return true, fmt.Sprintf("replicas=%d", actual), nil
+	}
+	return false, fmt.Sprintf("replicas=%d, expected %d", actual, expected), nil
 }
 
 // checkResourceExists verifies that a specific Kubernetes resource exists in the cluster.
