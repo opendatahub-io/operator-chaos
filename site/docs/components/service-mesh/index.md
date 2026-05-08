@@ -9,7 +9,7 @@ The project tests Service Mesh resilience at two layers:
 
 1. **Service Mesh Operator** (6 experiments): The OLM-managed operator (`servicemesh-operator3`) in `openshift-operators`. Tests operator-layer resilience (OLM subscription, CSV, deployment, leader election).
 
-2. **Istiod Control Plane** (12 experiments): The `istiod-openshift-gateway` deployment and its webhooks in `openshift-ingress`. Tests control plane resilience (config distribution, sidecar injection, validation, ownership, finalizers).
+2. **Istiod Control Plane** (16 experiments): The `istiod-openshift-gateway` deployment and its webhooks in `openshift-ingress`. Tests control plane resilience (config distribution, sidecar injection, validation, ownership, finalizers, CrashLoopBackOff, ImagePullBackOff, Service deletion, eviction blocking).
 
 ## Service Mesh Operator (OSSM 3.x)
 

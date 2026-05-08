@@ -1,6 +1,6 @@
 # Service Mesh Validation Results
 
-!!! success "18/18 Resilient"
+!!! success "22/22 Resilient"
     All Service Mesh experiments passed with sub-3 second recovery times. Tested on ROSA HyperShift 4.21.11 with OSSM 3.2.0 (Istio 1.27.3).
 
 ## Test Environment
@@ -41,6 +41,10 @@
 | config-drift | Resilient | 1.7s | 1 |
 | webhook-latency | Resilient | 1.6s | 1 |
 | ownerref-orphan | Resilient | 1.8s | 1 |
+| crashloop-inject | Resilient | <3s | 1 |
+| image-corrupt | Resilient | <3s | 1 |
+| resource-deletion-service | Resilient | <3s | 1 |
+| pdb-block | Resilient | <3s | 1 |
 
 ### OLM Lifecycle
 

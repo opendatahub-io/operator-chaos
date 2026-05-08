@@ -84,11 +84,14 @@ nav:
       - NetworkPartition: failure-modes/network-partition.md
       - QuotaExhaustion: failure-modes/quota-exhaustion.md
       - NamespaceDeletion: failure-modes/namespace-deletion.md
+      - DeploymentScaleZero: failure-modes/deployment-scale-zero.md
     - Configuration:
       - ConfigDrift: failure-modes/config-drift.md
       - CRDMutation: failure-modes/crd-mutation.md
       - LabelStomping: failure-modes/label-stomping.md
       - ClientFault: failure-modes/client-fault.md
+      - ImageCorrupt: failure-modes/image-corrupt.md
+      - CrashLoopInject: failure-modes/crashloop-inject.md
     - Access Control:
       - RBACRevoke: failure-modes/rbac-revoke.md
       - WebhookDisrupt: failure-modes/webhook-disrupt.md
@@ -97,6 +100,10 @@ nav:
       - FinalizerBlock: failure-modes/finalizer-block.md
       - OwnerRefOrphan: failure-modes/ownerref-orphan.md
       - OLM Lifecycle: failure-modes/olm-lifecycle.md
+      - LeaderElectionDisrupt: failure-modes/leader-election-disrupt.md
+      - SecretDeletion: failure-modes/secret-deletion.md
+      - ResourceDeletion: failure-modes/resource-deletion.md
+      - PDBBlock: failure-modes/pdb-block.md
     - Creating Custom Failure Modes: failure-modes/custom-failure-modes.md
   - Guides:
     - Profiles: guides/profiles.md

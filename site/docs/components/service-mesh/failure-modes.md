@@ -22,6 +22,10 @@
 | 16 | istiod-webhook-latency | istiod | WebhookLatency | 4 | high |
 | 17 | istiod-ownerref-orphan | istiod | OwnerRefOrphan | 3 | low |
 | 18 | servicemesh-operator3-olm-subscription-corrupt | servicemesh-operator3 | CRDMutation | 3 | low |
+| 19 | istiod-crashloop-inject | istiod | CrashLoopInject | 3 | high |
+| 20 | istiod-image-corrupt | istiod | ImageCorrupt | 3 | high |
+| 21 | istiod-resource-deletion-service | istiod | ResourceDeletion | 3 | high |
+| 22 | istiod-pdb-block | istiod | PDBBlock | 2 | high |
 
 ## servicemesh-operator3 (Operator Layer)
 
