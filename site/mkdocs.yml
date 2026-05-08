@@ -23,7 +23,7 @@ theme:
     - navigation.tabs
     - navigation.top
     - navigation.indexes
-    - toc.integrate
+    - navigation.tabs.sticky
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -125,24 +125,96 @@ nav:
   - Use Cases:
     - components/index.md
     - RHOAI / ODH:
-      - Dashboard: components/dashboard/index.md
-      - Data Science Pipelines: components/data-science-pipelines/index.md
-      - Feast: components/feast/index.md
-      - KServe: components/kserve/index.md
-      - LlamaStack: components/llamastack/index.md
-      - Model Registry: components/model-registry/index.md
-      - odh-model-controller: components/odh-model-controller/index.md
-      - OpenDataHub Operator: components/opendatahub-operator/index.md
-      - Ray: components/ray/index.md
-      - Training Operator: components/training-operator/index.md
-      - TrustyAI: components/trustyai/index.md
-      - Workbenches: components/workbenches/index.md
-      - CodeFlare (removed): components/codeflare/index.md
-      - ModelMesh (removed): components/modelmesh/index.md
-    - OpenShift Service Mesh: components/service-mesh/index.md
-    - Red Hat Build of Kueue: components/kueue/index.md
-    - OpenShift Serverless: components/knative-serving/index.md
-    - cert-manager Operator: components/cert-manager/index.md
+      - Dashboard:
+        - components/dashboard/index.md
+        - Failure Modes: components/dashboard/failure-modes.md
+        - Validation Results: components/dashboard/validation-results.md
+        - Custom Experiments: components/dashboard/custom-experiments.md
+      - Data Science Pipelines:
+        - components/data-science-pipelines/index.md
+        - Failure Modes: components/data-science-pipelines/failure-modes.md
+        - Validation Results: components/data-science-pipelines/validation-results.md
+        - Custom Experiments: components/data-science-pipelines/custom-experiments.md
+      - Feast:
+        - components/feast/index.md
+        - Failure Modes: components/feast/failure-modes.md
+        - Validation Results: components/feast/validation-results.md
+        - Custom Experiments: components/feast/custom-experiments.md
+      - KServe:
+        - components/kserve/index.md
+        - Failure Modes: components/kserve/failure-modes.md
+        - Validation Results: components/kserve/validation-results.md
+        - Custom Experiments: components/kserve/custom-experiments.md
+      - LlamaStack:
+        - components/llamastack/index.md
+        - Failure Modes: components/llamastack/failure-modes.md
+        - Validation Results: components/llamastack/validation-results.md
+        - Custom Experiments: components/llamastack/custom-experiments.md
+      - Model Registry:
+        - components/model-registry/index.md
+        - Failure Modes: components/model-registry/failure-modes.md
+        - Validation Results: components/model-registry/validation-results.md
+        - Custom Experiments: components/model-registry/custom-experiments.md
+      - odh-model-controller:
+        - components/odh-model-controller/index.md
+        - Failure Modes: components/odh-model-controller/failure-modes.md
+        - Validation Results: components/odh-model-controller/validation-results.md
+        - Custom Experiments: components/odh-model-controller/custom-experiments.md
+      - OpenDataHub Operator:
+        - components/opendatahub-operator/index.md
+        - Failure Modes: components/opendatahub-operator/failure-modes.md
+        - Validation Results: components/opendatahub-operator/validation-results.md
+        - Custom Experiments: components/opendatahub-operator/custom-experiments.md
+      - Ray:
+        - components/ray/index.md
+        - Failure Modes: components/ray/failure-modes.md
+        - Validation Results: components/ray/validation-results.md
+        - Custom Experiments: components/ray/custom-experiments.md
+      - Training Operator:
+        - components/training-operator/index.md
+        - Failure Modes: components/training-operator/failure-modes.md
+        - Validation Results: components/training-operator/validation-results.md
+        - Custom Experiments: components/training-operator/custom-experiments.md
+      - TrustyAI:
+        - components/trustyai/index.md
+        - Failure Modes: components/trustyai/failure-modes.md
+        - Validation Results: components/trustyai/validation-results.md
+        - Custom Experiments: components/trustyai/custom-experiments.md
+      - Workbenches:
+        - components/workbenches/index.md
+        - Failure Modes: components/workbenches/failure-modes.md
+        - Validation Results: components/workbenches/validation-results.md
+        - Custom Experiments: components/workbenches/custom-experiments.md
+      - CodeFlare (removed):
+        - components/codeflare/index.md
+        - Failure Modes: components/codeflare/failure-modes.md
+        - Validation Results: components/codeflare/validation-results.md
+        - Custom Experiments: components/codeflare/custom-experiments.md
+      - ModelMesh (removed):
+        - components/modelmesh/index.md
+        - Failure Modes: components/modelmesh/failure-modes.md
+        - Validation Results: components/modelmesh/validation-results.md
+        - Custom Experiments: components/modelmesh/custom-experiments.md
+    - OpenShift Service Mesh:
+      - components/service-mesh/index.md
+      - Failure Modes: components/service-mesh/failure-modes.md
+      - Validation Results: components/service-mesh/validation-results.md
+      - Custom Experiments: components/service-mesh/custom-experiments.md
+    - Red Hat Build of Kueue:
+      - components/kueue/index.md
+      - Failure Modes: components/kueue/failure-modes.md
+      - Validation Results: components/kueue/validation-results.md
+      - Custom Experiments: components/kueue/custom-experiments.md
+    - OpenShift Serverless:
+      - components/knative-serving/index.md
+      - Failure Modes: components/knative-serving/failure-modes.md
+      - Validation Results: components/knative-serving/validation-results.md
+      - Custom Experiments: components/knative-serving/custom-experiments.md
+    - cert-manager Operator:
+      - components/cert-manager/index.md
+      - Failure Modes: components/cert-manager/failure-modes.md
+      - Validation Results: components/cert-manager/validation-results.md
+      - Custom Experiments: components/cert-manager/custom-experiments.md
   - Reference:
     - CLI Commands: reference/cli-commands.md
     - CRD Schema: reference/crd-schema.md
