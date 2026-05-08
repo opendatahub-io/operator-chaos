@@ -1121,6 +1121,11 @@ func TestValidateSteadyStateCheckReplicaCountMissingFields(t *testing.T) {
 			check: v1alpha1.SteadyStateCheck{Type: v1alpha1.CheckReplicaCount, Kind: "Deployment", Name: "test"},
 			want:  "requires expectedReplicas",
 		},
+		{
+			name:  "negative expectedReplicas",
+			check: v1alpha1.SteadyStateCheck{Type: v1alpha1.CheckReplicaCount, Kind: "Deployment", Name: "test", ExpectedReplicas: int32Ptr(-1)},
+			want:  "requires expectedReplicas >= 0",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

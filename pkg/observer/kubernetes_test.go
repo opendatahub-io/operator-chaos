@@ -572,6 +572,33 @@ func TestCheckSteadyState_ReplicaCount_NoReplicasFieldDefaultsTo1(t *testing.T) 
 	assert.True(t, result.Passed, "missing replicas field defaults to 1")
 }
 
+func TestCheckSteadyState_ReplicaCount_NonScalableKindMissingReplicas(t *testing.T) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"})
+	obj.SetName("test-cm")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{}
+	obs := buildFakeClient(obj)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "v1",
+			Kind:             "ConfigMap",
+			Name:             "test-cm",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Contains(t, result.Details[0].Error, "spec.replicas is not defined for kind ConfigMap")
+}
+
 func TestCheckSteadyState_ResourceExists_NonNotFoundError(t *testing.T) {
 	// Use an interceptor to return a non-NotFound error (simulating RBAC denied).
 	scheme := runtime.NewScheme()

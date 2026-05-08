@@ -139,11 +139,15 @@ func (o *KubernetesObserver) checkReplicaCount(ctx context.Context, check v1alph
 
 	expected := int64(*check.ExpectedReplicas)
 	if !found {
-		// When spec.replicas is not set, Kubernetes defaults to 1.
-		if expected == 1 {
-			return true, "replicas=1 (default)", nil
+		switch check.Kind {
+		case "Deployment", "StatefulSet", "ReplicaSet":
+			if expected == 1 {
+				return true, "replicas=1 (default)", nil
+			}
+			return false, fmt.Sprintf("replicas not set (default 1), expected %d", expected), nil
+		default:
+			return false, "", fmt.Errorf("spec.replicas is not defined for kind %s", check.Kind)
 		}
-		return false, fmt.Sprintf("replicas not set (default 1), expected %d", expected), nil
 	}
 
 	var actual int64
