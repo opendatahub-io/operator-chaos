@@ -1,30 +1,108 @@
-# Component Overview
+# Use Cases
 
-Coverage matrix showing which failure modes have experiments defined for each component.
+Operator Chaos is a generic framework that works with any Kubernetes operator. The following operators have been validated with chaos experiments.
 
-### Active Components (RHOAI 3.x / ODH)
+## Validated Operators
 
-| Component | PodKill | ConfigDrift | CRDMutation | FinalizerBlock | NetworkPartition | RBACRevoke | WebhookDisrupt | ClientFault |
-|-----------|---------|-------------|-------------|----------------|------------------|------------|----------------|-------------|
-| [dashboard](dashboard/index.md) | Y | Y | Y | - | Y | Y | Y | - |
-| [data-science-pipelines](data-science-pipelines/index.md) | Y | Y | - | Y | Y | Y | Y | - |
-| [feast](feast/index.md) | Y | - | - | Y | Y | Y | Y | - |
-| [kserve](kserve/index.md) | Y | Y | Y | - | Y | - | Y | - |
-| [llamastack](llamastack/index.md) | Y | Y | - | Y | Y | Y | Y | - |
-| [model-registry](model-registry/index.md) | Y | - | Y | Y | Y | Y | Y | - |
-| [odh-model-controller](odh-model-controller/index.md) | Y | Y | Y | Y | Y | Y | Y | Y |
-| [opendatahub-operator](opendatahub-operator/index.md) | Y | - | - | Y | Y | Y | Y | - |
-| [ray](ray/index.md) | Y | - | - | Y | Y | Y | Y | - |
-| [training-operator](training-operator/index.md) | Y | - | - | Y | Y | Y | Y | - |
-| [trustyai](trustyai/index.md) | Y | - | - | Y | Y | Y | Y | - |
-| [workbenches](workbenches/index.md) | Y | - | - | - | Y | Y | Y | - |
+| Operator | Components | Experiments | Failure Modes | Status |
+|----------|-----------|-------------|---------------|--------|
+| [RHOAI](dashboard/index.md) | 14 | 65+ | 20 | Actively tested |
+| [ODH](dashboard/index.md) | 12 | 65+ | 20 | Same components as RHOAI, different namespace |
+| [OpenShift Service Mesh](service-mesh/index.md) | 2 | 22 | 14 | All Resilient |
+| [Red Hat Build of Kueue](kueue/index.md) | 3 | 30 | 11 | 29/30 Resilient |
+| [OpenShift Serverless](knative-serving/index.md) | 7 | 35+ | 10 | 34/35 Resilient |
+| [cert-manager](cert-manager/index.md) | 3 | 14+ | 10 | All Resilient |
 
-### Removed/Replaced (RHOAI 3.x)
+## Coverage Matrix
 
-These components have been removed or replaced in RHOAI 3.x. Experiments are still available for ODH or RHOAI 2.x testing.
+### RHOAI / ODH Components: Core Failure Modes
 
-| Component | PodKill | ConfigDrift | CRDMutation | FinalizerBlock | NetworkPartition | RBACRevoke | WebhookDisrupt | ClientFault | Status |
-|-----------|---------|-------------|-------------|----------------|------------------|------------|----------------|-------------|--------|
-| [codeflare](codeflare/index.md) | Y | Y | - | Y | Y | Y | Y | - | Removed in RHOAI 3.0 |
-| [kueue](kueue/index.md) | Y | - | - | Y | Y | Y | Y | - | Replaced by Red Hat Build of Kueue Operator |
-| [modelmesh](modelmesh/index.md) | Y | Y | - | Y | Y | Y | Y | - | Removed in RHOAI 3.0 |
+Abbreviations: PK (PodKill), NP (NetworkPartition), QE (QuotaExhaustion), ND (NamespaceDeletion), CD (ConfigDrift), CM (CRDMutation), LS (LabelStomping), CF (ClientFault), RR (RBACRevoke), WD (WebhookDisrupt), WL (WebhookLatency), FB (FinalizerBlock), OR (OwnerRefOrphan)
+
+| Component | PK | NP | QE | ND | CD | CM | LS | CF | RR | WD | WL | FB | OR |
+|-----------|----|----|----|----|----|----|----|----|----|----|----|----|------|
+| [dashboard](dashboard/index.md) | Y | Y | Y | - | Y | Y | - | - | Y | Y | - | - | - |
+| [data-science-pipelines](data-science-pipelines/index.md) | Y | Y | - | - | Y | - | - | - | Y | Y | - | Y | - |
+| [feast](feast/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
+| [kserve](kserve/index.md) | Y | Y | - | - | Y | Y | - | - | - | Y | - | - | Y |
+| [llamastack](llamastack/index.md) | Y | Y | - | - | Y | - | - | - | Y | - | - | - | - |
+| [model-registry](model-registry/index.md) | Y | Y | - | - | - | Y | - | - | Y | Y | - | Y | - |
+| [odh-model-controller](odh-model-controller/index.md) | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| [opendatahub-operator](opendatahub-operator/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
+| [ray](ray/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
+| [training-operator](training-operator/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
+| [trustyai](trustyai/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
+| [workbenches](workbenches/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | - | - |
+| [codeflare](codeflare/index.md) | Y | Y | - | - | Y | - | - | - | Y | Y | - | Y | - |
+| [modelmesh](modelmesh/index.md) | Y | Y | - | - | Y | - | - | - | Y | Y | - | Y | - |
+
+### RHOAI / ODH Components: Extended Failure Modes
+
+Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero), LE (LeaderElectionDisrupt), CL (CrashLoopInject), IC (ImageCorrupt), RD (ResourceDeletion), PB (PDBBlock)
+
+| Component | OL | SD | SZ | LE | CL | IC | RD | PB |
+|-----------|----|----|----|----|----|----|----|----|
+| [dashboard](dashboard/index.md) | - | - | - | - | - | - | - | - |
+| [data-science-pipelines](data-science-pipelines/index.md) | - | - | - | - | - | - | - | - |
+| [feast](feast/index.md) | - | - | - | - | - | - | - | - |
+| [kserve](kserve/index.md) | - | - | - | - | - | - | - | - |
+| [llamastack](llamastack/index.md) | - | - | - | - | - | - | - | - |
+| [model-registry](model-registry/index.md) | - | - | - | - | - | - | - | - |
+| [odh-model-controller](odh-model-controller/index.md) | - | - | - | - | - | - | - | - |
+| [opendatahub-operator](opendatahub-operator/index.md) | - | - | - | - | - | - | - | - |
+| [ray](ray/index.md) | - | - | - | - | - | - | - | - |
+| [training-operator](training-operator/index.md) | - | - | - | - | - | - | - | - |
+| [trustyai](trustyai/index.md) | - | - | - | - | - | - | - | - |
+| [workbenches](workbenches/index.md) | - | - | - | - | - | - | - | - |
+| [codeflare](codeflare/index.md) | - | - | - | - | - | - | - | - |
+| [modelmesh](modelmesh/index.md) | - | - | - | - | - | - | - | - |
+
+### OpenShift Service Mesh: Core Failure Modes
+
+| Component | PK | NP | QE | CD | CM | LS | RR | WD | WL | FB | OR |
+|-----------|----|----|----|----|----|----|----|----|----|----|------|
+| servicemesh-operator3 | Y | Y | Y | - | Y | Y | Y | - | - | - | - |
+| istiod | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+
+### OpenShift Service Mesh: Extended Failure Modes
+
+| Component | OL | CL | IC | RD | PB |
+|-----------|----|----|----|----|------|
+| servicemesh-operator3 | Y | - | - | - | - |
+| istiod | - | Y | Y | Y | Y |
+
+### Red Hat Build of Kueue: Core Failure Modes
+
+| Component | PK | NP | QE | CD | CM | LS | RR | WD | FB | OR |
+|-----------|----|----|----|----|----|----|----|----|----|----|------|
+| kueue (legacy) | Y | Y | - | - | - | - | Y | Y | Y | - |
+| kueue-operator | Y | Y | Y | - | Y | Y | Y | - | - | Y |
+| kueue-operand | Y | - | - | Y | Y | - | - | - | - | - |
+
+### Red Hat Build of Kueue: Extended Failure Modes
+
+| Component | SZ | LE |
+|-----------|----|----|
+| kueue (legacy) | - | - |
+| kueue-operator | Y | Y |
+| kueue-operand | Y | - |
+
+### OpenShift Serverless (Knative Serving): Core Failure Modes
+
+| Component | PK | NP | QE | LS | RR | WD | CD |
+|-----------|----|----|----|----|----|----|------|
+| activator | Y | Y | Y | Y | Y | - | - |
+| autoscaler | Y | Y | Y | Y | - | - | - |
+| autoscaler-hpa | Y | Y | - | - | - | - | - |
+| controller | Y | Y | Y | Y | Y | - | - |
+| webhook | Y | Y | Y | Y | - | Y | Y |
+| kourier-gateway | Y | Y | Y | Y | - | - | - |
+| net-kourier-controller | Y | Y | - | - | Y | - | - |
+
+### cert-manager Operator: Core Failure Modes
+
+| Component | PK | NP | QE | LS | RR | CD |
+|-----------|----|----|----|----|----|----|------|
+| controller | Y | Y | Y | Y | Y | - |
+| webhook | Y | Y | Y | Y | - | Y |
+| cainjector | Y | Y | Y | Y | - | - |
