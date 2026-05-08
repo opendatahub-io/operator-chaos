@@ -51,5 +51,11 @@
 Timeout: 60s
 
 
+## Pages
+
+- [Failure Modes](failure-modes.md)
+- [Validation Results](validation-results.md)
+- [Custom Experiments](custom-experiments.md)
+
 <!-- custom-start: notes -->
 <!-- custom-end: notes -->

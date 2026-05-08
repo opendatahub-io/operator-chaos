@@ -90,5 +90,11 @@ The CA injector injects CA bundles into webhooks and API services.
 Timeout: 30s
 
 
+## Pages
+
+- [Failure Modes](failure-modes.md)
+- [Validation Results](validation-results.md)
+- [Custom Experiments](custom-experiments.md)
+
 <!-- custom-start: notes -->
 <!-- custom-end: notes -->
