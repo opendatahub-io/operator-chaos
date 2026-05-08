@@ -29,6 +29,10 @@
          <lastmod>2026-05-08</lastmod>
     </url>
     <url>
+         <loc>https://opendatahub-io.github.io/operator-chaos/components/rhoai-odh/</loc>
+         <lastmod>2026-05-08</lastmod>
+    </url>
+    <url>
          <loc>https://opendatahub-io.github.io/operator-chaos/components/cert-manager/</loc>
          <lastmod>2026-05-08</lastmod>
     </url>

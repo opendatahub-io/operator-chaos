@@ -5,13 +5,13 @@
       
       
       
-        <link rel="canonical" href="https://opendatahub-io.github.io/operator-chaos/components/llamastack/">
+        <link rel="canonical" href="https://opendatahub-io.github.io/operator-chaos/components/rhoai-odh/">
       
       
-        <link rel="prev" href="../kserve/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../model-registry/">
+        <link rel="next" href="../dashboard/">
       
       
         
@@ -22,7 +22,7 @@
     
     
       
-        <title>LlamaStack - Operator Chaos</title>
+        <title>RHOAI / ODH - Operator Chaos</title>
       
     
     
@@ -85,7 +85,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#llamastack" class="md-skip">
+        <a href="#rhoai-odh" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              LlamaStack
+              RHOAI / ODH
             
           </span>
         </div>
@@ -899,10 +899,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../rhoai-odh/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RHOAI / ODH
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -918,6 +945,37 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+      
+        <li class="md-nav__item">
+  <a href="#components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1013,37 +1071,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    LlamaStack
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../llamastack/" class="md-nav__link">
         
   
   
@@ -1059,137 +1090,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resource-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Components
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Components">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#llamastack-controller-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        llamastack-controller-manager
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="llamastack-controller-manager">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#managed-resources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Managed Resources
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#webhooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Webhooks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#finalizers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Finalizers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#steady-state-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Steady-State Checks
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pages
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1942,110 +1842,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resource-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#components" class="md-nav__link">
     <span class="md-ellipsis">
       
         Components
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Components">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#llamastack-controller-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        llamastack-controller-manager
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="llamastack-controller-manager">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#managed-resources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Managed Resources
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#webhooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Webhooks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#finalizers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Finalizers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#steady-state-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Steady-State Checks
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pages
       
     </span>
   </a>
@@ -2072,185 +1872,115 @@
   
 
 
-<h1 id="llamastack">llamastack<a class="headerlink" href="#llamastack" title="Permanent link">¶</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<h1 id="rhoai-odh">RHOAI / ODH<a class="headerlink" href="#rhoai-odh" title="Permanent link">¶</a></h1>
+<p>Red Hat OpenShift AI (RHOAI) and Open Data Hub (ODH) share the same set of operator components. The chaos experiments work with both distributions; the only differences are namespace names and the managing operator (DataScienceCluster for RHOAI, similar CR for ODH).</p>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th>Distribution</th>
+<th>Operator Namespace</th>
+<th>Components Namespace</th>
+<th>Managing CR</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Operator</strong></td>
-<td>llamastack</td>
+<td>RHOAI</td>
+<td>redhat-ods-operator</td>
+<td>redhat-ods-applications</td>
+<td>DataScienceCluster</td>
 </tr>
 <tr>
-<td><strong>Namespace</strong></td>
+<td>ODH</td>
+<td>opendatahub-operator-system</td>
 <td>opendatahub</td>
-</tr>
-<tr>
-<td><strong>Repository</strong></td>
-<td><a href="https://github.com/meta-llama/llama-stack-k8s-operator">https://github.com/meta-llama/llama-stack-k8s-operator</a></td>
-</tr>
-<tr>
-<td><strong>Components</strong></td>
-<td>1</td>
-</tr>
-<tr>
-<td><strong>Reconcile Timeout</strong></td>
-<td>300s</td>
-</tr>
-<tr>
-<td><strong>Max Reconcile Cycles</strong></td>
-<td>10</td>
-</tr>
-</tbody>
-</table>
-<h2 id="resource-summary">Resource Summary<a class="headerlink" href="#resource-summary" title="Permanent link">¶</a></h2>
-<table>
-<thead>
-<tr>
-<th>Kind</th>
-<th>Count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ClusterRoleBinding</td>
-<td>1</td>
-</tr>
-<tr>
-<td>ConfigMap</td>
-<td>1</td>
-</tr>
-<tr>
-<td>Deployment</td>
-<td>1</td>
-</tr>
-<tr>
-<td>Lease</td>
-<td>1</td>
-</tr>
-<tr>
-<td>Service</td>
-<td>1</td>
-</tr>
-<tr>
-<td>ServiceAccount</td>
-<td>1</td>
-</tr>
-<tr>
-<td><strong>Total</strong></td>
-<td><strong>6</strong></td>
+<td>DataScienceCluster</td>
 </tr>
 </tbody>
 </table>
 <h2 id="components">Components<a class="headerlink" href="#components" title="Permanent link">¶</a></h2>
-<h3 id="llamastack-controller-manager">llamastack-controller-manager<a class="headerlink" href="#llamastack-controller-manager" title="Permanent link">¶</a></h3>
-<p><strong>Controller:</strong> DataScienceCluster
-<strong>Dependencies:</strong> kserve-controller-manager</p>
-<h4 id="managed-resources">Managed Resources<a class="headerlink" href="#managed-resources" title="Permanent link">¶</a></h4>
 <table>
 <thead>
 <tr>
-<th>API Version</th>
-<th>Kind</th>
-<th>Name</th>
-<th>Namespace</th>
+<th>Component</th>
+<th>Experiments</th>
+<th>Key Findings</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>apps/v1</td>
-<td>Deployment</td>
-<td>llamastack-controller-manager</td>
-<td>opendatahub</td>
+<td><a href="../dashboard/">Dashboard</a></td>
+<td>7</td>
+<td>All Resilient</td>
 </tr>
 <tr>
-<td>v1</td>
-<td>ServiceAccount</td>
-<td>llamastack-controller-manager</td>
-<td>opendatahub</td>
+<td><a href="../data-science-pipelines/">Data Science Pipelines</a></td>
+<td>5</td>
+<td>All Resilient</td>
 </tr>
 <tr>
-<td>rbac.authorization.k8s.io/v1</td>
-<td>ClusterRoleBinding</td>
-<td>llamastack-controller-manager-rolebinding</td>
-<td></td>
+<td><a href="../feast/">Feast</a></td>
+<td>4</td>
+<td>All Resilient</td>
 </tr>
 <tr>
-<td>coordination.k8s.io/v1</td>
-<td>Lease</td>
-<td>llamastack-controller-manager-leader-election</td>
-<td>opendatahub</td>
+<td><a href="../kserve/">KServe</a></td>
+<td>11</td>
+<td>Route recovery slow (RHOAIENG-60900)</td>
 </tr>
 <tr>
-<td>v1</td>
-<td>Service</td>
-<td>llamastack-controller-manager-metrics-service</td>
-<td>opendatahub</td>
+<td><a href="../llamastack/">LlamaStack</a></td>
+<td>4</td>
+<td>All Resilient</td>
 </tr>
 <tr>
-<td>v1</td>
-<td>ConfigMap</td>
-<td>llamastack-serving-config</td>
-<td>opendatahub</td>
+<td><a href="../model-registry/">Model Registry</a></td>
+<td>6</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../odh-model-controller/">odh-model-controller</a></td>
+<td>20</td>
+<td>DeploymentScaleZero Degraded (RHOAIENG-61458)</td>
+</tr>
+<tr>
+<td><a href="../opendatahub-operator/">OpenDataHub Operator</a></td>
+<td>5</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../ray/">Ray</a></td>
+<td>4</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../training-operator/">Training Operator</a></td>
+<td>4</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../trustyai/">TrustyAI</a></td>
+<td>3</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../workbenches/">Workbenches</a></td>
+<td>4</td>
+<td>All Resilient</td>
+</tr>
+<tr>
+<td><a href="../codeflare/">CodeFlare</a></td>
+<td>4</td>
+<td>Removed in RHOAI 3.0</td>
+</tr>
+<tr>
+<td><a href="../modelmesh/">ModelMesh</a></td>
+<td>5</td>
+<td>Removed in RHOAI 3.0</td>
 </tr>
 </tbody>
 </table>
-<h4 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">¶</a></h4>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Path</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>vllamastackdistribution.meta.com</td>
-<td>validating</td>
-<td><code>/validate-llamastack-meta-com-v1alpha1-llamastackdistribution</code></td>
-</tr>
-</tbody>
-</table>
-<h4 id="finalizers">Finalizers<a class="headerlink" href="#finalizers" title="Permanent link">¶</a></h4>
-<ul>
-<li><code>llamastack.meta.com/finalizer</code></li>
-</ul>
-<h4 id="steady-state-checks">Steady-State Checks<a class="headerlink" href="#steady-state-checks" title="Permanent link">¶</a></h4>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Kind</th>
-<th>Name</th>
-<th>Namespace</th>
-<th>Condition</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>conditionTrue</td>
-<td>Deployment</td>
-<td>llamastack-controller-manager</td>
-<td>opendatahub</td>
-<td>Available</td>
-</tr>
-</tbody>
-</table>
-<p>Timeout: 60s</p>
-<h2 id="pages">Pages<a class="headerlink" href="#pages" title="Permanent link">¶</a></h2>
-<ul>
-<li><a href="failure-modes/">Failure Modes</a></li>
-<li><a href="validation-results/">Validation Results</a></li>
-<li><a href="custom-experiments/">Custom Experiments</a></li>
-</ul>
-<!-- custom-start: notes -->
-<!-- custom-end: notes -->
+<p>To use these experiments with ODH instead of RHOAI, use the <code>--profile odh</code> flag or create experiments targeting the <code>opendatahub</code> namespace.</p>
 
 
 
@@ -2273,7 +2003,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 8, 2026 09:02:46 UTC">May 8, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 8, 2026 09:58:04 UTC">May 8, 2026</span>
   </span>
 
     
@@ -2283,7 +2013,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 17, 2026 13:19:23 UTC">April 17, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 8, 2026 09:58:04 UTC">May 8, 2026</span>
   </span>
 
     
