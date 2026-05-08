@@ -246,17 +246,20 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../getting-started/installation/" class="md-tabs__link">
-        
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
   
   
     
   
-  Installation
+  Getting Started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -268,7 +271,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../modes/cli/" class="md-tabs__link">
+        <a href="../../modes/" class="md-tabs__link">
           
   
   
@@ -394,25 +397,6 @@
   
 
       
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../../troubleshooting/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Troubleshooting
-
-      </a>
-    </li>
-  
-
-      
     </ul>
   </div>
 </nav>
@@ -497,6 +481,60 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../getting-started/installation/" class="md-nav__link">
         
@@ -517,6 +555,14 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
@@ -526,6 +572,10 @@
   
     
     
+      
+        
+          
+        
       
         
       
@@ -549,8 +599,9 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3">
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../modes/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -564,8 +615,14 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
@@ -577,6 +634,8 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
             
               
                 
@@ -2170,6 +2229,8 @@
       
         
       
+        
+      
     
     
     
@@ -2284,6 +2345,34 @@
     
   
     Grafana Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
   
 
     
@@ -4464,7 +4553,7 @@
   <span class="md-ellipsis">
     
   
-    CodeFlare (removed)
+    CodeFlare
   
 
     
@@ -4486,7 +4575,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    CodeFlare (removed)
+    CodeFlare
   
 
           </label>
@@ -4627,7 +4716,7 @@
   <span class="md-ellipsis">
     
   
-    ModelMesh (removed)
+    ModelMesh
   
 
     
@@ -4649,7 +4738,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    ModelMesh (removed)
+    ModelMesh
   
 
           </label>
@@ -6311,33 +6400,6 @@
   
 
     
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Troubleshooting
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
   </ul>
 </nav>
                   </div>
@@ -6960,20 +7022,32 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">NewDefaultRegistry</span><span class="p">(</span><span class="nx">client</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">injection</span><span class="p">.</span><span class="nx">Registry</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">registry</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewRegistry</span><span class="p">()</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">PodKill</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewPodKillInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">NetworkPartition</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewNetworkPartitionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ConfigDrift</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewConfigDriftInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">CRDMutation</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewCRDMutationInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">WebhookDisrupt</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewWebhookDisruptInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">RBACRevoke</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewRBACRevokeInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">FinalizerBlock</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewFinalizerBlockInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ClientFault</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewClientFaultInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">OwnerRefOrphan</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewOwnerRefOrphanInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">QuotaExhaustion</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewQuotaExhaustionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">WebhookLatency</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewWebhookLatencyInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">registry</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="p">}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="c1">// Core injection types</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">PodKill</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewPodKillInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">NetworkPartition</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewNetworkPartitionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ConfigDrift</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewConfigDriftInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">CRDMutation</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewCRDMutationInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">WebhookDisrupt</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewWebhookDisruptInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">RBACRevoke</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewRBACRevokeInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">FinalizerBlock</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewFinalizerBlockInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ClientFault</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewClientFaultInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">OwnerRefOrphan</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewOwnerRefOrphanInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">QuotaExhaustion</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewQuotaExhaustionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">WebhookLatency</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewWebhookLatencyInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">LabelStomping</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewLabelStompingInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">NamespaceDeletion</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewNamespaceDeletionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">    </span><span class="c1">// Extended injection types</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">SecretDeletion</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewSecretDeletionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">DeploymentScaleZero</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewDeploymentScaleZeroInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">LeaderElectionDisrupt</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewLeaderElectionDisruptInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">CrashLoopInject</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewCrashLoopInjectInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ImageCorrupt</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewImageCorruptInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">ResourceDeletion</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewResourceDeletionInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">    </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">PDBBlock</span><span class="p">,</span><span class="w"> </span><span class="nx">injection</span><span class="p">.</span><span class="nx">NewPDBBlockInjector</span><span class="p">(</span><span class="nx">client</span><span class="p">))</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">registry</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="crash-safe-cleanup">Crash-Safe Cleanup<a class="headerlink" href="#crash-safe-cleanup" title="Permanent link">¶</a></h2>
 <p>All injectors use a standardized rollback annotation pattern to enable cleanup after controller restarts.</p>
@@ -7076,6 +7150,51 @@
 <td>WebhookLatency</td>
 <td>Yes</td>
 <td>Delete slow admission webhook</td>
+</tr>
+<tr>
+<td>LabelStomping</td>
+<td>Yes</td>
+<td>Restore labels from annotation</td>
+</tr>
+<tr>
+<td>NamespaceDeletion</td>
+<td>No</td>
+<td>No-op (operator should recreate namespace and resources)</td>
+</tr>
+<tr>
+<td>SecretDeletion</td>
+<td>No</td>
+<td>No-op (operator should recreate Secret)</td>
+</tr>
+<tr>
+<td>DeploymentScaleZero</td>
+<td>Yes</td>
+<td>Restore original replica count from annotation</td>
+</tr>
+<tr>
+<td>LeaderElectionDisrupt</td>
+<td>No</td>
+<td>No-op (leader re-election occurs automatically)</td>
+</tr>
+<tr>
+<td>CrashLoopInject</td>
+<td>Yes</td>
+<td>Restore original container command from annotation</td>
+</tr>
+<tr>
+<td>ImageCorrupt</td>
+<td>Yes</td>
+<td>Restore original container image from annotation</td>
+</tr>
+<tr>
+<td>ResourceDeletion</td>
+<td>No</td>
+<td>No-op (operator should recreate deleted resource)</td>
+</tr>
+<tr>
+<td>PDBBlock</td>
+<td>Yes</td>
+<td>Delete injected PodDisruptionBudget</td>
 </tr>
 </tbody>
 </table>
@@ -7263,7 +7382,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 24, 2026 15:01:00 UTC">April 24, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 8, 2026 10:38:43 UTC">May 8, 2026</span>
   </span>
 
     
