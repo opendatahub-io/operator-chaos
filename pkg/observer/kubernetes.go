@@ -155,9 +155,16 @@ func (o *KubernetesObserver) checkReplicaCount(ctx context.Context, check v1alph
 	case int64:
 		actual = v
 	case float64:
+		if v != float64(int64(v)) {
+			return false, "", fmt.Errorf("spec.replicas has non-integer value %v for %s/%s", v, check.Kind, check.Name)
+		}
 		actual = int64(v)
 	default:
 		return false, "", fmt.Errorf("spec.replicas has unexpected type %T", replicas)
+	}
+
+	if actual < 0 {
+		return false, "", fmt.Errorf("spec.replicas is negative (%d) for %s/%s", actual, check.Kind, check.Name)
 	}
 
 	if actual == expected {
