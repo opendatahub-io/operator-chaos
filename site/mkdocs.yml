@@ -126,6 +126,7 @@ nav:
   - Use Cases:
     - components/index.md
     - RHOAI / ODH:
+      - components/rhoai-odh.md
       - Dashboard: components/dashboard/index.md
       - Data Science Pipelines: components/data-science-pipelines/index.md
       - Feast: components/feast/index.md
@@ -140,10 +141,14 @@ nav:
       - Workbenches: components/workbenches/index.md
       - CodeFlare (removed): components/codeflare/index.md
       - ModelMesh (removed): components/modelmesh/index.md
-    - OpenShift Service Mesh: components/service-mesh/index.md
-    - Red Hat Build of Kueue: components/kueue/index.md
-    - OpenShift Serverless: components/knative-serving/index.md
-    - cert-manager Operator: components/cert-manager/index.md
+    - OpenShift Service Mesh:
+      - components/service-mesh/index.md
+    - Red Hat Build of Kueue:
+      - components/kueue/index.md
+    - OpenShift Serverless:
+      - components/knative-serving/index.md
+    - cert-manager Operator:
+      - components/cert-manager/index.md
   - Reference:
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md
