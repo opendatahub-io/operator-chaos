@@ -1,19 +1,19 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: odh-model-controller-pdb-block
+  name: dashboard-pdb-block
 spec:
   tier: 2
   target:
-    operator: odh-model-controller
-    component: odh-model-controller
-    resource: Deployment/odh-model-controller
+    operator: dashboard
+    component: odh-dashboard
+    resource: Deployment/rhods-dashboard
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
-        name: odh-model-controller
+        name: rhods-dashboard
         namespace: redhat-ods-applications
         conditionType: Available
     timeout: "30s"
@@ -21,7 +21,7 @@ spec:
     type: PDBBlock
     dangerLevel: high
     parameters:
-      labelSelector: app=odh-model-controller
+      labelSelector: app=rhods-dashboard
     ttl: "10s"
   hypothesis:
     description: >-

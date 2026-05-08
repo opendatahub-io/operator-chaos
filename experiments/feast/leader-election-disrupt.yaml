@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: feast-leader-election-disrupt
+spec:
+  tier: 3
+  target:
+    operator: feast
+    component: feast-operator-controller-manager
+    resource: Deployment/feast-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: feast-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LeaderElectionDisrupt
+    dangerLevel: high
+    parameters:
+      name: 66483dbd.feast.dev
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Disrupting the leader election lease forces a re-election cycle.
+      Tests whether the operator detects the lost lease and re-acquires
+      leadership, resuming reconciliation within the recovery timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications

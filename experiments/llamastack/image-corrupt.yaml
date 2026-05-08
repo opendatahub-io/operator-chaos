@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: llamastack-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: llamastack
+    component: llamastack-controller-manager
+    resource: Deployment/llama-stack-k8s-operator-controller-manager
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: llama-stack-k8s-operator-controller-manager
+        namespace: redhat-ods-applications
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: llama-stack-k8s-operator-controller-manager
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether the operator detects the stuck
+      rollout and takes corrective action.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - redhat-ods-applications

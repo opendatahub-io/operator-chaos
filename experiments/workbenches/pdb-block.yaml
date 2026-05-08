@@ -1,19 +1,19 @@
 apiVersion: chaos.operatorchaos.io/v1alpha1
 kind: ChaosExperiment
 metadata:
-  name: odh-model-controller-pdb-block
+  name: workbenches-pdb-block
 spec:
   tier: 2
   target:
-    operator: odh-model-controller
-    component: odh-model-controller
-    resource: Deployment/odh-model-controller
+    operator: workbenches
+    component: odh-notebook-controller
+    resource: Deployment/odh-notebook-controller-manager
   steadyState:
     checks:
       - type: conditionTrue
         apiVersion: apps/v1
         kind: Deployment
-        name: odh-model-controller
+        name: odh-notebook-controller-manager
         namespace: redhat-ods-applications
         conditionType: Available
     timeout: "30s"
@@ -21,7 +21,7 @@ spec:
     type: PDBBlock
     dangerLevel: high
     parameters:
-      labelSelector: app=odh-model-controller
+      labelSelector: app=odh-notebook-controller
     ttl: "10s"
   hypothesis:
     description: >-
@@ -30,7 +30,7 @@ spec:
       for node maintenance or cluster upgrades.
     recoveryTimeout: 120s
   blastRadius:
-    maxPodsAffected: 2
+    maxPodsAffected: 1
     allowDangerous: true
     allowedNamespaces:
       - redhat-ods-applications

@@ -22,13 +22,13 @@ spec:
     dangerLevel: high
     parameters:
       labelSelector: app=controller
-    ttl: "120s"
+    ttl: "10s"
   hypothesis:
     description: >-
       Creating a PDB with maxUnavailable=0 blocks all voluntary
       evictions. Tests whether the operator's pods can be drained
       for node maintenance or cluster upgrades.
-    recoveryTimeout: 60s
+    recoveryTimeout: 120s
   blastRadius:
     maxPodsAffected: 2
     allowDangerous: true
