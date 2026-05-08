@@ -23,7 +23,7 @@ theme:
     - navigation.tabs
     - navigation.top
     - navigation.indexes
-    - navigation.prune
+    - toc.integrate
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -140,18 +140,14 @@ nav:
       - Workbenches: components/workbenches/index.md
       - CodeFlare (removed): components/codeflare/index.md
       - ModelMesh (removed): components/modelmesh/index.md
-    - OpenShift Service Mesh:
-      - components/service-mesh/index.md
-    - Red Hat Build of Kueue:
-      - components/kueue/index.md
-    - OpenShift Serverless:
-      - components/knative-serving/index.md
-    - cert-manager Operator:
-      - components/cert-manager/index.md
+    - OpenShift Service Mesh: components/service-mesh/index.md
+    - Red Hat Build of Kueue: components/kueue/index.md
+    - OpenShift Serverless: components/knative-serving/index.md
+    - cert-manager Operator: components/cert-manager/index.md
   - Reference:
+    - CLI Commands: reference/cli-commands.md
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md
-    - CLI Commands: reference/cli-commands.md
     - Architecture:
       - Design Overview: architecture/overview.md
       - Injection Engine: architecture/injection-engine.md
