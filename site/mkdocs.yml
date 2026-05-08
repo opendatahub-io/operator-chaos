@@ -125,7 +125,6 @@ nav:
   - Use Cases:
     - components/index.md
     - RHOAI / ODH:
-      - components/rhoai-odh.md
       - Dashboard: components/dashboard/index.md
       - Data Science Pipelines: components/data-science-pipelines/index.md
       - Feast: components/feast/index.md
