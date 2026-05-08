@@ -71,8 +71,10 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Installation: getting-started/installation.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
   - Modes:
+    - modes/index.md
     - CLI: modes/cli.md
     - SDK: modes/sdk.md
     - Controller: modes/controller.md
@@ -122,6 +124,7 @@ nav:
       - CI Integration: guides/ci-integration.md
       - Operator Dashboard: guides/dashboard-operator.md
       - Grafana Dashboard: guides/dashboard-grafana.md
+      - Troubleshooting: troubleshooting.md
   - Use Cases:
     - components/index.md
     - RHOAI / ODH:
@@ -185,12 +188,12 @@ nav:
         - Failure Modes: components/workbenches/failure-modes.md
         - Validation Results: components/workbenches/validation-results.md
         - Custom Experiments: components/workbenches/custom-experiments.md
-      - CodeFlare (removed):
+      - CodeFlare:
         - components/codeflare/index.md
         - Failure Modes: components/codeflare/failure-modes.md
         - Validation Results: components/codeflare/validation-results.md
         - Custom Experiments: components/codeflare/custom-experiments.md
-      - ModelMesh (removed):
+      - ModelMesh:
         - components/modelmesh/index.md
         - Failure Modes: components/modelmesh/failure-modes.md
         - Validation Results: components/modelmesh/validation-results.md
@@ -228,4 +231,3 @@ nav:
     - contributing/index.md
     - Development Setup: contributing/development-setup.md
     - Adding Failure Modes: contributing/adding-failure-modes.md
-  - Troubleshooting: troubleshooting.md

@@ -45,11 +45,11 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 | [dashboard](dashboard/index.md) | - | - | - | - | - | - | - | - |
 | [data-science-pipelines](data-science-pipelines/index.md) | - | - | - | - | - | - | - | - |
 | [feast](feast/index.md) | - | - | - | - | - | - | - | - |
-| [kserve](kserve/index.md) | - | - | - | - | - | - | - | - |
+| [kserve](kserve/index.md) | - | - | - | - | Y | Y | Y | Y |
 | [llamastack](llamastack/index.md) | - | - | - | - | - | - | - | - |
 | [model-registry](model-registry/index.md) | - | - | - | - | - | - | - | - |
-| [odh-model-controller](odh-model-controller/index.md) | - | - | - | - | - | - | - | - |
-| [opendatahub-operator](opendatahub-operator/index.md) | - | - | - | - | - | - | - | - |
+| [odh-model-controller](odh-model-controller/index.md) | - | - | - | - | Y | Y | Y | Y |
+| [opendatahub-operator](opendatahub-operator/index.md) | Y | - | - | - | - | - | - | - |
 | [ray](ray/index.md) | - | - | - | - | - | - | - | - |
 | [training-operator](training-operator/index.md) | - | - | - | - | - | - | - | - |
 | [trustyai](trustyai/index.md) | - | - | - | - | - | - | - | - |

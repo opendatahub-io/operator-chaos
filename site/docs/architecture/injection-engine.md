@@ -227,6 +227,7 @@ func (r *Registry) Get(t v1alpha1.InjectionType) (Injector, error) {
 func NewDefaultRegistry(client client.Client) *injection.Registry {
     registry := injection.NewRegistry()
 
+    // Core injection types
     registry.Register(v1alpha1.PodKill, injection.NewPodKillInjector(client))
     registry.Register(v1alpha1.NetworkPartition, injection.NewNetworkPartitionInjector(client))
     registry.Register(v1alpha1.ConfigDrift, injection.NewConfigDriftInjector(client))
@@ -238,6 +239,17 @@ func NewDefaultRegistry(client client.Client) *injection.Registry {
     registry.Register(v1alpha1.OwnerRefOrphan, injection.NewOwnerRefOrphanInjector(client))
     registry.Register(v1alpha1.QuotaExhaustion, injection.NewQuotaExhaustionInjector(client))
     registry.Register(v1alpha1.WebhookLatency, injection.NewWebhookLatencyInjector(client))
+    registry.Register(v1alpha1.LabelStomping, injection.NewLabelStompingInjector(client))
+    registry.Register(v1alpha1.NamespaceDeletion, injection.NewNamespaceDeletionInjector(client))
+
+    // Extended injection types
+    registry.Register(v1alpha1.SecretDeletion, injection.NewSecretDeletionInjector(client))
+    registry.Register(v1alpha1.DeploymentScaleZero, injection.NewDeploymentScaleZeroInjector(client))
+    registry.Register(v1alpha1.LeaderElectionDisrupt, injection.NewLeaderElectionDisruptInjector(client))
+    registry.Register(v1alpha1.CrashLoopInject, injection.NewCrashLoopInjectInjector(client))
+    registry.Register(v1alpha1.ImageCorrupt, injection.NewImageCorruptInjector(client))
+    registry.Register(v1alpha1.ResourceDeletion, injection.NewResourceDeletionInjector(client))
+    registry.Register(v1alpha1.PDBBlock, injection.NewPDBBlockInjector(client))
 
     return registry
 }
@@ -312,6 +324,15 @@ kubectl get all -l chaos.operatorchaos.io/managed=true
 | OwnerRefOrphan | Yes | Restore ownerReferences from annotation |
 | QuotaExhaustion | Yes | Delete injected ResourceQuota |
 | WebhookLatency | Yes | Delete slow admission webhook |
+| LabelStomping | Yes | Restore labels from annotation |
+| NamespaceDeletion | No | No-op (operator should recreate namespace and resources) |
+| SecretDeletion | No | No-op (operator should recreate Secret) |
+| DeploymentScaleZero | Yes | Restore original replica count from annotation |
+| LeaderElectionDisrupt | No | No-op (leader re-election occurs automatically) |
+| CrashLoopInject | Yes | Restore original container command from annotation |
+| ImageCorrupt | Yes | Restore original container image from annotation |
+| ResourceDeletion | No | No-op (operator should recreate deleted resource) |
+| PDBBlock | Yes | Delete injected PodDisruptionBudget |
 
 ### Stateful vs. Stateless Cleanup
 
