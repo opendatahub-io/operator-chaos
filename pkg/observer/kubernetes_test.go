@@ -651,6 +651,50 @@ func TestCheckSteadyState_ReplicaCount_NegativeReplicasRejected(t *testing.T) {
 	assert.Contains(t, result.Details[0].Error, "negative")
 }
 
+func TestCheckSteadyState_ReplicaCount_ErrorFailsOverallResult(t *testing.T) {
+	// A replicaCount check that hits a fatal error (fractional replicas) mixed
+	// with a passing conditionTrue check must fail the overall result—callers
+	// rely on result.Passed, not the top-level error, to detect per-check failures.
+	deploy := newDeploymentWithCondition("healthy", "test-ns", "Available", "True")
+	badDeploy := &unstructured.Unstructured{}
+	badDeploy.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	badDeploy.SetName("bad-replicas")
+	badDeploy.SetNamespace("test-ns")
+	badDeploy.Object["spec"] = map[string]interface{}{
+		"replicas": float64(1.5),
+	}
+	obs := buildFakeClient(deploy, badDeploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:          v1alpha1.CheckConditionTrue,
+			APIVersion:    "apps/v1",
+			Kind:          "Deployment",
+			Name:          "healthy",
+			Namespace:     "test-ns",
+			ConditionType: "Available",
+		},
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "bad-replicas",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err, "top-level error is nil; per-check errors live in CheckDetail.Error")
+	assert.False(t, result.Passed, "overall result must fail when any check errors")
+	assert.Equal(t, int32(2), result.ChecksRun)
+	assert.Equal(t, int32(1), result.ChecksPassed)
+	require.Len(t, result.Details, 2)
+	assert.True(t, result.Details[0].Passed)
+	assert.False(t, result.Details[1].Passed)
+	assert.Contains(t, result.Details[1].Error, "non-integer value")
+}
+
 func TestCheckSteadyState_ResourceExists_NonNotFoundError(t *testing.T) {
 	// Use an interceptor to return a non-NotFound error (simulating RBAC denied).
 	scheme := runtime.NewScheme()

@@ -24,6 +24,10 @@ func NewKubernetesObserver(c client.Client) *KubernetesObserver {
 
 // CheckSteadyState evaluates a list of steady-state checks against the cluster
 // and returns a CheckResult summarizing which checks passed or failed.
+// Per-check errors (parsing failures, unexpected types, missing fields) are recorded
+// in CheckDetail.Error and the check is counted as failed—callers must inspect
+// result.Passed (not just the returned error) to detect failures. The top-level
+// error is reserved for infrastructure failures that prevent evaluation entirely.
 func (o *KubernetesObserver) CheckSteadyState(ctx context.Context, checks []v1alpha1.SteadyStateCheck, namespace string) (*v1alpha1.CheckResult, error) {
 	result := &v1alpha1.CheckResult{
 		ChecksRun: int32(len(checks)),
@@ -138,6 +142,9 @@ func (o *KubernetesObserver) checkReplicaCount(ctx context.Context, check v1alph
 	}
 
 	expected := int64(*check.ExpectedReplicas)
+	// When spec.replicas is omitted, Kubernetes defaults it to 1 for scalable
+	// workload kinds (Deployment, StatefulSet, ReplicaSet).
+	// Ref: https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/
 	if !found {
 		switch check.Kind {
 		case "Deployment", "StatefulSet", "ReplicaSet":
