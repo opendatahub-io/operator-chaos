@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: strimzi-cluster-operator-network-partition
+spec:
+  tier: 2
+  target:
+    operator: strimzi
+    component: cluster-operator
+    resource: Deployment/amq-streams-cluster-operator-v3.2.0-8
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: name=amq-streams-cluster-operator
+      direction: ingress
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the Strimzi cluster operator from the API server should cause
+      Kafka CR reconciliation to stall. Existing Kafka clusters remain running
+      since brokers operate independently. After the partition is lifted, the
+      operator should reconnect and process any backlogged reconciliation.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

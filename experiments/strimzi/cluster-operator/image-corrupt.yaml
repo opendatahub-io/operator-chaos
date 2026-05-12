@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: strimzi-cluster-operator-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: strimzi
+    component: cluster-operator
+    resource: Deployment/amq-streams-cluster-operator-v3.2.0-8
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: amq-streams-cluster-operator-v3.2.0-8
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether OLM detects the stuck rollout
+      and takes corrective action to restore the operator.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

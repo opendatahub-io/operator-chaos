@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-webhook-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: spark-operator
+    component: webhook
+    resource: Deployment/spark-operator-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-webhook
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/component=webhook,app.kubernetes.io/name=spark-operator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the Spark operator webhook pod should trigger a Deployment
+      rollout that recreates it. While the webhook is down, SparkApplication
+      submissions that require validation or mutation will fail until the
+      webhook recovers.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator

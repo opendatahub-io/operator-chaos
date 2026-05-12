@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-webhook-disrupt
+spec:
+  tier: 4
+  target:
+    operator: spark-operator
+    component: webhook
+    resource: ValidatingWebhookConfiguration/spark-operator-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-webhook
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: WebhookDisrupt
+    dangerLevel: high
+    parameters:
+      webhookName: spark-operator-webhook
+      webhookType: validating
+      action: setFailurePolicy
+      value: Ignore
+    ttl: "60s"
+  hypothesis:
+    description: >-
+      When the validating webhook failurePolicy is weakened from Fail to
+      Ignore, invalid SparkApplications may be accepted without validation.
+      The chaos framework restores the original failurePolicy via TTL-based
+      cleanup after 60s.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true

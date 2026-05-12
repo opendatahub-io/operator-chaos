@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: strimzi-cluster-operator-pdb-block
+spec:
+  tier: 2
+  target:
+    operator: strimzi
+    component: cluster-operator
+    resource: Deployment/amq-streams-cluster-operator-v3.2.0-8
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PDBBlock
+    dangerLevel: high
+    parameters:
+      labelSelector: name=amq-streams-cluster-operator
+    ttl: "10s"
+  hypothesis:
+    description: >-
+      Creating a PDB with maxUnavailable=0 blocks all voluntary
+      evictions. Tests whether the operator's pods can be drained
+      for node maintenance or cluster upgrades.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

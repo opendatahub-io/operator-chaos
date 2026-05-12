@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-webhook-resource-deletion-service
+spec:
+  tier: 3
+  target:
+    operator: spark-operator
+    component: webhook
+    resource: Deployment/spark-operator-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-webhook
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ResourceDeletion
+    dangerLevel: high
+    parameters:
+      apiVersion: v1
+      kind: Service
+      name: spark-operator-webhook-svc
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Deleting the webhook Service tests whether the operator recreates
+      it during reconciliation. Without the Service, the API server
+      cannot route webhook calls, causing SparkApplication validation
+      and mutation to fail.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator

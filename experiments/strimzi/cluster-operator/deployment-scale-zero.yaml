@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: strimzi-cluster-operator-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: strimzi
+    component: cluster-operator
+    resource: Deployment/amq-streams-cluster-operator-v3.2.0-8
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: amq-streams-cluster-operator-v3.2.0-8
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the deployment to zero replicas removes all operator pods.
+      Tests whether OLM detects the unavailable deployment and restores it.
+      Without the operator, no Kafka CR reconciliation occurs but existing
+      Kafka clusters continue running.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

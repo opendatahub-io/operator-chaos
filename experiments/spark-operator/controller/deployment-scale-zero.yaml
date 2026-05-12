@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-controller-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: spark-operator
+    component: controller
+    resource: Deployment/spark-operator-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-controller
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: spark-operator-controller
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the deployment to zero replicas removes all controller pods.
+      Tests whether the platform detects the unavailable deployment and
+      restores it. Without the controller, no SparkApplication reconciliation
+      occurs but existing Spark jobs continue running.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator

@@ -1,0 +1,38 @@
+operator:
+  name: strimzi
+  namespace: openshift-operators
+  repository: https://github.com/strimzi/strimzi-kafka-operator
+
+components:
+  - name: cluster-operator
+    controller: OLM
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        labels:
+          name: amq-streams-cluster-operator
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: strimzi-cluster-operator
+        namespace: openshift-operators
+      - apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: strimzi-cluster-operator
+        namespace: openshift-operators
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: amq-streams-cluster-operator-v3.2.0-8
+          namespace: openshift-operators
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

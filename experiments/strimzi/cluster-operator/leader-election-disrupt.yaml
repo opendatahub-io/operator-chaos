@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: strimzi-cluster-operator-leader-election-disrupt
+spec:
+  tier: 3
+  target:
+    operator: strimzi
+    component: cluster-operator
+    resource: Deployment/amq-streams-cluster-operator-v3.2.0-8
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: amq-streams-cluster-operator-v3.2.0-8
+        namespace: openshift-operators
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: LeaderElectionDisrupt
+    dangerLevel: high
+    parameters:
+      name: strimzi-cluster-operator
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Disrupting the leader election lease forces a re-election cycle.
+      Tests whether the operator detects the lost lease and re-acquires
+      leadership, resuming Kafka CR reconciliation within the recovery
+      timeout.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-operators

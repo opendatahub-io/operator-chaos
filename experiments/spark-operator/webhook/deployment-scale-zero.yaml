@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-webhook-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: spark-operator
+    component: webhook
+    resource: Deployment/spark-operator-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-webhook
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: spark-operator-webhook
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the webhook deployment to zero replicas removes all webhook
+      pods. Tests whether the platform detects the unavailable deployment
+      and restores it. Without the webhook, SparkApplication validation
+      and mutation will fail.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator

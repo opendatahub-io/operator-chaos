@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-controller-network-partition
+spec:
+  tier: 2
+  target:
+    operator: spark-operator
+    component: controller
+    resource: Deployment/spark-operator-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-controller
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app.kubernetes.io/component=controller,app.kubernetes.io/name=spark-operator
+      direction: ingress
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the Spark operator controller from the API server should
+      cause SparkApplication reconciliation to stall. Existing Spark jobs
+      continue running independently. After the partition is lifted, the
+      controller should reconnect and process any backlogged submissions.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator

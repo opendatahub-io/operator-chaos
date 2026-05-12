@@ -1,0 +1,80 @@
+operator:
+  name: spark-operator
+  namespace: spark-operator
+  repository: https://github.com/kubeflow/spark-operator
+
+components:
+  - name: controller
+    controller: Helm
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-controller
+        namespace: spark-operator
+        labels:
+          app.kubernetes.io/name: spark-operator
+          app.kubernetes.io/component: controller
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: spark-operator-controller
+        namespace: spark-operator
+      - apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: spark-operator-controller-lock
+        namespace: spark-operator
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: spark-operator-controller
+          namespace: spark-operator
+          conditionType: Available
+      timeout: "60s"
+
+  - name: webhook
+    controller: Helm
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-webhook
+        namespace: spark-operator
+        labels:
+          app.kubernetes.io/name: spark-operator
+          app.kubernetes.io/component: webhook
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: spark-operator-webhook-svc
+        namespace: spark-operator
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: spark-operator-webhook
+        namespace: spark-operator
+      - apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: spark-operator-webhook-lock
+        namespace: spark-operator
+    webhooks:
+      - name: spark-operator-webhook
+        type: validating
+        path: /validate
+      - name: spark-operator-webhook
+        type: mutating
+        path: /mutate
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: spark-operator-webhook
+          namespace: spark-operator
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: spark-operator-controller-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: spark-operator
+    component: controller
+    resource: Deployment/spark-operator-controller
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: spark-operator-controller
+        namespace: spark-operator
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/component=controller,app.kubernetes.io/name=spark-operator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the Spark operator controller pod should trigger a Deployment
+      rollout that recreates it. Existing SparkApplications continue running
+      since Spark drivers and executors are independent pods. Pending
+      SparkApplication submissions will stall until the controller recovers.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - spark-operator
