@@ -21,7 +21,22 @@ Operator Chaos is a generic framework that works with any Kubernetes operator. T
 
 ### RHOAI / ODH Components: Core Failure Modes
 
-Abbreviations: PK (PodKill), NP (NetworkPartition), QE (QuotaExhaustion), ND (NamespaceDeletion), CD (ConfigDrift), CM (CRDMutation), LS (LabelStomping), CF (ClientFault), RR (RBACRevoke), WD (WebhookDisrupt), WL (WebhookLatency), FB (FinalizerBlock), OR (OwnerRefOrphan)
+??? note "Column abbreviations"
+    | Abbreviation | Failure Mode |
+    |---|---|
+    | PK | PodKill |
+    | NP | NetworkPartition |
+    | QE | QuotaExhaustion |
+    | ND | NamespaceDeletion |
+    | CD | ConfigDrift |
+    | CM | CRDMutation |
+    | LS | LabelStomping |
+    | CF | ClientFault |
+    | RR | RBACRevoke |
+    | WD | WebhookDisrupt |
+    | WL | WebhookLatency |
+    | FB | FinalizerBlock |
+    | OR | OwnerRefOrphan |
 
 | Component | PK | NP | QE | ND | CD | CM | LS | CF | RR | WD | WL | FB | OR |
 |----|----|----|----|----|----|----|----|----|----|----|----|----|----|
@@ -42,7 +57,17 @@ Abbreviations: PK (PodKill), NP (NetworkPartition), QE (QuotaExhaustion), ND (Na
 
 ### RHOAI / ODH Components: Extended Failure Modes
 
-Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero), LE (LeaderElectionDisrupt), CL (CrashLoopInject), IC (ImageCorrupt), RD (ResourceDeletion), PB (PDBBlock)
+??? note "Column abbreviations"
+    | Abbreviation | Failure Mode |
+    |---|---|
+    | OL | OLM Lifecycle |
+    | SD | SecretDeletion |
+    | SZ | DeploymentScaleZero |
+    | LE | LeaderElectionDisrupt |
+    | CL | CrashLoopInject |
+    | IC | ImageCorrupt |
+    | RD | ResourceDeletion |
+    | PB | PDBBlock |
 
 | Component | OL | SD | SZ | LE | CL | IC | RD | PB |
 |-----------|----|----|----|----|----|----|----|----|
