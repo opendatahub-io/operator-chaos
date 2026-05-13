@@ -24,7 +24,7 @@ Operator Chaos is a generic framework that works with any Kubernetes operator. T
 Abbreviations: PK (PodKill), NP (NetworkPartition), QE (QuotaExhaustion), ND (NamespaceDeletion), CD (ConfigDrift), CM (CRDMutation), LS (LabelStomping), CF (ClientFault), RR (RBACRevoke), WD (WebhookDisrupt), WL (WebhookLatency), FB (FinalizerBlock), OR (OwnerRefOrphan)
 
 | Component | PK | NP | QE | ND | CD | CM | LS | CF | RR | WD | WL | FB | OR |
-|-----------|----|----|----|----|----|----|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|----|----|----|----|----|----|
 | [dashboard](dashboard/index.md) | Y | Y | Y | - | Y | Y | - | - | Y | Y | - | - | - |
 | [data-science-pipelines](data-science-pipelines/index.md) | Y | Y | - | - | Y | - | - | - | Y | Y | - | Y | - |
 | [feast](feast/index.md) | Y | Y | - | - | - | - | - | - | Y | Y | - | Y | - |
@@ -64,21 +64,21 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 ### OpenShift Service Mesh: Core Failure Modes
 
 | Component | PK | NP | QE | CD | CM | LS | RR | WD | WL | FB | OR |
-|-----------|----|----|----|----|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|----|----|----|----|
 | servicemesh-operator3 | Y | Y | Y | - | Y | Y | Y | - | - | - | - |
 | istiod | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### OpenShift Service Mesh: Extended Failure Modes
 
 | Component | OL | CL | IC | RD | PB |
-|-----------|----|----|----|----|------|
+|-----------|----|----|----|----|
 | servicemesh-operator3 | Y | - | - | - | - |
 | istiod | - | Y | Y | Y | Y |
 
 ### Red Hat Build of Kueue: Core Failure Modes
 
 | Component | PK | NP | QE | CD | CM | LS | RR | WD | FB | OR |
-|-----------|----|----|----|----|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|----|----|----|----|
 | kueue (legacy) | Y | Y | - | - | - | - | Y | Y | Y | - |
 | kueue-operator | Y | Y | Y | - | Y | Y | Y | - | - | Y |
 | kueue-operand | Y | - | - | Y | Y | - | - | - | - | - |
@@ -94,7 +94,7 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 ### OpenShift Serverless (Knative Serving): Core Failure Modes
 
 | Component | PK | NP | QE | LS | RR | WD | CD |
-|-----------|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|
 | activator | Y | Y | Y | Y | Y | - | - |
 | autoscaler | Y | Y | Y | Y | - | - | - |
 | autoscaler-hpa | Y | Y | - | - | - | - | - |
@@ -118,7 +118,7 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 ### cert-manager Operator: Core Failure Modes
 
 | Component | PK | NP | QE | LS | RR | CD |
-|-----------|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|
 | controller | Y | Y | Y | Y | Y | - |
 | webhook | Y | Y | Y | Y | - | Y |
 | cainjector | Y | Y | Y | Y | - | - |
@@ -126,46 +126,46 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 ### cert-manager Operator: Extended Failure Modes
 
 | Component | SD | CL | IC | RD | PB |
-|-----------|----|----|----|----|------|
+|-----------|----|----|----|----|
 | cert-manager | Y | Y | Y | Y | Y |
 
 ### Strimzi (AMQ Streams): Core Failure Modes
 
 | Component | PK | NP | LS |
-|-----------|----|----|------|
+|-----------|----|----|
 | cluster-operator | Y | Y | Y |
 
 ### Strimzi (AMQ Streams): Extended Failure Modes
 
 | Component | SZ | LE | CL | IC | PB |
-|-----------|----|----|----|----|------|
+|-----------|----|----|----|----|
 | cluster-operator | Y | Y | Y | Y | Y |
 
 ### Spark Operator: Core Failure Modes
 
 | Component | PK | NP | LS |
-|-----------|----|----|------|
+|-----------|----|----|
 | controller | Y | Y | Y |
 | webhook | Y | - | - |
 
 ### Spark Operator: Extended Failure Modes
 
 | Component | SZ | LE | CL | IC | RD | PB | WD |
-|-----------|----|----|----|----|----|----|------|
+|-----------|----|----|----|----|----|----|
 | controller | Y | Y | Y | Y | - | Y | - |
 | webhook | Y | - | - | - | Y | - | Y |
 
 ### ArgoCD (OpenShift GitOps): Core Failure Modes
 
 | Component | PK | NP | LS |
-|-----------|----|----|------|
+|-----------|----|----|
 | server | Y | Y | Y |
 | repo-server | Y | Y | Y |
 
 ### ArgoCD (OpenShift GitOps): Extended Failure Modes
 
 | Component | SZ | CL | IC | RD | PB |
-|-----------|----|----|----|----|------|
+|-----------|----|----|----|----|
 | server | Y | Y | Y | Y | Y |
 | repo-server | Y | Y | Y | Y | Y |
 
