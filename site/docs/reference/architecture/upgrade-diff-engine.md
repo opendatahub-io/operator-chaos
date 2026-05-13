@@ -496,6 +496,6 @@ experiments/upgrade-suite/
 
 ## Next Steps
 
-- [Upgrade Testing Guide](../guides/upgrade-testing.md) — Step-by-step workflow for testing operator upgrades
-- [Knowledge Models Guide](../guides/knowledge-models.md) — How to write versioned knowledge models
-- [CLI Commands Reference](../reference/cli-commands.md) — Full command syntax for diff engine tools
+- [Upgrade Testing Guide](../../guides/upgrade-testing.md) — Step-by-step workflow for testing operator upgrades
+- [Knowledge Models Guide](../../guides/knowledge-models.md) — How to write versioned knowledge models
+- [CLI Commands Reference](../cli-commands.md) — Full command syntax for diff engine tools

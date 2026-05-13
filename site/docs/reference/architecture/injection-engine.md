@@ -548,5 +548,5 @@ if err != nil {
 ## Next Steps
 
 - [Observer Blackboard Pattern](observer-blackboard.md) — How observations are collected
-- [Contributing: Adding Failure Modes](../contributing/adding-failure-modes.md) — Implement a new injector
-- [Failure Modes Reference](../failure-modes/index.md) — All available failure modes
+- [Contributing: Adding Failure Modes](../../contributing/adding-failure-modes.md) — Implement a new injector
+- [Failure Modes Reference](../../failure-modes/index.md) — All available failure modes

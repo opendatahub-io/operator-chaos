@@ -664,6 +664,6 @@ safety.ApplyChaosMetadata(webhookConfig, rollbackStr, injectionType)
 ## Next Steps
 
 - Review existing injectors in `pkg/injection/` for examples
-- Read [Injection Engine Architecture](../architecture/injection-engine.md)
+- Read [Injection Engine Architecture](../reference/architecture/injection-engine.md)
 - Test your injector with [Development Setup](development-setup.md)
 - Submit a pull request with your new injection type!

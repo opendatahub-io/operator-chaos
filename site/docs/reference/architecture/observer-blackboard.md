@@ -545,4 +545,4 @@ result := evaluator.EvaluateFromFindings(findings, hypothesis)
 
 - [Injection Engine](injection-engine.md) — How faults are executed
 - [Architecture Overview](overview.md) — Full system design
-- [Contributing: Development Setup](../contributing/development-setup.md) — Build from source
+- [Contributing: Development Setup](../../contributing/development-setup.md) — Build from source

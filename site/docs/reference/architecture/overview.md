@@ -393,4 +393,4 @@ Used for:
 
 - [Injection Engine Deep Dive](injection-engine.md) — How injectors work
 - [Observer Blackboard Pattern](observer-blackboard.md) — Observation architecture
-- [Development Setup](../contributing/development-setup.md) — Build from source
+- [Development Setup](../../contributing/development-setup.md) — Build from source

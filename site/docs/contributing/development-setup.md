@@ -428,5 +428,5 @@ kubectl get pod -n default -l app=chaos-cleanup-controller
 ## Next Steps
 
 - [Adding Failure Modes](adding-failure-modes.md) — Implement a new injector
-- [Architecture Overview](../architecture/overview.md) — Understand system design
+- [Architecture Overview](../reference/architecture/overview.md) — Understand system design
 - [Go SDK Reference](../reference/go-sdk.md) — Use SDK in your operators

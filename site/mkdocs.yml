@@ -126,132 +126,132 @@ nav:
       - Grafana Dashboard: guides/dashboard-grafana.md
       - Troubleshooting: troubleshooting.md
   - Use Cases:
-    - components/index.md
+    - use-cases/index.md
     - RHOAI / ODH:
       - Dashboard:
-        - components/dashboard/index.md
-        - Failure Modes: components/dashboard/failure-modes.md
-        - Validation Results: components/dashboard/validation-results.md
-        - Custom Experiments: components/dashboard/custom-experiments.md
+        - use-cases/dashboard/index.md
+        - Failure Modes: use-cases/dashboard/failure-modes.md
+        - Validation Results: use-cases/dashboard/validation-results.md
+        - Custom Experiments: use-cases/dashboard/custom-experiments.md
       - Data Science Pipelines:
-        - components/data-science-pipelines/index.md
-        - Failure Modes: components/data-science-pipelines/failure-modes.md
-        - Validation Results: components/data-science-pipelines/validation-results.md
-        - Custom Experiments: components/data-science-pipelines/custom-experiments.md
+        - use-cases/data-science-pipelines/index.md
+        - Failure Modes: use-cases/data-science-pipelines/failure-modes.md
+        - Validation Results: use-cases/data-science-pipelines/validation-results.md
+        - Custom Experiments: use-cases/data-science-pipelines/custom-experiments.md
       - Feast:
-        - components/feast/index.md
-        - Failure Modes: components/feast/failure-modes.md
-        - Validation Results: components/feast/validation-results.md
-        - Custom Experiments: components/feast/custom-experiments.md
+        - use-cases/feast/index.md
+        - Failure Modes: use-cases/feast/failure-modes.md
+        - Validation Results: use-cases/feast/validation-results.md
+        - Custom Experiments: use-cases/feast/custom-experiments.md
       - KServe:
-        - components/kserve/index.md
-        - Failure Modes: components/kserve/failure-modes.md
-        - Validation Results: components/kserve/validation-results.md
-        - Custom Experiments: components/kserve/custom-experiments.md
+        - use-cases/kserve/index.md
+        - Failure Modes: use-cases/kserve/failure-modes.md
+        - Validation Results: use-cases/kserve/validation-results.md
+        - Custom Experiments: use-cases/kserve/custom-experiments.md
       - LlamaStack:
-        - components/llamastack/index.md
-        - Failure Modes: components/llamastack/failure-modes.md
-        - Validation Results: components/llamastack/validation-results.md
-        - Custom Experiments: components/llamastack/custom-experiments.md
+        - use-cases/llamastack/index.md
+        - Failure Modes: use-cases/llamastack/failure-modes.md
+        - Validation Results: use-cases/llamastack/validation-results.md
+        - Custom Experiments: use-cases/llamastack/custom-experiments.md
       - Model Registry:
-        - components/model-registry/index.md
-        - Failure Modes: components/model-registry/failure-modes.md
-        - Validation Results: components/model-registry/validation-results.md
-        - Custom Experiments: components/model-registry/custom-experiments.md
+        - use-cases/model-registry/index.md
+        - Failure Modes: use-cases/model-registry/failure-modes.md
+        - Validation Results: use-cases/model-registry/validation-results.md
+        - Custom Experiments: use-cases/model-registry/custom-experiments.md
       - odh-model-controller:
-        - components/odh-model-controller/index.md
-        - Failure Modes: components/odh-model-controller/failure-modes.md
-        - Validation Results: components/odh-model-controller/validation-results.md
-        - Custom Experiments: components/odh-model-controller/custom-experiments.md
+        - use-cases/odh-model-controller/index.md
+        - Failure Modes: use-cases/odh-model-controller/failure-modes.md
+        - Validation Results: use-cases/odh-model-controller/validation-results.md
+        - Custom Experiments: use-cases/odh-model-controller/custom-experiments.md
       - OpenDataHub Operator:
-        - components/opendatahub-operator/index.md
-        - Failure Modes: components/opendatahub-operator/failure-modes.md
-        - Validation Results: components/opendatahub-operator/validation-results.md
-        - Custom Experiments: components/opendatahub-operator/custom-experiments.md
+        - use-cases/opendatahub-operator/index.md
+        - Failure Modes: use-cases/opendatahub-operator/failure-modes.md
+        - Validation Results: use-cases/opendatahub-operator/validation-results.md
+        - Custom Experiments: use-cases/opendatahub-operator/custom-experiments.md
       - Ray:
-        - components/ray/index.md
-        - Failure Modes: components/ray/failure-modes.md
-        - Validation Results: components/ray/validation-results.md
-        - Custom Experiments: components/ray/custom-experiments.md
+        - use-cases/ray/index.md
+        - Failure Modes: use-cases/ray/failure-modes.md
+        - Validation Results: use-cases/ray/validation-results.md
+        - Custom Experiments: use-cases/ray/custom-experiments.md
       - Training Operator:
-        - components/training-operator/index.md
-        - Failure Modes: components/training-operator/failure-modes.md
-        - Validation Results: components/training-operator/validation-results.md
-        - Custom Experiments: components/training-operator/custom-experiments.md
+        - use-cases/training-operator/index.md
+        - Failure Modes: use-cases/training-operator/failure-modes.md
+        - Validation Results: use-cases/training-operator/validation-results.md
+        - Custom Experiments: use-cases/training-operator/custom-experiments.md
       - TrustyAI:
-        - components/trustyai/index.md
-        - Failure Modes: components/trustyai/failure-modes.md
-        - Validation Results: components/trustyai/validation-results.md
-        - Custom Experiments: components/trustyai/custom-experiments.md
+        - use-cases/trustyai/index.md
+        - Failure Modes: use-cases/trustyai/failure-modes.md
+        - Validation Results: use-cases/trustyai/validation-results.md
+        - Custom Experiments: use-cases/trustyai/custom-experiments.md
       - Workbenches:
-        - components/workbenches/index.md
-        - Failure Modes: components/workbenches/failure-modes.md
-        - Validation Results: components/workbenches/validation-results.md
-        - Custom Experiments: components/workbenches/custom-experiments.md
+        - use-cases/workbenches/index.md
+        - Failure Modes: use-cases/workbenches/failure-modes.md
+        - Validation Results: use-cases/workbenches/validation-results.md
+        - Custom Experiments: use-cases/workbenches/custom-experiments.md
       - CodeFlare:
-        - components/codeflare/index.md
-        - Failure Modes: components/codeflare/failure-modes.md
-        - Validation Results: components/codeflare/validation-results.md
-        - Custom Experiments: components/codeflare/custom-experiments.md
+        - use-cases/codeflare/index.md
+        - Failure Modes: use-cases/codeflare/failure-modes.md
+        - Validation Results: use-cases/codeflare/validation-results.md
+        - Custom Experiments: use-cases/codeflare/custom-experiments.md
       - ModelMesh:
-        - components/modelmesh/index.md
-        - Failure Modes: components/modelmesh/failure-modes.md
-        - Validation Results: components/modelmesh/validation-results.md
-        - Custom Experiments: components/modelmesh/custom-experiments.md
+        - use-cases/modelmesh/index.md
+        - Failure Modes: use-cases/modelmesh/failure-modes.md
+        - Validation Results: use-cases/modelmesh/validation-results.md
+        - Custom Experiments: use-cases/modelmesh/custom-experiments.md
     - OpenShift Service Mesh:
-      - components/service-mesh/index.md
-      - Failure Modes: components/service-mesh/failure-modes.md
-      - Validation Results: components/service-mesh/validation-results.md
-      - Custom Experiments: components/service-mesh/custom-experiments.md
+      - use-cases/service-mesh/index.md
+      - Failure Modes: use-cases/service-mesh/failure-modes.md
+      - Validation Results: use-cases/service-mesh/validation-results.md
+      - Custom Experiments: use-cases/service-mesh/custom-experiments.md
     - Red Hat Build of Kueue:
-      - components/kueue/index.md
-      - Failure Modes: components/kueue/failure-modes.md
-      - Validation Results: components/kueue/validation-results.md
-      - Custom Experiments: components/kueue/custom-experiments.md
+      - use-cases/kueue/index.md
+      - Failure Modes: use-cases/kueue/failure-modes.md
+      - Validation Results: use-cases/kueue/validation-results.md
+      - Custom Experiments: use-cases/kueue/custom-experiments.md
     - OpenShift Serverless:
-      - components/knative-serving/index.md
-      - Failure Modes: components/knative-serving/failure-modes.md
-      - Validation Results: components/knative-serving/validation-results.md
-      - Custom Experiments: components/knative-serving/custom-experiments.md
+      - use-cases/knative-serving/index.md
+      - Failure Modes: use-cases/knative-serving/failure-modes.md
+      - Validation Results: use-cases/knative-serving/validation-results.md
+      - Custom Experiments: use-cases/knative-serving/custom-experiments.md
     - cert-manager Operator:
-      - components/cert-manager/index.md
-      - Failure Modes: components/cert-manager/failure-modes.md
-      - Validation Results: components/cert-manager/validation-results.md
-      - Custom Experiments: components/cert-manager/custom-experiments.md
+      - use-cases/cert-manager/index.md
+      - Failure Modes: use-cases/cert-manager/failure-modes.md
+      - Validation Results: use-cases/cert-manager/validation-results.md
+      - Custom Experiments: use-cases/cert-manager/custom-experiments.md
     - Strimzi (AMQ Streams):
-      - components/strimzi/index.md
-      - Failure Modes: components/strimzi/failure-modes.md
-      - Validation Results: components/strimzi/validation-results.md
-      - Custom Experiments: components/strimzi/custom-experiments.md
+      - use-cases/strimzi/index.md
+      - Failure Modes: use-cases/strimzi/failure-modes.md
+      - Validation Results: use-cases/strimzi/validation-results.md
+      - Custom Experiments: use-cases/strimzi/custom-experiments.md
     - Spark Operator:
-      - components/spark-operator/index.md
-      - Failure Modes: components/spark-operator/failure-modes.md
-      - Validation Results: components/spark-operator/validation-results.md
-      - Custom Experiments: components/spark-operator/custom-experiments.md
+      - use-cases/spark-operator/index.md
+      - Failure Modes: use-cases/spark-operator/failure-modes.md
+      - Validation Results: use-cases/spark-operator/validation-results.md
+      - Custom Experiments: use-cases/spark-operator/custom-experiments.md
     - ArgoCD (OpenShift GitOps):
-      - components/argocd/index.md
-      - Failure Modes: components/argocd/failure-modes.md
-      - Validation Results: components/argocd/validation-results.md
-      - Custom Experiments: components/argocd/custom-experiments.md
+      - use-cases/argocd/index.md
+      - Failure Modes: use-cases/argocd/failure-modes.md
+      - Validation Results: use-cases/argocd/validation-results.md
+      - Custom Experiments: use-cases/argocd/custom-experiments.md
     - Tekton (OpenShift Pipelines):
-      - components/tekton/index.md
-      - Failure Modes: components/tekton/failure-modes.md
-      - Validation Results: components/tekton/validation-results.md
-      - Custom Experiments: components/tekton/custom-experiments.md
+      - use-cases/tekton/index.md
+      - Failure Modes: use-cases/tekton/failure-modes.md
+      - Validation Results: use-cases/tekton/validation-results.md
+      - Custom Experiments: use-cases/tekton/custom-experiments.md
     - Prometheus Operator:
-      - components/prometheus-operator/index.md
-      - Failure Modes: components/prometheus-operator/failure-modes.md
-      - Validation Results: components/prometheus-operator/validation-results.md
-      - Custom Experiments: components/prometheus-operator/custom-experiments.md
+      - use-cases/prometheus-operator/index.md
+      - Failure Modes: use-cases/prometheus-operator/failure-modes.md
+      - Validation Results: use-cases/prometheus-operator/validation-results.md
+      - Custom Experiments: use-cases/prometheus-operator/custom-experiments.md
   - Reference:
     - CLI Commands: reference/cli-commands.md
     - CRD Schema: reference/crd-schema.md
     - Go SDK: reference/go-sdk.md
     - Architecture:
-      - Design Overview: architecture/overview.md
-      - Injection Engine: architecture/injection-engine.md
-      - Observer & Blackboard: architecture/observer-blackboard.md
-      - Upgrade Diff Engine: architecture/upgrade-diff-engine.md
+      - Design Overview: reference/architecture/overview.md
+      - Injection Engine: reference/architecture/injection-engine.md
+      - Observer & Blackboard: reference/architecture/observer-blackboard.md
+      - Upgrade Diff Engine: reference/architecture/upgrade-diff-engine.md
   - Contributing:
     - contributing/index.md
     - Development Setup: contributing/development-setup.md
