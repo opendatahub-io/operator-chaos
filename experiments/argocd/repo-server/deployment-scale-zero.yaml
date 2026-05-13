@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: openshift-gitops-repo-server
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the repo-server deployment to zero replicas removes all
+      repo-server pods. Tests whether the GitOps operator detects the
+      unavailable deployment and restores it. Without the repo-server,
+      ArgoCD cannot clone repositories or generate manifests.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

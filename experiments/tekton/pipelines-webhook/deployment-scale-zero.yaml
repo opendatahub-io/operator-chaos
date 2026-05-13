@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: tekton-pipelines-webhook-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: tekton
+    component: pipelines-webhook
+    resource: Deployment/tekton-pipelines-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: tekton-pipelines-webhook
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the deployment to zero replicas removes all webhook pods.
+      Tests whether the Pipelines operator detects the unavailable
+      deployment and restores it. Without the webhook, all Tekton
+      resource creation and updates that require admission validation
+      will fail.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-pipelines

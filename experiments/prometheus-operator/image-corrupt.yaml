@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: prometheus-operator
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether the cluster-monitoring-operator
+      detects the stuck rollout and takes corrective action to restore
+      the prometheus-operator.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

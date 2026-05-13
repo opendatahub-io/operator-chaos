@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-network-partition
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app.kubernetes.io/component=controller,app.kubernetes.io/name=prometheus-operator
+      direction: ingress
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the prometheus-operator from the API server should
+      cause monitoring configuration reconciliation to stall. Existing
+      Prometheus and Alertmanager instances continue scraping and
+      alerting independently. After the partition is lifted, the
+      operator should reconnect and process any pending changes.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-crashloop-inject
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CrashLoopInject
+    dangerLevel: high
+    parameters:
+      name: prometheus-operator
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Replacing the container command with a nonexistent binary causes
+      CrashLoopBackOff. Tests whether the cluster-monitoring-operator
+      detects the degraded deployment and takes corrective action to
+      restore the prometheus-operator.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

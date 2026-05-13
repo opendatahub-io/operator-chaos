@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-pod-kill
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/component=controller,app.kubernetes.io/name=prometheus-operator
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the prometheus-operator pod should trigger a Deployment
+      rollout that recreates it. Existing Prometheus, Alertmanager,
+      and ServiceMonitor configurations continue functioning. New
+      monitoring configuration changes stall until the operator
+      recovers.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

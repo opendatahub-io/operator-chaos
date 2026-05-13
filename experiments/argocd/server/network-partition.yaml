@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-server-network-partition
+spec:
+  tier: 2
+  target:
+    operator: argocd
+    component: server
+    resource: Deployment/openshift-gitops-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app.kubernetes.io/name=openshift-gitops-server
+      direction: ingress
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the ArgoCD API server from the network should prevent
+      UI access and API calls. The server pod remains running but cannot
+      serve requests or communicate with the repo-server and application
+      controller. After the partition is lifted, the server should
+      reconnect and resume normal operations.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-network-partition
+spec:
+  tier: 2
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: NetworkPartition
+    parameters:
+      labelSelector: app.kubernetes.io/name=openshift-gitops-repo-server
+      direction: ingress
+    ttl: "120s"
+  hypothesis:
+    description: >-
+      Isolating the repo-server from the network should prevent Git
+      repository cloning and manifest generation. The application
+      controller cannot fetch desired state, causing sync operations
+      to stall. After the partition is lifted, the repo-server should
+      reconnect and resume caching Git repositories.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

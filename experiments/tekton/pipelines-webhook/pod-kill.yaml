@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: tekton-pipelines-webhook-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: tekton
+    component: pipelines-webhook
+    resource: Deployment/tekton-pipelines-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/component=webhook,app.kubernetes.io/part-of=tekton-pipelines
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the Tekton webhook pod should trigger a Deployment rollout
+      that recreates it. During downtime, pipeline and task creation
+      requests that require admission validation will fail. Running
+      pipelines are unaffected.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-pipelines

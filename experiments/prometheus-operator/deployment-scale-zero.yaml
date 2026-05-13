@@ -1,0 +1,38 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-deployment-scale-zero
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: DeploymentScaleZero
+    dangerLevel: high
+    parameters:
+      name: prometheus-operator
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Scaling the deployment to zero replicas removes all operator
+      pods. Tests whether the cluster-monitoring-operator detects the
+      unavailable deployment and restores it. Without the operator,
+      no Prometheus or Alertmanager reconciliation occurs but existing
+      monitoring instances continue running.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

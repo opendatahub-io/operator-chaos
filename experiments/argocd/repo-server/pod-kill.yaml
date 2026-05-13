@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-pod-kill
+spec:
+  tier: 1
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PodKill
+    parameters:
+      labelSelector: app.kubernetes.io/name=openshift-gitops-repo-server
+    count: 1
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Killing the ArgoCD repo-server pod should trigger a Deployment
+      rollout that recreates it. During downtime, manifest generation
+      and Git repository access are unavailable, blocking new syncs.
+      Existing synced applications continue running unaffected.
+    recoveryTimeout: 120s
+  blastRadius:
+    maxPodsAffected: 1
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

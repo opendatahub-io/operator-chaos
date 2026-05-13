@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-resource-deletion-service
+spec:
+  tier: 3
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ResourceDeletion
+    dangerLevel: high
+    parameters:
+      apiVersion: v1
+      kind: Service
+      name: openshift-gitops-repo-server
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Deleting the repo-server Service tests whether the GitOps
+      operator recreates it during reconciliation. Without the Service,
+      the application controller and server cannot reach the repo-server
+      for manifest generation and Git operations.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

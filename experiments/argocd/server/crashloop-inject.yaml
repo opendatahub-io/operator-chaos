@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-server-crashloop-inject
+spec:
+  tier: 3
+  target:
+    operator: argocd
+    component: server
+    resource: Deployment/openshift-gitops-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: CrashLoopInject
+    dangerLevel: high
+    parameters:
+      name: openshift-gitops-server
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Replacing the container command with a nonexistent binary causes
+      CrashLoopBackOff. Tests whether the GitOps operator detects the
+      degraded deployment and takes corrective action to restore the
+      ArgoCD API server.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

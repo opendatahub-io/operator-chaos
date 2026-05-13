@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: prometheus-operator-pdb-block
+spec:
+  tier: 3
+  target:
+    operator: prometheus-operator
+    component: prometheus-operator
+    resource: Deployment/prometheus-operator
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PDBBlock
+    dangerLevel: high
+    parameters:
+      labelSelector: app.kubernetes.io/component=controller,app.kubernetes.io/name=prometheus-operator
+    ttl: "10s"
+  hypothesis:
+    description: >-
+      Creating a PDB with maxUnavailable=0 blocks all voluntary
+      evictions. Tests whether the prometheus-operator pods can be
+      drained for node maintenance or cluster upgrades.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-monitoring

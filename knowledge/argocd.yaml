@@ -1,0 +1,67 @@
+operator:
+  name: argocd
+  namespace: openshift-gitops
+  repository: https://github.com/argoproj/argo-cd
+
+components:
+  - name: server
+    controller: OLM
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-server
+        namespace: openshift-gitops
+        labels:
+          app.kubernetes.io/name: openshift-gitops-server
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: openshift-gitops-server
+        namespace: openshift-gitops
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: openshift-gitops-argocd-server
+        namespace: openshift-gitops
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: openshift-gitops-server
+          namespace: openshift-gitops
+          conditionType: Available
+      timeout: "60s"
+
+  - name: repo-server
+    controller: OLM
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        labels:
+          app.kubernetes.io/name: openshift-gitops-repo-server
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: openshift-gitops-argocd-repo-server
+        namespace: openshift-gitops
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: openshift-gitops-repo-server
+          namespace: openshift-gitops
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

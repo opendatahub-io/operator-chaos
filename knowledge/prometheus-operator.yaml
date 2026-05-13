@@ -1,0 +1,39 @@
+operator:
+  name: prometheus-operator
+  namespace: openshift-monitoring
+  repository: https://github.com/prometheus-operator/prometheus-operator
+
+components:
+  - name: prometheus-operator
+    controller: ClusterMonitoringOperator
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: prometheus-operator
+        namespace: openshift-monitoring
+        labels:
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/name: prometheus-operator
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: prometheus-operator
+        namespace: openshift-monitoring
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: prometheus-operator
+        namespace: openshift-monitoring
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: prometheus-operator
+          namespace: openshift-monitoring
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

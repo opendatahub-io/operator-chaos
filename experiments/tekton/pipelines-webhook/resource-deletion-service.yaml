@@ -1,0 +1,39 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: tekton-pipelines-webhook-resource-deletion-service
+spec:
+  tier: 3
+  target:
+    operator: tekton
+    component: pipelines-webhook
+    resource: Deployment/tekton-pipelines-webhook
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ResourceDeletion
+    dangerLevel: high
+    parameters:
+      apiVersion: v1
+      kind: Service
+      name: tekton-pipelines-webhook
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Deleting the webhook Service tests whether the Pipelines operator
+      recreates it during reconciliation. Without the Service, the API
+      server cannot route admission webhook calls, causing Tekton
+      resource validation and defaulting to fail.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-pipelines

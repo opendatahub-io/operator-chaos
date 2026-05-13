@@ -1,0 +1,36 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-pdb-block
+spec:
+  tier: 2
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: PDBBlock
+    dangerLevel: high
+    parameters:
+      labelSelector: app.kubernetes.io/name=openshift-gitops-repo-server
+    ttl: "10s"
+  hypothesis:
+    description: >-
+      Creating a PDB with maxUnavailable=0 blocks all voluntary
+      evictions. Tests whether the repo-server pods can be drained
+      for node maintenance or cluster upgrades.
+    recoveryTimeout: 60s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops

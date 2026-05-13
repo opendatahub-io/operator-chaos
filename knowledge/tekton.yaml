@@ -1,0 +1,73 @@
+operator:
+  name: tekton
+  namespace: openshift-pipelines
+  repository: https://github.com/tektoncd/pipeline
+
+components:
+  - name: pipelines-controller
+    controller: OLM
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: tekton-pipelines-controller
+        namespace: openshift-pipelines
+        labels:
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/part-of: tekton-pipelines
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: tekton-pipelines-controller
+        namespace: openshift-pipelines
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: tekton-pipelines-controller
+        namespace: openshift-pipelines
+      - apiVersion: coordination.k8s.io/v1
+        kind: Lease
+        name: tekton-pipelines-controller.github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.reconciler.00-of-01
+        namespace: openshift-pipelines
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: tekton-pipelines-controller
+          namespace: openshift-pipelines
+          conditionType: Available
+      timeout: "60s"
+
+  - name: pipelines-webhook
+    controller: OLM
+    managedResources:
+      - apiVersion: apps/v1
+        kind: Deployment
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+        labels:
+          app.kubernetes.io/component: webhook
+          app.kubernetes.io/part-of: tekton-pipelines
+        expectedSpec:
+          replicas: 1
+      - apiVersion: v1
+        kind: Service
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+      - apiVersion: v1
+        kind: ServiceAccount
+        name: tekton-pipelines-webhook
+        namespace: openshift-pipelines
+    steadyState:
+      checks:
+        - type: conditionTrue
+          apiVersion: apps/v1
+          kind: Deployment
+          name: tekton-pipelines-webhook
+          namespace: openshift-pipelines
+          conditionType: Available
+      timeout: "60s"
+
+recovery:
+  reconcileTimeout: "300s"
+  maxReconcileCycles: 10

@@ -1,0 +1,37 @@
+apiVersion: chaos.operatorchaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: argocd-repo-server-image-corrupt
+spec:
+  tier: 3
+  target:
+    operator: argocd
+    component: repo-server
+    resource: Deployment/openshift-gitops-repo-server
+  steadyState:
+    checks:
+      - type: conditionTrue
+        apiVersion: apps/v1
+        kind: Deployment
+        name: openshift-gitops-repo-server
+        namespace: openshift-gitops
+        conditionType: Available
+    timeout: "30s"
+  injection:
+    type: ImageCorrupt
+    dangerLevel: high
+    parameters:
+      name: openshift-gitops-repo-server
+    ttl: "300s"
+  hypothesis:
+    description: >-
+      Patching the container image to an invalid registry causes
+      ImagePullBackOff. Tests whether the GitOps operator detects the
+      stuck rollout and takes corrective action to restore the
+      repo-server.
+    recoveryTimeout: 180s
+  blastRadius:
+    maxPodsAffected: 2
+    allowDangerous: true
+    allowedNamespaces:
+      - openshift-gitops
