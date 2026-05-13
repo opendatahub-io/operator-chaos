@@ -7078,20 +7078,6 @@
 <td></td>
 </tr>
 <tr>
-<td>controller/quota-exhaustion</td>
-<td>controller</td>
-<td>QuotaExhaustion</td>
-<td>Resilient</td>
-<td></td>
-</tr>
-<tr>
-<td>controller/rbac-revoke</td>
-<td>controller</td>
-<td>RBACRevoke</td>
-<td>Resilient</td>
-<td></td>
-</tr>
-<tr>
 <td>controller/deployment-scale-zero</td>
 <td>controller</td>
 <td>DeploymentScaleZero</td>
@@ -7099,30 +7085,37 @@
 <td>No controller to restore replicas</td>
 </tr>
 <tr>
+<td>controller/leader-election-disrupt</td>
+<td>controller</td>
+<td>LeaderElectionDisrupt</td>
+<td>Resilient</td>
+<td></td>
+</tr>
+<tr>
+<td>controller/crashloop-inject</td>
+<td>controller</td>
+<td>CrashLoopInject</td>
+<td>Resilient</td>
+<td></td>
+</tr>
+<tr>
+<td>controller/image-corrupt</td>
+<td>controller</td>
+<td>ImageCorrupt</td>
+<td>Resilient</td>
+<td></td>
+</tr>
+<tr>
+<td>controller/pdb-block</td>
+<td>controller</td>
+<td>PDBBlock</td>
+<td>Resilient</td>
+<td></td>
+</tr>
+<tr>
 <td>webhook/pod-kill</td>
 <td>webhook</td>
 <td>PodKill</td>
-<td>Resilient</td>
-<td></td>
-</tr>
-<tr>
-<td>webhook/network-partition</td>
-<td>webhook</td>
-<td>NetworkPartition</td>
-<td>Resilient</td>
-<td></td>
-</tr>
-<tr>
-<td>webhook/label-stomping</td>
-<td>webhook</td>
-<td>LabelStomping</td>
-<td>Resilient</td>
-<td></td>
-</tr>
-<tr>
-<td>webhook/quota-exhaustion</td>
-<td>webhook</td>
-<td>QuotaExhaustion</td>
 <td>Resilient</td>
 <td></td>
 </tr>
@@ -7134,9 +7127,16 @@
 <td>No controller to restore replicas</td>
 </tr>
 <tr>
-<td>webhook/webhook-cert-corrupt</td>
+<td>webhook/resource-deletion-service</td>
 <td>webhook</td>
-<td>ConfigDrift</td>
+<td>ResourceDeletion</td>
+<td>Resilient</td>
+<td>Service recreated in ~10s</td>
+</tr>
+<tr>
+<td>webhook/webhook-disrupt</td>
+<td>webhook</td>
+<td>WebhookDisrupt</td>
 <td>Resilient</td>
 <td></td>
 </tr>
@@ -7173,7 +7173,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 13, 2026 14:35:25 UTC">May 13, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 13, 2026 15:22:22 UTC">May 13, 2026</span>
   </span>
 
     
