@@ -12,6 +12,11 @@ Operator Chaos is a generic framework that works with any Kubernetes operator. T
 | [Red Hat Build of Kueue](kueue/index.md) | 3 | 30 | 11 | 29/30 Resilient |
 | [OpenShift Serverless](knative-serving/index.md) | 7 | 35+ | 10 | 34/35 Resilient |
 | [cert-manager](cert-manager/index.md) | 3 | 14+ | 10 | All Resilient |
+| [Strimzi (AMQ Streams)](strimzi/index.md) | 1 | 8 | 8 | 7/8 Resilient, 1 Degraded |
+| [Spark Operator](spark-operator/index.md) | 2 | 12 | 9 | 9/12 Resilient, 2 Degraded, 1 Failed |
+| [ArgoCD (OpenShift GitOps)](argocd/index.md) | 2 | 16 | 8 | All Resilient |
+| [Tekton (OpenShift Pipelines)](tekton/index.md) | 2 | 14 | 8 | All Resilient |
+| [Prometheus Operator](prometheus-operator/index.md) | 1 | 6 | 6 | All Resilient |
 
 ## Coverage Matrix
 

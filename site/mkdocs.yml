@@ -218,6 +218,31 @@ nav:
       - Failure Modes: components/cert-manager/failure-modes.md
       - Validation Results: components/cert-manager/validation-results.md
       - Custom Experiments: components/cert-manager/custom-experiments.md
+    - Strimzi (AMQ Streams):
+      - components/strimzi/index.md
+      - Failure Modes: components/strimzi/failure-modes.md
+      - Validation Results: components/strimzi/validation-results.md
+      - Custom Experiments: components/strimzi/custom-experiments.md
+    - Spark Operator:
+      - components/spark-operator/index.md
+      - Failure Modes: components/spark-operator/failure-modes.md
+      - Validation Results: components/spark-operator/validation-results.md
+      - Custom Experiments: components/spark-operator/custom-experiments.md
+    - ArgoCD (OpenShift GitOps):
+      - components/argocd/index.md
+      - Failure Modes: components/argocd/failure-modes.md
+      - Validation Results: components/argocd/validation-results.md
+      - Custom Experiments: components/argocd/custom-experiments.md
+    - Tekton (OpenShift Pipelines):
+      - components/tekton/index.md
+      - Failure Modes: components/tekton/failure-modes.md
+      - Validation Results: components/tekton/validation-results.md
+      - Custom Experiments: components/tekton/custom-experiments.md
+    - Prometheus Operator:
+      - components/prometheus-operator/index.md
+      - Failure Modes: components/prometheus-operator/failure-modes.md
+      - Validation Results: components/prometheus-operator/validation-results.md
+      - Custom Experiments: components/prometheus-operator/custom-experiments.md
   - Reference:
     - CLI Commands: reference/cli-commands.md
     - CRD Schema: reference/crd-schema.md
