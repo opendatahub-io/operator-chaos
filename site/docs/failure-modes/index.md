@@ -76,26 +76,31 @@ graph TD
 
 | Component | CRDMut | Client | CfgDrift | Finalizer | LblStomp | NsDel | NetPart | OwnerRef | PodKill | Quota | RBAC | WebhookD | WebhookL | SecDel | ScaleZ | LeaderE | Crash | ImgCorr | ResDel | PDB | Total |
 |-----------|:------:|:------:|:--------:|:---------:|:--------:|:-----:|:-------:|:--------:|:-------:|:-----:|:----:|:--------:|:--------:|:------:|:------:|:-------:|:-----:|:-------:|:------:|:---:|:-----:|
-| dashboard | :material-check: | - | :material-check: | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | - | - | - | - | - | - | - | - | 7 |
-| data-science-pipelines | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | - | - | - | - | - | - | 5 |
-| feast | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | - | - | - | - | 4 |
+| dashboard | :material-check: | - | :material-check: | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | 12 |
+| data-science-pipelines | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 11 |
+| feast | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
 | kserve | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | - | - | :material-check: | - | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
-| llamastack | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | - | - | - | - | 4 |
-| model-registry | :material-check: | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | - | - | - | - | - | - | 6 |
+| llamastack | - | - | :material-check: | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
+| model-registry | :material-check: | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 12 |
 | odh-model-controller | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 17 |
 | opendatahub-operator | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | - | - | - | - | - | - | 5 |
-| ray | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | - | - | - | - | 4 |
-| training-operator | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | - | - | - | - | 4 |
-| trustyai | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | - | - | - | - | 3 |
-| workbenches | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | - | - | - | - | - | - | 4 |
+| ray | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
+| training-operator | - | - | - | :material-check: | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | 9 |
+| trustyai | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 9 |
+| workbenches | - | - | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | 9 |
 
 ### External Dependencies
 
 | Component | CRDMut | Client | CfgDrift | Finalizer | LblStomp | NsDel | NetPart | OwnerRef | PodKill | Quota | RBAC | WebhookD | WebhookL | SecDel | ScaleZ | LeaderE | Crash | ImgCorr | ResDel | PDB | Total |
 |-----------|:------:|:------:|:--------:|:---------:|:--------:|:-----:|:-------:|:--------:|:-------:|:-----:|:----:|:--------:|:--------:|:------:|:------:|:-------:|:-----:|:-------:|:------:|:---:|:-----:|
-| cert-manager | - | - | :material-check: | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | :material-check: | - | - | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
+| cert-manager | - | - | :material-check: | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | :material-check: | - | - | :material-check: | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 11 |
 | knative-serving | - | - | :material-check: | - | :material-check: | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | - | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 11 |
 | service-mesh | :material-check: | - | :material-check: | :material-check: | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | 15 |
+| strimzi | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | - | :material-check: | 8 |
+| spark-operator | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | :material-check: | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 10 |
+| argocd | - | - | - | - | :material-check: | - | :material-check: | - | :material-check: | - | - | - | - | - | :material-check: | - | :material-check: | :material-check: | :material-check: | :material-check: | 8 |
+| tekton | - | - | - | - | - | - | :material-check: | - | :material-check: | - | - | - | - | - | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | :material-check: | 8 |
+| prometheus-operator | - | - | - | - | - | - | :material-check: | - | :material-check: | - | - | - | - | - | :material-check: | - | :material-check: | :material-check: | - | :material-check: | 6 |
 
 ### Removed/Replaced (RHOAI 3.x)
 

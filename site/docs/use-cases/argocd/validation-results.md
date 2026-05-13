@@ -13,19 +13,19 @@
 | server/pod-kill | server | PodKill | Resilient | |
 | server/network-partition | server | NetworkPartition | Resilient | |
 | server/label-stomping | server | LabelStomping | Resilient | |
-| server/quota-exhaustion | server | QuotaExhaustion | Resilient | |
-| server/rbac-revoke | server | RBACRevoke | Resilient | |
 | server/deployment-scale-zero | server | DeploymentScaleZero | Resilient | |
-| server/leader-election-disrupt | server | LeaderElectionDisrupt | Resilient | |
-| server/config-drift | server | ConfigDrift | Resilient | |
+| server/crashloop-inject | server | CrashLoopInject | Resilient | |
+| server/image-corrupt | server | ImageCorrupt | Resilient | |
+| server/resource-deletion-service | server | ResourceDeletion | Resilient | |
+| server/pdb-block | server | PDBBlock | Resilient | |
 | repo-server/pod-kill | repo-server | PodKill | Resilient | |
 | repo-server/network-partition | repo-server | NetworkPartition | Resilient | |
 | repo-server/label-stomping | repo-server | LabelStomping | Resilient | |
-| repo-server/quota-exhaustion | repo-server | QuotaExhaustion | Resilient | |
-| repo-server/rbac-revoke | repo-server | RBACRevoke | Resilient | |
 | repo-server/deployment-scale-zero | repo-server | DeploymentScaleZero | Resilient | |
-| repo-server/leader-election-disrupt | repo-server | LeaderElectionDisrupt | Resilient | |
-| repo-server/config-drift | repo-server | ConfigDrift | Resilient | |
+| repo-server/crashloop-inject | repo-server | CrashLoopInject | Resilient | |
+| repo-server/image-corrupt | repo-server | ImageCorrupt | Resilient | |
+| repo-server/resource-deletion-service | repo-server | ResourceDeletion | Resilient | |
+| repo-server/pdb-block | repo-server | PDBBlock | Resilient | |
 
 ## Key Findings
 

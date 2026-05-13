@@ -6,14 +6,13 @@ Operator Chaos is a generic framework that works with any Kubernetes operator. T
 
 | Operator | Components | Experiments | Failure Modes | Status |
 |----------|-----------|-------------|---------------|--------|
-| [RHOAI](dashboard/index.md) | 14 | 65+ | 20 | Actively tested |
-| [ODH](dashboard/index.md) | 12 | 65+ | 20 | Same components as RHOAI, different namespace |
+| [RHOAI / ODH](dashboard/index.md) | 14 | 200+ | 20 | Actively tested |
 | [OpenShift Service Mesh](service-mesh/index.md) | 2 | 22 | 14 | All Resilient |
-| [Red Hat Build of Kueue](kueue/index.md) | 3 | 30 | 11 | 29/30 Resilient |
-| [OpenShift Serverless](knative-serving/index.md) | 7 | 35+ | 10 | 34/35 Resilient |
-| [cert-manager](cert-manager/index.md) | 3 | 14+ | 10 | All Resilient |
-| [Strimzi (AMQ Streams)](strimzi/index.md) | 1 | 8 | 8 | 7/8 Resilient, 1 Degraded |
-| [Spark Operator](spark-operator/index.md) | 2 | 12 | 9 | 9/12 Resilient, 2 Degraded, 1 Failed |
+| [Red Hat Build of Kueue](kueue/index.md) | 3 | 38 | 11 | All Resilient |
+| [OpenShift Serverless](knative-serving/index.md) | 7 | 39 | 10 | 38/39 Resilient |
+| [cert-manager](cert-manager/index.md) | 3 | 18 | 10 | All Resilient |
+| [Strimzi (AMQ Streams)](strimzi/index.md) | 1 | 8 | 8 | 7/8 Resilient |
+| [Spark Operator](spark-operator/index.md) | 2 | 12 | 9 | 9/12 Resilient |
 | [ArgoCD (OpenShift GitOps)](argocd/index.md) | 2 | 16 | 8 | All Resilient |
 | [Tekton (OpenShift Pipelines)](tekton/index.md) | 2 | 14 | 8 | All Resilient |
 | [Prometheus Operator](prometheus-operator/index.md) | 1 | 6 | 6 | All Resilient |
@@ -47,18 +46,18 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 
 | Component | OL | SD | SZ | LE | CL | IC | RD | PB |
 |-----------|----|----|----|----|----|----|----|----|
-| [dashboard](dashboard/index.md) | - | - | - | - | - | - | - | - |
-| [data-science-pipelines](data-science-pipelines/index.md) | - | - | - | - | - | - | - | - |
-| [feast](feast/index.md) | - | - | - | - | - | - | - | - |
+| [dashboard](dashboard/index.md) | - | - | Y | - | Y | Y | Y | Y |
+| [data-science-pipelines](data-science-pipelines/index.md) | - | - | Y | Y | Y | Y | Y | Y |
+| [feast](feast/index.md) | - | - | Y | Y | Y | Y | Y | Y |
 | [kserve](kserve/index.md) | - | - | - | - | Y | Y | Y | Y |
-| [llamastack](llamastack/index.md) | - | - | - | - | - | - | - | - |
-| [model-registry](model-registry/index.md) | - | - | - | - | - | - | - | - |
+| [llamastack](llamastack/index.md) | - | - | Y | Y | Y | Y | Y | Y |
+| [model-registry](model-registry/index.md) | - | - | Y | Y | Y | Y | Y | Y |
 | [odh-model-controller](odh-model-controller/index.md) | - | - | - | - | Y | Y | Y | Y |
 | [opendatahub-operator](opendatahub-operator/index.md) | Y | - | - | - | - | - | - | - |
-| [ray](ray/index.md) | - | - | - | - | - | - | - | - |
-| [training-operator](training-operator/index.md) | - | - | - | - | - | - | - | - |
-| [trustyai](trustyai/index.md) | - | - | - | - | - | - | - | - |
-| [workbenches](workbenches/index.md) | - | - | - | - | - | - | - | - |
+| [ray](ray/index.md) | - | - | Y | Y | Y | Y | Y | Y |
+| [training-operator](training-operator/index.md) | - | - | Y | - | Y | Y | Y | Y |
+| [trustyai](trustyai/index.md) | - | - | Y | Y | Y | Y | Y | Y |
+| [workbenches](workbenches/index.md) | - | - | Y | - | Y | Y | Y | Y |
 | [codeflare](codeflare/index.md) | - | - | - | - | - | - | - | - |
 | [modelmesh](modelmesh/index.md) | - | - | - | - | - | - | - | - |
 
@@ -104,6 +103,18 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 | kourier-gateway | Y | Y | Y | Y | - | - | - |
 | net-kourier-controller | Y | Y | - | - | Y | - | - |
 
+### OpenShift Serverless (Knative Serving): Extended Failure Modes
+
+| Component | CL | IC | RD | PB |
+|-----------|----|----|----|----|
+| activator | - | - | - | - |
+| autoscaler | - | - | - | - |
+| autoscaler-hpa | - | - | - | - |
+| controller | Y | Y | Y | Y |
+| webhook | - | - | - | - |
+| kourier-gateway | - | - | - | - |
+| net-kourier-controller | - | - | - | - |
+
 ### cert-manager Operator: Core Failure Modes
 
 | Component | PK | NP | QE | LS | RR | CD |
@@ -111,3 +122,75 @@ Abbreviations: OL (OLM Lifecycle), SD (SecretDeletion), SZ (DeploymentScaleZero)
 | controller | Y | Y | Y | Y | Y | - |
 | webhook | Y | Y | Y | Y | - | Y |
 | cainjector | Y | Y | Y | Y | - | - |
+
+### cert-manager Operator: Extended Failure Modes
+
+| Component | SD | CL | IC | RD | PB |
+|-----------|----|----|----|----|------|
+| cert-manager | Y | Y | Y | Y | Y |
+
+### Strimzi (AMQ Streams): Core Failure Modes
+
+| Component | PK | NP | LS |
+|-----------|----|----|------|
+| cluster-operator | Y | Y | Y |
+
+### Strimzi (AMQ Streams): Extended Failure Modes
+
+| Component | SZ | LE | CL | IC | PB |
+|-----------|----|----|----|----|------|
+| cluster-operator | Y | Y | Y | Y | Y |
+
+### Spark Operator: Core Failure Modes
+
+| Component | PK | NP | LS |
+|-----------|----|----|------|
+| controller | Y | Y | Y |
+| webhook | Y | - | - |
+
+### Spark Operator: Extended Failure Modes
+
+| Component | SZ | LE | CL | IC | RD | PB | WD |
+|-----------|----|----|----|----|----|----|------|
+| controller | Y | Y | Y | Y | - | Y | - |
+| webhook | Y | - | - | - | Y | - | Y |
+
+### ArgoCD (OpenShift GitOps): Core Failure Modes
+
+| Component | PK | NP | LS |
+|-----------|----|----|------|
+| server | Y | Y | Y |
+| repo-server | Y | Y | Y |
+
+### ArgoCD (OpenShift GitOps): Extended Failure Modes
+
+| Component | SZ | CL | IC | RD | PB |
+|-----------|----|----|----|----|------|
+| server | Y | Y | Y | Y | Y |
+| repo-server | Y | Y | Y | Y | Y |
+
+### Tekton (OpenShift Pipelines): Core Failure Modes
+
+| Component | PK | NP |
+|-----------|----|----|
+| pipelines-controller | Y | Y |
+| pipelines-webhook | Y | Y |
+
+### Tekton (OpenShift Pipelines): Extended Failure Modes
+
+| Component | SZ | LE | CL | IC | RD | PB |
+|-----------|----|----|----|----|----|----|
+| pipelines-controller | Y | Y | Y | Y | - | Y |
+| pipelines-webhook | Y | - | Y | Y | Y | Y |
+
+### Prometheus Operator: Core Failure Modes
+
+| Component | PK | NP |
+|-----------|----|----|
+| prometheus-operator | Y | Y |
+
+### Prometheus Operator: Extended Failure Modes
+
+| Component | SZ | CL | IC | PB |
+|-----------|----|----|----|----|
+| prometheus-operator | Y | Y | Y | Y |

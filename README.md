@@ -81,7 +81,7 @@ Full documentation at [opendatahub-io.github.io/operator-chaos](https://opendata
 
 - [SDK Middleware](https://opendatahub-io.github.io/operator-chaos/modes/sdk/) - ChaosClient, WrapReconciler, fuzz harness integration
 - [Fuzz Testing](https://opendatahub-io.github.io/operator-chaos/modes/fuzz/) - Automated fault exploration with Go's native fuzz engine
-- [Failure Modes Reference](https://opendatahub-io.github.io/operator-chaos/failure-modes/) - All 14 injection types with parameters and examples
+- [Failure Modes Reference](https://opendatahub-io.github.io/operator-chaos/failure-modes/) - All 20 injection types with parameters and examples
 - [Knowledge Models](https://opendatahub-io.github.io/operator-chaos/guides/knowledge-models/) - Schema, validation, and examples
 - [CLI Reference](https://opendatahub-io.github.io/operator-chaos/reference/cli-commands/) - All commands, flags, and usage patterns
 - [E2E Testing Guide](https://opendatahub-io.github.io/operator-chaos/guides/e2e-testing/) - Full walkthrough with suite execution and expected verdicts

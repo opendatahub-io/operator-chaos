@@ -12,18 +12,18 @@
 |-----------|-----------|-----------|---------|-------|
 | pipelines-controller/pod-kill | pipelines-controller | PodKill | Resilient | |
 | pipelines-controller/network-partition | pipelines-controller | NetworkPartition | Resilient | |
-| pipelines-controller/label-stomping | pipelines-controller | LabelStomping | Resilient | |
-| pipelines-controller/quota-exhaustion | pipelines-controller | QuotaExhaustion | Resilient | |
-| pipelines-controller/rbac-revoke | pipelines-controller | RBACRevoke | Resilient | |
 | pipelines-controller/deployment-scale-zero | pipelines-controller | DeploymentScaleZero | Resilient | |
-| pipelines-controller/config-drift | pipelines-controller | ConfigDrift | Resilient | |
+| pipelines-controller/leader-election-disrupt | pipelines-controller | LeaderElectionDisrupt | Resilient | |
+| pipelines-controller/crashloop-inject | pipelines-controller | CrashLoopInject | Resilient | |
+| pipelines-controller/image-corrupt | pipelines-controller | ImageCorrupt | Resilient | |
+| pipelines-controller/pdb-block | pipelines-controller | PDBBlock | Resilient | |
 | pipelines-webhook/pod-kill | pipelines-webhook | PodKill | Resilient | |
 | pipelines-webhook/network-partition | pipelines-webhook | NetworkPartition | Resilient | |
-| pipelines-webhook/label-stomping | pipelines-webhook | LabelStomping | Resilient | |
-| pipelines-webhook/quota-exhaustion | pipelines-webhook | QuotaExhaustion | Resilient | |
 | pipelines-webhook/deployment-scale-zero | pipelines-webhook | DeploymentScaleZero | Resilient | |
-| pipelines-webhook/config-drift | pipelines-webhook | ConfigDrift | Resilient | |
-| pipelines-webhook/service-deletion | pipelines-webhook | ResourceDeletion | Resilient | Service recreated in ~10s |
+| pipelines-webhook/crashloop-inject | pipelines-webhook | CrashLoopInject | Resilient | |
+| pipelines-webhook/image-corrupt | pipelines-webhook | ImageCorrupt | Resilient | |
+| pipelines-webhook/resource-deletion-service | pipelines-webhook | ResourceDeletion | Resilient | Service recreated in ~10s |
+| pipelines-webhook/pdb-block | pipelines-webhook | PDBBlock | Resilient | |
 
 ## Key Findings
 

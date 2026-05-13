@@ -13,15 +13,15 @@
 | controller/pod-kill | controller | PodKill | Resilient | |
 | controller/network-partition | controller | NetworkPartition | Failed | Controller permanently non-functional after partition |
 | controller/label-stomping | controller | LabelStomping | Resilient | |
-| controller/quota-exhaustion | controller | QuotaExhaustion | Resilient | |
-| controller/rbac-revoke | controller | RBACRevoke | Resilient | |
 | controller/deployment-scale-zero | controller | DeploymentScaleZero | Degraded | No controller to restore replicas |
+| controller/leader-election-disrupt | controller | LeaderElectionDisrupt | Resilient | |
+| controller/crashloop-inject | controller | CrashLoopInject | Resilient | |
+| controller/image-corrupt | controller | ImageCorrupt | Resilient | |
+| controller/pdb-block | controller | PDBBlock | Resilient | |
 | webhook/pod-kill | webhook | PodKill | Resilient | |
-| webhook/network-partition | webhook | NetworkPartition | Resilient | |
-| webhook/label-stomping | webhook | LabelStomping | Resilient | |
-| webhook/quota-exhaustion | webhook | QuotaExhaustion | Resilient | |
 | webhook/deployment-scale-zero | webhook | DeploymentScaleZero | Degraded | No controller to restore replicas |
-| webhook/webhook-cert-corrupt | webhook | ConfigDrift | Resilient | |
+| webhook/resource-deletion-service | webhook | ResourceDeletion | Resilient | Service recreated in ~10s |
+| webhook/webhook-disrupt | webhook | WebhookDisrupt | Resilient | |
 
 ## Key Findings
 
