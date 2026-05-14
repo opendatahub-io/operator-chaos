@@ -4,9 +4,9 @@ hide:
   - toc
 ---
 
-# Operator Chaos
-
 <div style="text-align: center; padding: 40px 0;">
+  <img src="images/logo-512.png" alt="Operator Chaos" style="width: 180px; height: 180px; margin-bottom: 16px;">
+  <h1 style="margin: 0;">Operator Chaos</h1>
   <p style="font-size: 1.4em; color: #666;">
     Chaos engineering for Kubernetes operators.<br>
     Test reconciliation semantics, not just pod restarts.
