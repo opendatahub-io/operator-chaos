@@ -8,8 +8,8 @@ copyright: Copyright &copy; Red Hat, Inc.
 theme:
   name: material
   language: en
-  favicon: images/favicon.ico
-  logo: images/logo.png
+  favicon: images/favicon.svg
+  logo: images/favicon.svg
   icon:
     repo: fontawesome/brands/github
   font:
