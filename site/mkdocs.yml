@@ -3,27 +3,37 @@ site_url: https://opendatahub-io.github.io/operator-chaos
 repo_url: https://github.com/opendatahub-io/operator-chaos
 repo_name: opendatahub-io/operator-chaos
 edit_uri: edit/main/site/docs/
+copyright: Copyright &copy; Red Hat, Inc.
 
 theme:
   name: material
+  language: en
+  favicon: images/favicon.ico
+  logo: images/logo.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Red Hat Text
+    code: Red Hat Mono
   palette:
     - scheme: default
-      primary: indigo
-      accent: blue
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: indigo
-      accent: blue
+      primary: black
       toggle:
         icon: material/brightness-4
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      toggle:
+        icon: material/brightness-7
         name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.top
     - navigation.indexes
     - navigation.tabs.sticky
+    - navigation.path
+    - navigation.instant
+    - toc.follow
     - search.suggest
     - search.highlight
     - content.code.copy
