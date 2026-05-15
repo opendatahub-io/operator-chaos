@@ -71,6 +71,12 @@ components:
           name: odh-model-controller
           namespace: opendatahub
           conditionType: Available
+        - type: replicaCount
+          apiVersion: apps/v1
+          kind: Deployment
+          name: odh-model-controller
+          namespace: opendatahub
+          expectedReplicas: 1
       timeout: "60s"
 
 recovery:

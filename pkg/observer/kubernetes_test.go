@@ -420,6 +420,281 @@ func TestCheckSteadyState_PerCheckNamespaceTakesPriority_ResourceExists(t *testi
 	assert.True(t, result.Passed, "per-check namespace should override function parameter")
 }
 
+func newDeploymentWithReplicas(name, namespace string, replicas int64) *unstructured.Unstructured {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	obj.SetName(name)
+	obj.SetNamespace(namespace)
+	obj.Object["spec"] = map[string]interface{}{
+		"replicas": replicas,
+	}
+	return obj
+}
+
+func int32Ptr(i int32) *int32 { return &i }
+
+func TestCheckSteadyState_ReplicaCount_Passed(t *testing.T) {
+	deploy := newDeploymentWithReplicas("test-deploy", "test-ns", 1)
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.True(t, result.Passed)
+	assert.Equal(t, int32(1), result.ChecksRun)
+	assert.Equal(t, int32(1), result.ChecksPassed)
+	require.Len(t, result.Details, 1)
+	assert.True(t, result.Details[0].Passed)
+	assert.Equal(t, "replicas=1", result.Details[0].Value)
+}
+
+func TestCheckSteadyState_ReplicaCount_ScaledToZero(t *testing.T) {
+	deploy := newDeploymentWithReplicas("test-deploy", "test-ns", 0)
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	assert.Equal(t, int32(1), result.ChecksRun)
+	assert.Equal(t, int32(0), result.ChecksPassed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Equal(t, "replicas=0, expected 1", result.Details[0].Value)
+}
+
+func TestCheckSteadyState_ReplicaCount_ResourceNotFound(t *testing.T) {
+	obs := buildFakeClient()
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "nonexistent",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.NotEmpty(t, result.Details[0].Error)
+}
+
+func TestCheckSteadyState_ReplicaCount_MissingExpectedReplicas(t *testing.T) {
+	deploy := newDeploymentWithReplicas("test-deploy", "test-ns", 1)
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:       v1alpha1.CheckReplicaCount,
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
+			Name:       "test-deploy",
+			Namespace:  "test-ns",
+			// ExpectedReplicas not set
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Contains(t, result.Details[0].Error, "expectedReplicas")
+}
+
+func TestCheckSteadyState_ReplicaCount_NamespaceFallback(t *testing.T) {
+	deploy := newDeploymentWithReplicas("test-deploy", "fallback-ns", 3)
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "",
+			ExpectedReplicas: int32Ptr(3),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "fallback-ns")
+	require.NoError(t, err)
+	assert.True(t, result.Passed)
+}
+
+func TestCheckSteadyState_ReplicaCount_NoReplicasFieldDefaultsTo1(t *testing.T) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	obj.SetName("test-deploy")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{}
+	obs := buildFakeClient(obj)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.True(t, result.Passed, "missing replicas field defaults to 1")
+}
+
+func TestCheckSteadyState_ReplicaCount_NonScalableKindMissingReplicas(t *testing.T) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"})
+	obj.SetName("test-cm")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{}
+	obs := buildFakeClient(obj)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "v1",
+			Kind:             "ConfigMap",
+			Name:             "test-cm",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Contains(t, result.Details[0].Error, "spec.replicas is not defined for kind ConfigMap")
+}
+
+func TestCheckSteadyState_ReplicaCount_FractionalReplicasRejected(t *testing.T) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	obj.SetName("test-deploy")
+	obj.SetNamespace("test-ns")
+	obj.Object["spec"] = map[string]interface{}{
+		"replicas": float64(1.5),
+	}
+	obs := buildFakeClient(obj)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Contains(t, result.Details[0].Error, "non-integer value")
+}
+
+func TestCheckSteadyState_ReplicaCount_NegativeReplicasRejected(t *testing.T) {
+	deploy := newDeploymentWithReplicas("test-deploy", "test-ns", -1)
+	obs := buildFakeClient(deploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "test-deploy",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err)
+	assert.False(t, result.Passed)
+	require.Len(t, result.Details, 1)
+	assert.False(t, result.Details[0].Passed)
+	assert.Contains(t, result.Details[0].Error, "negative")
+}
+
+func TestCheckSteadyState_ReplicaCount_ErrorFailsOverallResult(t *testing.T) {
+	// A replicaCount check that hits a fatal error (fractional replicas) mixed
+	// with a passing conditionTrue check must fail the overall result—callers
+	// rely on result.Passed, not the top-level error, to detect per-check failures.
+	deploy := newDeploymentWithCondition("healthy", "test-ns", "Available", "True")
+	badDeploy := &unstructured.Unstructured{}
+	badDeploy.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	badDeploy.SetName("bad-replicas")
+	badDeploy.SetNamespace("test-ns")
+	badDeploy.Object["spec"] = map[string]interface{}{
+		"replicas": float64(1.5),
+	}
+	obs := buildFakeClient(deploy, badDeploy)
+
+	checks := []v1alpha1.SteadyStateCheck{
+		{
+			Type:          v1alpha1.CheckConditionTrue,
+			APIVersion:    "apps/v1",
+			Kind:          "Deployment",
+			Name:          "healthy",
+			Namespace:     "test-ns",
+			ConditionType: "Available",
+		},
+		{
+			Type:             v1alpha1.CheckReplicaCount,
+			APIVersion:       "apps/v1",
+			Kind:             "Deployment",
+			Name:             "bad-replicas",
+			Namespace:        "test-ns",
+			ExpectedReplicas: int32Ptr(1),
+		},
+	}
+
+	result, err := obs.CheckSteadyState(context.Background(), checks, "test-ns")
+	require.NoError(t, err, "top-level error is nil; per-check errors live in CheckDetail.Error")
+	assert.False(t, result.Passed, "overall result must fail when any check errors")
+	assert.Equal(t, int32(2), result.ChecksRun)
+	assert.Equal(t, int32(1), result.ChecksPassed)
+	require.Len(t, result.Details, 2)
+	assert.True(t, result.Details[0].Passed)
+	assert.False(t, result.Details[1].Passed)
+	assert.Contains(t, result.Details[1].Error, "non-integer value")
+}
+
 func TestCheckSteadyState_ResourceExists_NonNotFoundError(t *testing.T) {
 	// Use an interceptor to return a non-NotFound error (simulating RBAC denied).
 	scheme := runtime.NewScheme()

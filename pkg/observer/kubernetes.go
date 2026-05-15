@@ -24,6 +24,10 @@ func NewKubernetesObserver(c client.Client) *KubernetesObserver {
 
 // CheckSteadyState evaluates a list of steady-state checks against the cluster
 // and returns a CheckResult summarizing which checks passed or failed.
+// Per-check errors (parsing failures, unexpected types, missing fields) are recorded
+// in CheckDetail.Error and the check is counted as failed—callers must inspect
+// result.Passed (not just the returned error) to detect failures. The top-level
+// error is reserved for infrastructure failures that prevent evaluation entirely.
 func (o *KubernetesObserver) CheckSteadyState(ctx context.Context, checks []v1alpha1.SteadyStateCheck, namespace string) (*v1alpha1.CheckResult, error) {
 	result := &v1alpha1.CheckResult{
 		ChecksRun: int32(len(checks)),
@@ -44,6 +48,13 @@ func (o *KubernetesObserver) CheckSteadyState(ctx context.Context, checks []v1al
 		case v1alpha1.CheckResourceExists:
 			passed, err := o.checkResourceExists(ctx, check, namespace)
 			detail.Passed = passed
+			if err != nil {
+				detail.Error = err.Error()
+			}
+		case v1alpha1.CheckReplicaCount:
+			passed, value, err := o.checkReplicaCount(ctx, check, namespace)
+			detail.Passed = passed
+			detail.Value = value
 			if err != nil {
 				detail.Error = err.Error()
 			}
@@ -102,6 +113,71 @@ func (o *KubernetesObserver) checkCondition(ctx context.Context, check v1alpha1.
 	}
 
 	return false, fmt.Sprintf("condition %s not found", check.ConditionType), nil
+}
+
+// checkReplicaCount verifies that a Deployment or StatefulSet has the expected number
+// of spec.replicas. This catches cases where a condition like Available might be stale
+// but the actual replica count has been changed (e.g., scaled to zero).
+func (o *KubernetesObserver) checkReplicaCount(ctx context.Context, check v1alpha1.SteadyStateCheck, namespace string) (bool, string, error) {
+	ns := check.Namespace
+	if ns == "" {
+		ns = namespace
+	}
+
+	if check.ExpectedReplicas == nil {
+		return false, "", fmt.Errorf("replicaCount check requires expectedReplicas field")
+	}
+
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(check.APIVersion)
+	obj.SetKind(check.Kind)
+
+	if err := o.client.Get(ctx, types.NamespacedName{Name: check.Name, Namespace: ns}, obj); err != nil {
+		return false, "", fmt.Errorf("getting %s/%s: %w", check.Kind, check.Name, err)
+	}
+
+	replicas, found, err := unstructured.NestedFieldNoCopy(obj.Object, "spec", "replicas")
+	if err != nil {
+		return false, "", fmt.Errorf("reading spec.replicas from %s/%s: %w", check.Kind, check.Name, err)
+	}
+
+	expected := int64(*check.ExpectedReplicas)
+	// When spec.replicas is omitted, Kubernetes defaults it to 1 for scalable
+	// workload kinds (Deployment, StatefulSet, ReplicaSet).
+	// Ref: https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/
+	if !found {
+		switch check.Kind {
+		case "Deployment", "StatefulSet", "ReplicaSet":
+			if expected == 1 {
+				return true, "replicas=1 (default)", nil
+			}
+			return false, fmt.Sprintf("replicas not set (default 1), expected %d", expected), nil
+		default:
+			return false, "", fmt.Errorf("spec.replicas is not defined for kind %s", check.Kind)
+		}
+	}
+
+	var actual int64
+	switch v := replicas.(type) {
+	case int64:
+		actual = v
+	case float64:
+		if v != float64(int64(v)) {
+			return false, "", fmt.Errorf("spec.replicas has non-integer value %v for %s/%s", v, check.Kind, check.Name)
+		}
+		actual = int64(v)
+	default:
+		return false, "", fmt.Errorf("spec.replicas has unexpected type %T", replicas)
+	}
+
+	if actual < 0 {
+		return false, "", fmt.Errorf("spec.replicas is negative (%d) for %s/%s", actual, check.Kind, check.Name)
+	}
+
+	if actual == expected {
+		return true, fmt.Sprintf("replicas=%d", actual), nil
+	}
+	return false, fmt.Sprintf("replicas=%d, expected %d", actual, expected), nil
 }
 
 // checkResourceExists verifies that a specific Kubernetes resource exists in the cluster.

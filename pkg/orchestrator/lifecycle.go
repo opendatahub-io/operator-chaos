@@ -264,6 +264,16 @@ func (o *Orchestrator) ValidateExperiment(ctx context.Context, exp *v1alpha1.Cha
 			if check.Kind == "" || check.Name == "" {
 				return fmt.Errorf("steadyState.checks[%d]: type 'resourceExists' requires kind and name", i)
 			}
+		case v1alpha1.CheckReplicaCount:
+			if check.Kind == "" || check.Name == "" {
+				return fmt.Errorf("steadyState.checks[%d]: type 'replicaCount' requires kind and name", i)
+			}
+			if check.ExpectedReplicas == nil {
+				return fmt.Errorf("steadyState.checks[%d]: type 'replicaCount' requires expectedReplicas", i)
+			}
+			if *check.ExpectedReplicas < 0 {
+				return fmt.Errorf("steadyState.checks[%d]: type 'replicaCount' requires expectedReplicas >= 0", i)
+			}
 		case "":
 			return fmt.Errorf("steadyState.checks[%d]: type is required", i)
 		default:

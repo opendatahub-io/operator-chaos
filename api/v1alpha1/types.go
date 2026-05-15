@@ -85,24 +85,26 @@ type SteadyStateSpec struct {
 }
 
 // CheckType represents the type of a steady-state check.
-// +kubebuilder:validation:Enum=conditionTrue;resourceExists
+// +kubebuilder:validation:Enum=conditionTrue;resourceExists;replicaCount
 type CheckType string
 
 const (
 	CheckConditionTrue  CheckType = "conditionTrue"
 	CheckResourceExists CheckType = "resourceExists"
+	CheckReplicaCount   CheckType = "replicaCount"
 )
 
 // SteadyStateCheck defines a single check for steady-state verification.
 // Note: APIVersion refers to the target resource's API version (e.g. "apps/v1"),
 // not the CRD's own TypeMeta API version.
 type SteadyStateCheck struct {
-	Type          CheckType `json:"type"`
-	APIVersion    string    `json:"apiVersion,omitempty"`
-	Kind          string    `json:"kind,omitempty"`
-	Name          string    `json:"name,omitempty"`
-	Namespace     string    `json:"namespace,omitempty"`
-	ConditionType string    `json:"conditionType,omitempty"`
+	Type             CheckType `json:"type"`
+	APIVersion       string    `json:"apiVersion,omitempty"`
+	Kind             string    `json:"kind,omitempty"`
+	Name             string    `json:"name,omitempty"`
+	Namespace        string    `json:"namespace,omitempty"`
+	ConditionType    string    `json:"conditionType,omitempty"`
+	ExpectedReplicas *int32    `json:"expectedReplicas,omitempty"`
 }
 
 type InjectionSpec struct {
