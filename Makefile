@@ -59,6 +59,24 @@ test: ## Run all tests with race detector
 test-short: ## Run tests without race detector
 	go test ./... -short -count=1
 
+test-sdk: ## Run SDK tests for all operators
+	go test ./internal/controller/ -run TestSDK -v -count=1
+	cd tests/sdk/opendatahub && go test -run TestSDK -v -count=1
+	cd tests/sdk/certmanager && go test -run TestSDK -v -count=1
+
+test-fuzz: ## Run fuzz tests (30s each)
+	go test ./internal/controller/ -fuzz FuzzChaosExperimentReconciler -fuzztime 30s
+	go test ./internal/controller/ -fuzz FuzzChaosExperimentWithSpecificFaults -fuzztime 30s
+	cd tests/sdk/opendatahub && go test -fuzz FuzzODHReconciler -fuzztime 30s
+	cd tests/sdk/opendatahub && go test -fuzz FuzzDSCIReconciler -fuzztime 30s
+	cd tests/sdk/certmanager && go test -fuzz FuzzCertManagerReconciler -fuzztime 30s
+
+test-fuzz-long: ## Run fuzz tests (5m each)
+	go test ./internal/controller/ -fuzz FuzzChaosExperimentReconciler -fuzztime 5m
+	cd tests/sdk/opendatahub && go test -fuzz FuzzODHReconciler -fuzztime 5m
+	cd tests/sdk/opendatahub && go test -fuzz FuzzDSCIReconciler -fuzztime 5m
+	cd tests/sdk/certmanager && go test -fuzz FuzzCertManagerReconciler -fuzztime 5m
+
 lint: ## Run golangci-lint
 	golangci-lint run ./...
 
