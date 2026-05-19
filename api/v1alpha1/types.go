@@ -91,6 +91,7 @@ type CheckType string
 const (
 	CheckConditionTrue  CheckType = "conditionTrue"
 	CheckResourceExists CheckType = "resourceExists"
+	CheckFieldEquals    CheckType = "fieldEquals"
 )
 
 // SteadyStateCheck defines a single check for steady-state verification.
@@ -103,6 +104,8 @@ type SteadyStateCheck struct {
 	Name          string    `json:"name,omitempty"`
 	Namespace     string    `json:"namespace,omitempty"`
 	ConditionType string    `json:"conditionType,omitempty"`
+	FieldPath     string    `json:"fieldPath,omitempty"`
+	ExpectedValue string    `json:"expectedValue,omitempty"`
 }
 
 type InjectionSpec struct {

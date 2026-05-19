@@ -264,6 +264,10 @@ func (o *Orchestrator) ValidateExperiment(ctx context.Context, exp *v1alpha1.Cha
 			if check.Kind == "" || check.Name == "" {
 				return fmt.Errorf("steadyState.checks[%d]: type 'resourceExists' requires kind and name", i)
 			}
+		case v1alpha1.CheckFieldEquals:
+			if check.Kind == "" || check.Name == "" || check.FieldPath == "" || check.ExpectedValue == "" {
+				return fmt.Errorf("steadyState.checks[%d]: type 'fieldEquals' requires kind, name, fieldPath, and expectedValue", i)
+			}
 		case "":
 			return fmt.Errorf("steadyState.checks[%d]: type is required", i)
 		default:
