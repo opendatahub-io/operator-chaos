@@ -93,6 +93,11 @@ func (c *ChaosClient) DeleteAllOf(ctx context.Context, obj client.Object, opts .
 	return c.inner.DeleteAllOf(ctx, obj, opts...)
 }
 
+// UpdateFaultConfig replaces the current fault configuration atomically.
+func (c *ChaosClient) UpdateFaultConfig(fc *FaultConfig) {
+	c.faults = fc
+}
+
 // Status returns a SubResourceWriter for the status subresource.
 // Delegates directly to the inner client.
 func (c *ChaosClient) Status() client.SubResourceWriter {
