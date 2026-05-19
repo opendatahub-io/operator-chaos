@@ -3,6 +3,7 @@ package injection
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
 	"github.com/opendatahub-io/operator-chaos/pkg/safety"
@@ -65,7 +66,11 @@ func (d *ConfigDriftInjector) injectSecret(ctx context.Context, spec v1alpha1.In
 	}
 	secret.Data[dataKey] = []byte(newValue)
 
-	rollbackSecretName := "chaos-rollback-" + key.Name + "-" + dataKey
+	sanitizedKey := strings.ToLower(strings.ReplaceAll(dataKey, "_", "-"))
+	if len(sanitizedKey) > 30 {
+		sanitizedKey = sanitizedKey[:30]
+	}
+	rollbackSecretName := "chaos-rollback-" + key.Name + "-" + sanitizedKey
 
 	// Build labels with chaos-experiment for traceability
 	rollbackLabels := safety.ChaosLabels(string(v1alpha1.ConfigDrift))
