@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	"sync/atomic"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,23 +16,29 @@ var _ client.Client = (*ChaosClient)(nil)
 // ChaosClient wraps a controller-runtime client.Client with fault injection.
 // CRUD operations check the FaultConfig before delegating to the inner client.
 // Metadata methods (Scheme, RESTMapper, etc.) always delegate directly.
+// The fault config is stored as an atomic pointer for safe concurrent updates.
 type ChaosClient struct {
 	inner  client.Client
-	faults *FaultConfig
+	faults atomic.Pointer[FaultConfig]
 }
 
 // NewChaosClient creates a new ChaosClient wrapping the given inner client.
 // If faults is nil, all operations pass through without fault injection.
 func NewChaosClient(inner client.Client, faults *FaultConfig) *ChaosClient {
-	return &ChaosClient{
-		inner:  inner,
-		faults: faults,
+	c := &ChaosClient{inner: inner}
+	if faults != nil {
+		c.faults.Store(faults)
 	}
+	return c
+}
+
+func (c *ChaosClient) getFaults() *FaultConfig {
+	return c.faults.Load()
 }
 
 // Get retrieves an object, with optional fault injection.
 func (c *ChaosClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
-	if err := c.faults.MaybeInject(OpGet); err != nil {
+	if err := c.getFaults().MaybeInject(OpGet); err != nil {
 		return err
 	}
 	return c.inner.Get(ctx, key, obj, opts...)
@@ -39,7 +46,7 @@ func (c *ChaosClient) Get(ctx context.Context, key client.ObjectKey, obj client.
 
 // List retrieves a list of objects, with optional fault injection.
 func (c *ChaosClient) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
-	if err := c.faults.MaybeInject(OpList); err != nil {
+	if err := c.getFaults().MaybeInject(OpList); err != nil {
 		return err
 	}
 	return c.inner.List(ctx, list, opts...)
@@ -47,7 +54,7 @@ func (c *ChaosClient) List(ctx context.Context, list client.ObjectList, opts ...
 
 // Apply applies the given apply configuration, with optional fault injection.
 func (c *ChaosClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.ApplyOption) error {
-	if err := c.faults.MaybeInject(OpApply); err != nil {
+	if err := c.getFaults().MaybeInject(OpApply); err != nil {
 		return err
 	}
 	return c.inner.Apply(ctx, obj, opts...)
@@ -55,7 +62,7 @@ func (c *ChaosClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration,
 
 // Create saves a new object, with optional fault injection.
 func (c *ChaosClient) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
-	if err := c.faults.MaybeInject(OpCreate); err != nil {
+	if err := c.getFaults().MaybeInject(OpCreate); err != nil {
 		return err
 	}
 	return c.inner.Create(ctx, obj, opts...)
@@ -63,7 +70,7 @@ func (c *ChaosClient) Create(ctx context.Context, obj client.Object, opts ...cli
 
 // Delete removes an object, with optional fault injection.
 func (c *ChaosClient) Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error {
-	if err := c.faults.MaybeInject(OpDelete); err != nil {
+	if err := c.getFaults().MaybeInject(OpDelete); err != nil {
 		return err
 	}
 	return c.inner.Delete(ctx, obj, opts...)
@@ -71,7 +78,7 @@ func (c *ChaosClient) Delete(ctx context.Context, obj client.Object, opts ...cli
 
 // Update modifies an existing object, with optional fault injection.
 func (c *ChaosClient) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
-	if err := c.faults.MaybeInject(OpUpdate); err != nil {
+	if err := c.getFaults().MaybeInject(OpUpdate); err != nil {
 		return err
 	}
 	return c.inner.Update(ctx, obj, opts...)
@@ -79,7 +86,7 @@ func (c *ChaosClient) Update(ctx context.Context, obj client.Object, opts ...cli
 
 // Patch applies a patch to an object, with optional fault injection.
 func (c *ChaosClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
-	if err := c.faults.MaybeInject(OpPatch); err != nil {
+	if err := c.getFaults().MaybeInject(OpPatch); err != nil {
 		return err
 	}
 	return c.inner.Patch(ctx, obj, patch, opts...)
@@ -87,7 +94,7 @@ func (c *ChaosClient) Patch(ctx context.Context, obj client.Object, patch client
 
 // DeleteAllOf deletes all objects of the given type matching the options, with optional fault injection.
 func (c *ChaosClient) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
-	if err := c.faults.MaybeInject(OpDeleteAllOf); err != nil {
+	if err := c.getFaults().MaybeInject(OpDeleteAllOf); err != nil {
 		return err
 	}
 	return c.inner.DeleteAllOf(ctx, obj, opts...)
@@ -95,7 +102,7 @@ func (c *ChaosClient) DeleteAllOf(ctx context.Context, obj client.Object, opts .
 
 // UpdateFaultConfig replaces the current fault configuration atomically.
 func (c *ChaosClient) UpdateFaultConfig(fc *FaultConfig) {
-	c.faults = fc
+	c.faults.Store(fc)
 }
 
 // Status returns a SubResourceWriter for the status subresource.
