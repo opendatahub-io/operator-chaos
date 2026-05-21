@@ -54,6 +54,12 @@ func (rt *chaosRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 		return rt.inner.RoundTrip(req)
 	}
 
+	// Exclude chaos-config ConfigMap reads from fault injection
+	// so the config watcher can always read its own configuration.
+	if req.Method == "GET" && strings.Contains(req.URL.Path, "/configmaps/chaos-config") {
+		return rt.inner.RoundTrip(req)
+	}
+
 	op := httpMethodToOperation(req.Method)
 	if err := fc.MaybeInject(op); err != nil {
 		return &http.Response{
