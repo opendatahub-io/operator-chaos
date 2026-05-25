@@ -52,14 +52,6 @@ func (c *ChaosClient) List(ctx context.Context, list client.ObjectList, opts ...
 	return c.inner.List(ctx, list, opts...)
 }
 
-// Apply applies the given apply configuration, with optional fault injection.
-func (c *ChaosClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.ApplyOption) error {
-	if err := c.getFaults().MaybeInject(OpApply); err != nil {
-		return err
-	}
-	return c.inner.Apply(ctx, obj, opts...)
-}
-
 // Create saves a new object, with optional fault injection.
 func (c *ChaosClient) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
 	if err := c.getFaults().MaybeInject(OpCreate); err != nil {
