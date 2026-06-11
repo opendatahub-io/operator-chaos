@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
+	chaosclient "github.com/opendatahub-io/operator-chaos/pkg/sdk/client"
 )
 
 // defaultRunTimeout is the maximum time a single fuzz iteration is allowed to run.
@@ -77,7 +78,7 @@ func (h *Harness) Run(t *testing.T, fc *sdk.FaultConfig) error {
 	fakeClient := builder.Build()
 
 	// Wrap with ChaosClient.
-	chaosClient := sdk.NewChaosClient(fakeClient, fc)
+	chaosClient := chaosclient.NewChaosClient(fakeClient, fc)
 
 	// Create a fresh reconciler with the chaos client injected.
 	rec := h.factory(chaosClient)

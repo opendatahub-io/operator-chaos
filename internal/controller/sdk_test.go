@@ -15,6 +15,7 @@ import (
 	"github.com/opendatahub-io/operator-chaos/pkg/observer"
 	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
+	chaosclient "github.com/opendatahub-io/operator-chaos/pkg/sdk/client"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,7 +57,7 @@ func newSDKReconciler(exp *v1alpha1.ChaosExperiment, faults map[sdk.Operation]sd
 		WithStatusSubresource(exp).
 		Build()
 
-	chaosClient := sdk.NewChaosClient(innerClient, sdk.NewFaultConfig(faults))
+	chaosClient := chaosclient.NewChaosClient(innerClient, sdk.NewFaultConfig(faults))
 
 	return &ChaosExperimentReconciler{
 		Client:       chaosClient,
@@ -212,7 +213,7 @@ func TestSDK_WrapReconciler(t *testing.T) {
 	fc := sdk.NewFaultConfig(map[sdk.Operation]sdk.FaultSpec{
 		sdk.OpReconcile: {ErrorRate: 1.0, Error: "reconcile blocked"},
 	})
-	wrapped := sdk.WrapReconciler(inner, sdk.WithFaultConfig(fc))
+	wrapped := chaosclient.WrapReconciler(inner, chaosclient.WithFaultConfig(fc))
 
 	_, err := wrapped.Reconcile(context.Background(), ctrl.Request{})
 	require.Error(t, err)

@@ -3,6 +3,7 @@ module github.com/opendatahub-io/operator-chaos
 go 1.25.0
 
 require (
+	github.com/opendatahub-io/operator-chaos/pkg/sdk/client v0.0.0-20260611152030-3b2d01010fcf
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1

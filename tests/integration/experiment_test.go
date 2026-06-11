@@ -12,6 +12,7 @@ import (
 	"github.com/opendatahub-io/operator-chaos/pkg/orchestrator"
 	"github.com/opendatahub-io/operator-chaos/pkg/safety"
 	"github.com/opendatahub-io/operator-chaos/pkg/sdk"
+	chaosclient "github.com/opendatahub-io/operator-chaos/pkg/sdk/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
@@ -200,7 +201,7 @@ func TestChaosClientIntegration(t *testing.T) {
 	inner := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cm).Build()
 
 	// Test 1: ChaosClient with nil faults (passthrough)
-	cc := sdk.NewChaosClient(inner, nil)
+	cc := chaosclient.NewChaosClient(inner, nil)
 	obj := &corev1.ConfigMap{}
 	err := cc.Get(context.Background(), client.ObjectKey{Name: "test-config", Namespace: "default"}, obj)
 	assert.NoError(t, err)
@@ -208,7 +209,7 @@ func TestChaosClientIntegration(t *testing.T) {
 
 	// Test 2: ChaosClient with inactive faults (still passthrough)
 	faults := &sdk.FaultConfig{Active: false}
-	cc2 := sdk.NewChaosClient(inner, faults)
+	cc2 := chaosclient.NewChaosClient(inner, faults)
 	obj2 := &corev1.ConfigMap{}
 	err = cc2.Get(context.Background(), client.ObjectKey{Name: "test-config", Namespace: "default"}, obj2)
 	assert.NoError(t, err)
@@ -218,7 +219,7 @@ func TestChaosClientIntegration(t *testing.T) {
 	faults.Faults = map[sdk.Operation]sdk.FaultSpec{
 		sdk.OpGet: {ErrorRate: 1.0, Error: "chaos: api server error"},
 	}
-	cc3 := sdk.NewChaosClient(inner, faults)
+	cc3 := chaosclient.NewChaosClient(inner, faults)
 	obj3 := &corev1.ConfigMap{}
 	err = cc3.Get(context.Background(), client.ObjectKey{Name: "test-config", Namespace: "default"}, obj3)
 	assert.Error(t, err)
@@ -238,7 +239,7 @@ func TestWrapReconcilerIntegration(t *testing.T) {
 	})
 
 	// Without faults
-	wrapped := sdk.WrapReconciler(inner)
+	wrapped := chaosclient.WrapReconciler(inner)
 	_, err := wrapped.Reconcile(context.Background(), reconcile.Request{})
 	assert.NoError(t, err)
 	assert.True(t, called)
@@ -251,7 +252,7 @@ func TestWrapReconcilerIntegration(t *testing.T) {
 			sdk.OpReconcile: {ErrorRate: 1.0, Error: "chaos: reconcile failed"},
 		},
 	}
-	wrapped2 := sdk.WrapReconciler(inner, sdk.WithFaultConfig(faults))
+	wrapped2 := chaosclient.WrapReconciler(inner, chaosclient.WithFaultConfig(faults))
 	_, err = wrapped2.Reconcile(context.Background(), reconcile.Request{})
 	assert.Error(t, err)
 	assert.False(t, called, "inner reconciler should not be called when fault fires")
