@@ -23,9 +23,12 @@ flowchart LR
 
 ## Prerequisites
 
-- Go 1.18+
-- controller-runtime v0.23+
+- Go 1.26+
+- controller-runtime v0.24+
 - Access to your operator's reconciler code
+
+!!! warning "Dependency conflicts?"
+    If your operator is pinned to an older controller-runtime version, use [Transport mode](transport.md) instead. The `chaostransport` sub-module has zero external dependencies and works with any Go 1.22+ project regardless of k8s.io version pins.
 
 ## Step-by-Step Walkthrough
 
