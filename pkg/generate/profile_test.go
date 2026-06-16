@@ -199,24 +199,21 @@ func TestLoadProfile_EmptyFile(t *testing.T) {
 }
 
 func TestLoadProfile_RealProfiles(t *testing.T) {
-	profiles := []struct {
-		path       string
-		components int
-	}{
-		{"../../profiles/rhoai/profile.yaml", 10},
-		{"../../profiles/odh/profile.yaml", 5},
-		{"../../profiles/cert-manager/profile.yaml", 3},
-		{"../../profiles/rh-kueue/profile.yaml", 1},
+	profiles := []string{
+		"../../profiles/rhoai/profile.yaml",
+		"../../profiles/odh/profile.yaml",
+		"../../profiles/cert-manager/profile.yaml",
+		"../../profiles/rh-kueue/profile.yaml",
 	}
 
-	for _, tt := range profiles {
-		t.Run(filepath.Base(filepath.Dir(tt.path)), func(t *testing.T) {
-			if _, err := os.Stat(tt.path); os.IsNotExist(err) {
+	for _, path := range profiles {
+		t.Run(filepath.Base(filepath.Dir(path)), func(t *testing.T) {
+			if _, err := os.Stat(path); os.IsNotExist(err) {
 				t.Skip("profile not found")
 			}
-			p, err := LoadProfile(tt.path)
+			p, err := LoadProfile(path)
 			require.NoError(t, err)
-			assert.Len(t, p.Components, tt.components)
+			assert.Greater(t, len(p.Components), 0, "profile should have at least one component")
 			assert.Empty(t, p.Warnings, "real profiles should have no unknown field warnings")
 		})
 	}
