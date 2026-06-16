@@ -54,3 +54,13 @@ components:
     webhook_type: validating
     webhook_resource_kind: ValidatingWebhookConfiguration
     webhook_cert_secret: kserve-webhook-server-cert
+
+  maas:
+    namespace: opendatahub
+    deployment: maas-controller
+    component_name: maas-controller
+    label_selector: control-plane=maas-controller
+    cluster_role_binding: maas-controller-rolebinding
+    webhook_name: maas-validating-webhook-configuration
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration

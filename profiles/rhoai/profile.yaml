@@ -82,3 +82,13 @@ components:
     namespace: redhat-ods-applications
     deployment: llama-stack-k8s-operator-controller-manager
     label_selector: control-plane=controller-manager,app.kubernetes.io/name=llama-stack-k8s-operator
+
+  maas:
+    namespace: redhat-ods-applications
+    deployment: maas-controller
+    component_name: maas-controller
+    label_selector: control-plane=maas-controller
+    cluster_role_binding: maas-controller-rolebinding
+    webhook_name: maas-validating-webhook-configuration
+    webhook_type: validating
+    webhook_resource_kind: ValidatingWebhookConfiguration
