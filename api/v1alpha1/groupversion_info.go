@@ -1,8 +1,8 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 var (
@@ -10,12 +10,16 @@ var (
 	GroupVersion = schema.GroupVersion{Group: "chaos.operatorchaos.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add Go types to the GroupVersionResource scheme.
-	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
+	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
 
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
 
-func init() {
-	SchemeBuilder.Register(&ChaosExperiment{}, &ChaosExperimentList{})
+func addKnownTypes(s *runtime.Scheme) error {
+	s.AddKnownTypes(GroupVersion,
+		&ChaosExperiment{},
+		&ChaosExperimentList{},
+	)
+	return nil
 }
