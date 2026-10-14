@@ -2,17 +2,21 @@ package observer
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 func TestNewReconciliationChecker(t *testing.T) {
@@ -318,6 +322,65 @@ func TestCheckReconciliation_NamespaceFallback(t *testing.T) {
 	assert.True(t, result.AllReconciled, "should find resource using fallback namespace")
 }
 
+func TestCheckReconciliation_MixedNamespaces(t *testing.T) {
+	// Managed resources may live outside the injection namespace: the
+	// checker must use each resource's declared namespace, not the
+	// injection namespace (regression: cross-namespace resources were
+	// never found, polling until timeout on every experiment).
+	deployment := &unstructured.Unstructured{}
+	deployment.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	deployment.SetName("operator-controller-manager")
+	deployment.SetNamespace("operator-ns")
+
+	route := &unstructured.Unstructured{}
+	route.SetGroupVersionKind(schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"})
+	route.SetName("model-catalog-https")
+	route.SetNamespace("registries-ns")
+
+	configMap := &unstructured.Unstructured{}
+	configMap.SetGroupVersionKind(schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"})
+	configMap.SetName("operator-config")
+	configMap.SetNamespace("operator-ns")
+
+	scheme := runtime.NewScheme()
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).
+		WithRuntimeObjects(deployment, route, configMap).Build()
+	rc := NewReconciliationChecker(fakeClient)
+
+	component := &model.ComponentModel{
+		Name: "test-component",
+		ManagedResources: []model.ManagedResource{
+			{
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       deployment.GetName(),
+				Namespace:  "operator-ns",
+			},
+			{
+				APIVersion: "route.openshift.io/v1",
+				Kind:       "Route",
+				Name:       route.GetName(),
+				Namespace:  "registries-ns",
+			},
+			{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Name:       configMap.GetName(),
+				Namespace:  "", // omitted -> fall back to injection namespace
+			},
+		},
+	}
+
+	result, err := rc.CheckReconciliation(context.Background(), component, "operator-ns", 100*time.Millisecond)
+	require.NoError(t, err)
+	require.True(t, result.AllReconciled, "cross-namespace resources must resolve: %+v", result.Resources)
+	assert.Equal(t, 1, result.ReconcileCycles)
+	require.Len(t, result.Resources, 3)
+	assert.Equal(t, "operator-ns", result.Resources[0].Namespace)
+	assert.Equal(t, "registries-ns", result.Resources[1].Namespace)
+	assert.Equal(t, "operator-ns", result.Resources[2].Namespace)
+}
+
 func TestCheckReconciliation_ContextTimeout(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
@@ -347,4 +410,40 @@ func TestCheckReconciliation_ContextTimeout(t *testing.T) {
 	require.Error(t, err)
 	assert.False(t, result.AllReconciled)
 	assert.Less(t, elapsed, 5*time.Second, "should exit quickly due to context timeout")
+}
+
+// TestCheckReconciliationOnce_NonNotFoundErrorsPropagate verifies that only
+// NotFound is an expected lookup result: other client errors (e.g. Forbidden
+// from a missing RBAC rule) must propagate to the caller instead of being
+// recorded as an unreconciled resource, which would mask an operational
+// failure as a Degraded verdict.
+func TestCheckReconciliationOnce_NonNotFoundErrorsPropagate(t *testing.T) {
+	deployment := &unstructured.Unstructured{}
+	deployment.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	deployment.SetName("operator-controller-manager")
+	deployment.SetNamespace("operator-ns")
+
+	fakeClient := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).
+		WithRuntimeObjects(deployment).
+		WithInterceptorFuncs(interceptor.Funcs{
+			Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+				if obj.GetObjectKind().GroupVersionKind().Kind == "Route" {
+					return apierrors.NewForbidden(schema.GroupResource{Group: "route.openshift.io", Resource: "routes"}, key.Name, errors.New("missing RBAC"))
+				}
+				return c.Get(ctx, key, obj, opts...)
+			},
+		}).
+		Build()
+	checker := NewReconciliationChecker(fakeClient)
+	component := &model.ComponentModel{
+		Name: "test-component",
+		ManagedResources: []model.ManagedResource{
+			{APIVersion: "route.openshift.io/v1", Kind: "Route", Name: "model-catalog-https", Namespace: "registries-ns"},
+		},
+	}
+
+	result, err := checker.CheckReconciliationOnce(context.Background(), component, "operator-ns")
+	require.Error(t, err, "a Forbidden lookup error must propagate, not become a resource result")
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "forbidden")
 }

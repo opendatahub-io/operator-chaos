@@ -85,7 +85,7 @@ type SteadyStateSpec struct {
 }
 
 // CheckType represents the type of a steady-state check.
-// +kubebuilder:validation:Enum=conditionTrue;resourceExists
+// +kubebuilder:validation:Enum=conditionTrue;resourceExists;fieldEquals
 type CheckType string
 
 const (
@@ -116,6 +116,13 @@ type InjectionSpec struct {
 	// +kubebuilder:validation:Maximum=100
 	// +kubebuilder:default=1
 	Count       int32             `json:"count,omitempty"`
+	// TTL is how long the injected fault stays active. When set, the fault is
+	// reverted once the TTL elapses and the recovery window (recoveryTimeout)
+	// is measured from the fault removal, so the experiment observes a full
+	// recovery period with the fault gone. When unset, drivers differ: the
+	// CLI keeps the legacy timing (post-check after recoveryTimeout measured
+	// from injection, cleanup deferred to the end of the run), while the
+	// controller always reverts before the post-check.
 	TTL         metav1.Duration   `json:"ttl,omitempty"`
 	DangerLevel DangerLevel       `json:"dangerLevel,omitempty"`
 }
@@ -308,8 +315,24 @@ type ChaosExperimentStatus struct {
 	StartTime          *metav1.Time       `json:"startTime,omitempty"`
 	EndTime            *metav1.Time       `json:"endTime,omitempty"`
 	InjectionStartedAt *metav1.Time       `json:"injectionStartedAt,omitempty"`
-	SteadyStatePre     *CheckResult       `json:"steadyStatePre,omitempty"`
-	SteadyStatePost    *CheckResult       `json:"steadyStatePost,omitempty"`
+	// FaultRevertedAt records when the injected fault was actually removed.
+	// The recovery window is measured from this time, not from
+	// InjectionStartedAt, so persistent faults (e.g. NetworkPartition) get a
+	// full recoveryTimeout of observation after the fault is gone.
+	// +optional
+	FaultRevertedAt *metav1.Time `json:"faultRevertedAt,omitempty"`
+	// PostCheckStartedAt records when the post-check's reconciliation
+	// polling began. The controller polls one cycle per reconcile until all
+	// managed resources reconcile or PostCheckStartedAt + recoveryTimeout
+	// passes; re-entries resume from this time instead of restarting.
+	// +optional
+	PostCheckStartedAt *metav1.Time       `json:"postCheckStartedAt,omitempty"`
+	// PostCheckCycles is the number of reconciliation poll cycles run so far
+	// in the post-check, accumulated across requeues.
+	// +optional
+	PostCheckCycles int                `json:"postCheckCycles,omitempty"`
+	SteadyStatePre  *CheckResult       `json:"steadyStatePre,omitempty"`
+	SteadyStatePost *CheckResult       `json:"steadyStatePost,omitempty"`
 	// +listType=atomic
 	InjectionLog       []InjectionEvent   `json:"injectionLog,omitempty"`
 	EvaluationResult   *EvaluationSummary `json:"evaluationResult,omitempty"`
