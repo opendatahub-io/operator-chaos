@@ -273,6 +273,15 @@ func runSingleExperiment(parentCtx context.Context, file string, deps *orchestra
 		return r
 	}
 
+	// Reject upfront when the experiment cannot finish inside the
+	// per-experiment timeout, instead of aborting mid-run.
+	if err := validateRunDuration(exp, timeout); err != nil {
+		r.verdict = fmt.Sprintf("SKIP  %s: %v", exp.Name, err)
+		r.status = "skip"
+		r.err = err
+		return r
+	}
+
 	// In dry-run mode, just validate
 	if dryRun {
 		r.verdict = fmt.Sprintf("VALID %s (%s)", exp.Name, exp.Spec.Injection.Type)
@@ -485,4 +494,3 @@ func collectExperimentFiles(dir string, recursive bool) ([]string, error) {
 
 	return files, nil
 }
-

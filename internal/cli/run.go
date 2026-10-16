@@ -69,6 +69,14 @@ func newRunCommand() *cobra.Command {
 				return fmt.Errorf("%d validation errors", len(errs))
 			}
 
+			// A TTL-bearing experiment runs for TTL (fault active) plus
+			// recoveryTimeout (recovery window measured from the revert).
+			// Reject upfront when that cannot fit in the run timeout, instead
+			// of aborting mid-window and losing the verdict.
+			if err := validateRunDuration(exp, timeout); err != nil {
+				return err
+			}
+
 			// Override namespace only when explicitly set by the user.
 			// The persistent --namespace flag has a default value, so
 			// checking for non-empty would always override per-check
@@ -166,4 +174,23 @@ func overrideExperimentNamespace(exp *v1alpha1.ChaosExperiment, namespace string
 		}
 		exp.Spec.BlastRadius.AllowedNamespaces = updated
 	}
+}
+
+// validateRunDuration rejects experiments whose worst-case duration cannot
+// fit in the run timeout. A TTL-bearing experiment runs for its TTL (fault
+// active), then the recoveryTimeout recovery window measured from the fault
+// removal, and the post-check's reconciliation poll gets up to another full
+// recoveryTimeout on the same context — that poll running to its deadline is
+// how Degraded verdicts are produced, so it must be reserved, not just the
+// happy path. An exact fit is also rejected: validation, locking, pre-check,
+// and injection all run inside the same timeout context. Failing upfront
+// beats aborting mid-run and losing the verdict.
+func validateRunDuration(exp *v1alpha1.ChaosExperiment, timeout time.Duration) error {
+	ttl := exp.Spec.Injection.TTL.Duration
+	recoveryTimeout := exp.ResolvedRecoveryTimeout()
+	if runDuration := ttl + recoveryTimeout*2; runDuration >= timeout {
+		return fmt.Errorf("experiment duration %s (TTL %s + 2x recoveryTimeout %s for the recovery window and post-check) exceeds --timeout %s; raise --timeout or shorten the experiment",
+			runDuration, ttl, recoveryTimeout, timeout)
+	}
+	return nil
 }

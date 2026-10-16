@@ -318,6 +318,65 @@ func TestCheckReconciliation_NamespaceFallback(t *testing.T) {
 	assert.True(t, result.AllReconciled, "should find resource using fallback namespace")
 }
 
+func TestCheckReconciliation_MixedNamespaces(t *testing.T) {
+	// Managed resources may live outside the injection namespace: the
+	// checker must use each resource's declared namespace, not the
+	// injection namespace (regression: cross-namespace resources were
+	// never found, polling until timeout on every experiment).
+	deployment := &unstructured.Unstructured{}
+	deployment.SetGroupVersionKind(schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+	deployment.SetName("operator-controller-manager")
+	deployment.SetNamespace("operator-ns")
+
+	route := &unstructured.Unstructured{}
+	route.SetGroupVersionKind(schema.GroupVersionKind{Group: "route.openshift.io", Version: "v1", Kind: "Route"})
+	route.SetName("model-catalog-https")
+	route.SetNamespace("registries-ns")
+
+	configMap := &unstructured.Unstructured{}
+	configMap.SetGroupVersionKind(schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"})
+	configMap.SetName("operator-config")
+	configMap.SetNamespace("operator-ns")
+
+	scheme := runtime.NewScheme()
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).
+		WithRuntimeObjects(deployment, route, configMap).Build()
+	rc := NewReconciliationChecker(fakeClient)
+
+	component := &model.ComponentModel{
+		Name: "test-component",
+		ManagedResources: []model.ManagedResource{
+			{
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       deployment.GetName(),
+				Namespace:  "operator-ns",
+			},
+			{
+				APIVersion: "route.openshift.io/v1",
+				Kind:       "Route",
+				Name:       route.GetName(),
+				Namespace:  "registries-ns",
+			},
+			{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Name:       configMap.GetName(),
+				Namespace:  "", // omitted -> fall back to injection namespace
+			},
+		},
+	}
+
+	result, err := rc.CheckReconciliation(context.Background(), component, "operator-ns", 100*time.Millisecond)
+	require.NoError(t, err)
+	require.True(t, result.AllReconciled, "cross-namespace resources must resolve: %+v", result.Resources)
+	assert.Equal(t, 1, result.ReconcileCycles)
+	require.Len(t, result.Resources, 3)
+	assert.Equal(t, "operator-ns", result.Resources[0].Namespace)
+	assert.Equal(t, "registries-ns", result.Resources[1].Namespace)
+	assert.Equal(t, "operator-ns", result.Resources[2].Namespace)
+}
+
 func TestCheckReconciliation_ContextTimeout(t *testing.T) {
 	scheme := runtime.NewScheme()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()

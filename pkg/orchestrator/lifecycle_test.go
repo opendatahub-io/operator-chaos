@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -74,7 +75,7 @@ func (m *mockInjector) Inject(ctx context.Context, spec v1alpha1.InjectionSpec, 
 	return cleanup, events, nil
 }
 
-func newTestOrchestrator(obs *mockObserver, inj *mockInjector) *Orchestrator {
+func newTestOrchestrator(obs observer.Observer, inj *mockInjector) *Orchestrator {
 	registry := injection.NewRegistry()
 	registry.Register(v1alpha1.PodKill, inj)
 
@@ -369,8 +370,8 @@ func TestOrchestratorCleanupUsesBackgroundContext(t *testing.T) {
 	// return a cleanup function that records whether its context is valid.
 	registry := injection.NewRegistry()
 	customInj := &contextCancellingMockInjector{
-		cancelParent: cancel,
-		cleanupDone:  cleanupDone,
+		cancelParent:  cancel,
+		cleanupDone:   cleanupDone,
 		cleanupCtxErr: &cleanupCtxErr,
 	}
 	registry.Register(v1alpha1.PodKill, customInj)
@@ -1271,4 +1272,249 @@ func TestValidateExperimentErrorChainBlastRadius(t *testing.T) {
 	// Verify the wrapped error is accessible
 	unwrapped := err
 	assert.NotNil(t, unwrapped)
+}
+
+// timelineObserver records the wall time of every steady-state check so tests
+// can assert ordering between fault revert and post-check. The first call is
+// the pre-check; the last is the post-check.
+type timelineObserver struct {
+	calls []time.Time
+}
+
+func (o *timelineObserver) CheckSteadyState(_ context.Context, checks []v1alpha1.SteadyStateCheck, _ string) (*v1alpha1.CheckResult, error) {
+	o.calls = append(o.calls, time.Now())
+	return &v1alpha1.CheckResult{Passed: true, ChecksRun: int32(len(checks)), ChecksPassed: int32(len(checks)), Timestamp: metav1.Now()}, nil
+}
+
+func newTimelineExperiment(ttl, recovery time.Duration) *v1alpha1.ChaosExperiment {
+	exp := newTestExperiment()
+	if ttl > 0 {
+		exp.Spec.Injection.TTL = metav1.Duration{Duration: ttl}
+	}
+	exp.Spec.Hypothesis.RecoveryTimeout = metav1.Duration{Duration: recovery}
+	exp.Spec.SteadyState.Checks = []v1alpha1.SteadyStateCheck{
+		{Type: v1alpha1.CheckConditionTrue, APIVersion: "apps/v1", Kind: "Deployment", Name: "test-deploy", Namespace: "test-ns", ConditionType: "Available"},
+	}
+	return exp
+}
+
+// TestRunTTLBearingFaultRevertedBeforePostCheck verifies that a TTL-bearing
+// fault is reverted when the TTL elapses and the post-check only runs after a
+// full recovery timeout measured from the revert, not from injection.
+func TestRunTTLBearingFaultRevertedBeforePostCheck(t *testing.T) {
+	obs := &timelineObserver{}
+	inj := &mockInjector{}
+	var cleanedAt time.Time
+	inj.cleanupFunc = func(_ context.Context) error {
+		cleanedAt = time.Now()
+		return nil
+	}
+
+	orch := newTestOrchestrator(obs, inj)
+	exp := newTimelineExperiment(40*time.Millisecond, 120*time.Millisecond)
+	start := time.Now()
+
+	_, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+
+	require.Len(t, obs.calls, 2, "pre-check and post-check must both run")
+	postCheckAt := obs.calls[1]
+	require.False(t, cleanedAt.IsZero(), "fault must be reverted during the run")
+	assert.True(t, cleanedAt.Before(postCheckAt), "fault revert must happen before the post-check")
+	assert.GreaterOrEqual(t, postCheckAt.Sub(cleanedAt).Milliseconds(), int64(115),
+		"post-check must run a full recovery timeout after the revert")
+	assert.GreaterOrEqual(t, time.Since(start).Milliseconds(), int64(155),
+		"total run must cover TTL plus recovery window")
+}
+
+// TestRunNoTTLKeepsDeferredCleanup verifies that experiments without a TTL
+// keep the legacy timing: observe from injection, cleanup deferred to the end.
+func TestRunNoTTLKeepsDeferredCleanup(t *testing.T) {
+	obs := &timelineObserver{}
+	inj := &mockInjector{}
+	var cleanedAt time.Time
+	inj.cleanupFunc = func(_ context.Context) error {
+		cleanedAt = time.Now()
+		return nil
+	}
+
+	orch := newTestOrchestrator(obs, inj)
+	exp := newTimelineExperiment(0, 100*time.Millisecond)
+	start := time.Now()
+
+	_, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+
+	require.Len(t, obs.calls, 2)
+	postCheckAt := obs.calls[1]
+	require.False(t, cleanedAt.IsZero())
+	assert.True(t, cleanedAt.After(postCheckAt), "cleanup stays deferred to the end when no TTL is set")
+	assert.GreaterOrEqual(t, postCheckAt.Sub(start).Milliseconds(), int64(95),
+		"post-check must still wait the recovery timeout from injection")
+	assert.Less(t, postCheckAt.Sub(start).Milliseconds(), int64(400),
+		"no second recovery window for TTL-less experiments")
+}
+
+// TestRunTTLRevertRetriedOnError verifies that a failed mid-run revert is
+// retried and the recovery window is measured from the successful revert.
+func TestRunTTLRevertRetriedOnError(t *testing.T) {
+	obs := &timelineObserver{}
+	inj := &mockInjector{}
+	attempts := 0
+	var okAt time.Time
+	inj.cleanupFunc = func(_ context.Context) error {
+		attempts++
+		if attempts == 1 {
+			return fmt.Errorf("transient revert failure")
+		}
+		okAt = time.Now()
+		return nil
+	}
+
+	orch := newTestOrchestrator(obs, inj)
+	orch.revertRetryInterval = time.Millisecond
+	exp := newTimelineExperiment(20*time.Millisecond, 60*time.Millisecond)
+
+	_, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+
+	assert.Equal(t, 2, attempts, "failed revert must be retried")
+	require.Len(t, obs.calls, 2)
+	assert.GreaterOrEqual(t, obs.calls[1].Sub(okAt).Milliseconds(), int64(55),
+		"recovery window must be measured from the successful revert")
+}
+
+// durationRecordingLock records the lease duration passed to Acquire.
+type durationRecordingLock struct {
+	safety.ExperimentLock
+	acquiredWith time.Duration
+}
+
+func (d *durationRecordingLock) Acquire(_ context.Context, _ string, _ string, leaseDuration time.Duration) error {
+	d.acquiredWith = leaseDuration
+	return nil
+}
+
+// TestRunLeaseDurationIncludesTTL verifies the distributed lock lease covers
+// the whole run: TTL plus twice the recovery timeout for TTL-bearing faults,
+// instead of just twice the recovery timeout, which expires mid-run when the
+// TTL outlasts it.
+func TestRunLeaseDurationIncludesTTL(t *testing.T) {
+	obs := &timelineObserver{}
+	inj := &mockInjector{}
+	lock := &durationRecordingLock{ExperimentLock: safety.NewLocalExperimentLock()}
+
+	registry := injection.NewRegistry()
+	registry.Register(v1alpha1.PodKill, inj)
+	orch := New(OrchestratorConfig{
+		Registry:  registry,
+		Observer:  obs,
+		Evaluator: evaluator.New(10),
+		Lock:      lock,
+		Verbose:   false,
+		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	})
+
+	exp := newTimelineExperiment(20*time.Millisecond, 60*time.Millisecond)
+	_, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, 20*time.Millisecond+2*60*time.Millisecond, lock.acquiredWith,
+		"lease must cover TTL plus the recovery-time allowance")
+
+	// Without a TTL the lease keeps the legacy duration.
+	lock2 := &durationRecordingLock{ExperimentLock: safety.NewLocalExperimentLock()}
+	orch2 := New(OrchestratorConfig{
+		Registry:  registry,
+		Observer:  &timelineObserver{},
+		Evaluator: evaluator.New(10),
+		Lock:      lock2,
+		Verbose:   false,
+		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	})
+	exp2 := newTimelineExperiment(0, 60*time.Millisecond)
+	_, err = orch2.Run(context.Background(), exp2)
+	require.NoError(t, err)
+	assert.Equal(t, 2*60*time.Millisecond, lock2.acquiredWith)
+}
+
+// renewRecordingLock records Renew calls and can fail them.
+type renewRecordingLock struct {
+	safety.ExperimentLock
+	renewCount   int
+	renewErr     error
+	acquireErr   error
+	acquiredWith time.Duration
+}
+
+func (d *renewRecordingLock) Acquire(_ context.Context, _ string, _ string, leaseDuration time.Duration) error {
+	if d.acquireErr != nil {
+		return d.acquireErr
+	}
+	d.acquiredWith = leaseDuration
+	return nil
+}
+
+func (d *renewRecordingLock) Renew(_ context.Context, _ string, _ string) error {
+	d.renewCount++
+	return d.renewErr
+}
+
+func newRenewTestOrchestrator(lock *renewRecordingLock, inj *mockInjector) *Orchestrator {
+	registry := injection.NewRegistry()
+	registry.Register(v1alpha1.PodKill, inj)
+	return New(OrchestratorConfig{
+		Registry:  registry,
+		Observer:  &timelineObserver{},
+		Evaluator: evaluator.New(10),
+		Lock:      lock,
+		Verbose:   false,
+		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	})
+}
+
+// TestRunRenewsLeaseDuringCleanupRetries verifies the lease is renewed while
+// fault cleanup keeps failing: the retry loop can outlast the fixed lease
+// duration, and without renewal another experiment could lock the same
+// operator while this fault is still active.
+func TestRunRenewsLeaseDuringCleanupRetries(t *testing.T) {
+	inj := &mockInjector{}
+	attempts := 0
+	inj.cleanupFunc = func(_ context.Context) error {
+		attempts++
+		if attempts <= 2 {
+			return fmt.Errorf("transient revert failure")
+		}
+		return nil
+	}
+	lock := &renewRecordingLock{ExperimentLock: safety.NewLocalExperimentLock()}
+	orch := newRenewTestOrchestrator(lock, inj)
+	orch.revertRetryInterval = time.Millisecond
+
+	exp := newTimelineExperiment(20*time.Millisecond, 60*time.Millisecond)
+	_, err := orch.Run(context.Background(), exp)
+	require.NoError(t, err)
+	assert.Equal(t, 3, attempts)
+	assert.Equal(t, 3, lock.renewCount,
+		"lease must be renewed on each cleanup retry and once more after the successful revert, so the recovery window and post-check fit in a fresh lease")
+}
+
+// TestRunAbortsWhenLeaseLostDuringCleanupRetry verifies that a failed lease
+// renewal mid-retry aborts the run instead of continuing to hold a lost lock.
+func TestRunAbortsWhenLeaseLostDuringCleanupRetry(t *testing.T) {
+	inj := &mockInjector{}
+	cleanupCalled := false
+	inj.cleanupFunc = func(_ context.Context) error {
+		cleanupCalled = true
+		return fmt.Errorf("transient revert failure")
+	}
+	lock := &renewRecordingLock{ExperimentLock: safety.NewLocalExperimentLock(), renewErr: errors.New("lease expired")}
+	orch := newRenewTestOrchestrator(lock, inj)
+	orch.revertRetryInterval = time.Millisecond
+
+	exp := newTimelineExperiment(20*time.Millisecond, 60*time.Millisecond)
+	result, err := orch.Run(context.Background(), exp)
+	require.Error(t, err)
+	assert.Equal(t, v1alpha1.PhaseAborted, result.Phase)
+	assert.True(t, cleanupCalled)
+	assert.Contains(t, err.Error(), "lock renewal")
 }

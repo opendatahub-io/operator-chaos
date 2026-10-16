@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -44,6 +45,7 @@ type mockOrchestrator struct {
 	preCheckCalled  bool
 	injectCalled    bool
 	revertCalled    bool
+	revertCallCount int
 	postCheckCalled bool
 	evaluateCalled  bool
 }
@@ -65,6 +67,7 @@ func (m *mockOrchestrator) InjectFault(_ context.Context, _ *v1alpha1.ChaosExper
 
 func (m *mockOrchestrator) RevertFault(_ context.Context, _ *v1alpha1.ChaosExperiment) error {
 	m.revertCalled = true
+	m.revertCallCount++
 	return m.revertErr
 }
 
@@ -378,7 +381,11 @@ func TestReconcileObserveRequeuesWithRemainingWhenLessThanMax(t *testing.T) {
 	assert.Equal(t, 10*time.Second, result.RequeueAfter)
 }
 
-func TestReconcileObserveTransitionsWhenTimedOut(t *testing.T) {
+// TestReconcileObserveNoTTLRevertsAtRecoveryTimeoutAndWaitsWindow verifies that
+// with no TTL the fault is reverted once the recovery timeout elapses, but the
+// post-check transition only happens after a full recovery timeout measured
+// from the revert, not from injection.
+func TestReconcileObserveNoTTLRevertsAtRecoveryTimeoutAndWaitsWindow(t *testing.T) {
 	scheme := newTestScheme()
 	exp := newTestExperiment()
 	exp.Status.Phase = v1alpha1.PhaseObserving
@@ -397,12 +404,251 @@ func TestReconcileObserveTransitionsWhenTimedOut(t *testing.T) {
 
 	result, err := r.Reconcile(ctx, reconcileRequest())
 	require.NoError(t, err)
+
+	// Fault reverted, but the phase must stay Observing until a full
+	// recovery window has elapsed since the revert.
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(61*time.Second)), "revert time should be the reconcile time")
+	// Requeue waits out the remaining window (capped at maxObserveRequeue).
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake one second past the full window since the revert.
+	clk = clock.NewFakeClock(updated.Status.FaultRevertedAt.Add(61 * time.Second))
+	r.Clock = clk
+
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	// Revert must not run a second time.
+	assert.Equal(t, 1, orch.revertCallCount)
+}
+
+// TestReconcileObserveTTLRevertsAtTTLAndWaitsWindowFromRevert verifies that a
+// TTL-bearing fault is reverted at the first wake past the TTL and that the
+// recovery window runs from the revert time.
+func TestReconcileObserveTTLRevertsAtTTLAndWaitsWindowFromRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 35s elapsed, past the 30s TTL but before the 60s recovery timeout.
+	clk := clock.NewFakeClock(startTime.Add(35 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(35*time.Second)), "revert time should be the reconcile time")
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake one second past revert+recoveryTimeout (35s + 61s = 96s).
+	clk = clock.NewFakeClock(startTime.Add(96 * time.Second))
+	r.Clock = clk
+
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 1, orch.revertCallCount)
+}
+
+// TestReconcileObserveTTLExceedsRecoveryTimeout verifies that the TTL is
+// authoritative: when the TTL is later than the recovery timeout, the fault
+// stays active for the full TTL (matching the CLI orchestrator and the
+// InjectionSpec.TTL documentation) and the recovery window still runs from
+// the revert.
+func TestReconcileObserveTTLExceedsRecoveryTimeout(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 120 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 61s elapsed: past the 60s recovery timeout, before the 120s TTL.
+	// The fault must NOT be reverted yet — the TTL is authoritative.
+	clk := clock.NewFakeClock(startTime.Add(61 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.False(t, orch.revertCalled, "fault must stay active until the TTL elapses")
+	assert.Nil(t, updated.Status.FaultRevertedAt)
+	// Requeue aims at the TTL deadline: 59s remain, capped at maxObserveRequeue.
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake past the TTL: revert, then wait out the window from the revert.
+	clk = clock.NewFakeClock(startTime.Add(121 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+
+	// Wake past revert + recovery timeout.
+	clk = clock.NewFakeClock(updated.Status.FaultRevertedAt.Add(61 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 1, orch.revertCallCount)
+}
+
+// TestReconcileObserveRevertErrorRetried verifies that a failed revert is
+// retried on a later reconcile instead of aborting, and FaultRevertedAt is
+// only set once the revert succeeds.
+func TestReconcileObserveRevertErrorRetried(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+
+	orch := &mockOrchestrator{revertErr: errors.New("revert failed")}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(startTime.Add(35 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	// No abort, no FaultRevertedAt, and the retry is spaced out so a
+	// persistently failing revert does not hammer the API server.
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.Nil(t, updated.Status.FaultRevertedAt)
+	assert.Equal(t, revertRetryInterval, result.RequeueAfter)
+
+	// Next reconcile succeeds.
+	orch.revertErr = nil
+	clk = clock.NewFakeClock(startTime.Add(36 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(36*time.Second)), "revert time should be the reconcile time")
+	assert.Equal(t, 2, orch.revertCallCount)
+}
+
+// TestReconcileObserveReentryAfterRevertSkipsRevert verifies crash-recovery:
+// when FaultRevertedAt is already recorded, re-entry must not revert again and
+// the window is measured from the recorded time.
+func TestReconcileObserveReentryAfterRevertSkipsRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+	revertedAt := metav1.NewTime(startTime.Add(35 * time.Second))
+	exp.Status.FaultRevertedAt = &revertedAt
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 96s: 61s past the recorded revert time.
+	clk := clock.NewFakeClock(startTime.Add(96 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
 	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
 
 	updated, err := getExperiment(ctx, r)
 	require.NoError(t, err)
 	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
-	assert.True(t, orch.revertCalled)
+	assert.False(t, orch.revertCalled, "re-entry after a recorded revert must not revert again")
+}
+
+// TestReconcileObserveReentryMidWindowRequeuesWithoutRevert verifies that a
+// re-entry while the recovery window is still running requeues based on the
+// remaining window since FaultRevertedAt and does not revert again.
+func TestReconcileObserveReentryMidWindowRequeuesWithoutRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+	revertedAt := metav1.NewTime(startTime.Add(35 * time.Second))
+	exp.Status.FaultRevertedAt = &revertedAt
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 60s: 25s into the 60s recovery window since the revert.
+	clk := clock.NewFakeClock(startTime.Add(60 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.False(t, orch.revertCalled)
+	// 35s of window remain, capped at maxObserveRequeue.
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
 }
 
 func TestReconcilePostCheckEvaluatesInline(t *testing.T) {
@@ -779,38 +1025,6 @@ func TestReconcileLeaseRenewalHolderMismatchAborts(t *testing.T) {
 	updated, err := getExperiment(ctx, r)
 	require.NoError(t, err)
 	assert.Equal(t, v1alpha1.PhaseAborted, updated.Status.Phase)
-}
-
-func TestReconcileObserveRevertFailureAborts(t *testing.T) {
-	scheme := newTestScheme()
-	exp := newTestExperiment()
-	exp.Status.Phase = v1alpha1.PhaseObserving
-	exp.Status.ObservedGeneration = 1
-	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	injTime := metav1.NewTime(startTime)
-	exp.Status.InjectionStartedAt = &injTime
-
-	orch := &mockOrchestrator{
-		revertErr: fmt.Errorf("revert network error"),
-	}
-	lock := &mockLock{}
-	clk := clock.NewFakeClock(startTime.Add(61 * time.Second))
-
-	r := newReconciler(scheme, exp, orch, lock, clk)
-	ctx := context.Background()
-
-	// RevertFault failure in reconcileObserve should abort (not retry indefinitely).
-	result, err := r.Reconcile(ctx, reconcileRequest())
-	require.NoError(t, err)
-	assert.Equal(t, ctrl.Result{RequeueAfter: 100 * time.Millisecond}, result)
-
-	updated, err := getExperiment(ctx, r)
-	require.NoError(t, err)
-	assert.Equal(t, v1alpha1.PhaseAborted, updated.Status.Phase)
-	assert.Contains(t, updated.Status.Message, "post-timeout revert failed")
-	// abort() from Observing calls RevertFault again, recording cleanup error.
-	assert.Contains(t, updated.Status.CleanupError, "abort revert failed")
-	assert.True(t, lock.releaseCalled)
 }
 
 func TestReconcileEvaluateWithDeviations(t *testing.T) {
@@ -1225,7 +1439,20 @@ func TestReconcileFullLifecycle(t *testing.T) {
 	// Advance clock past recovery timeout
 	clk.Advance(61 * time.Second)
 
-	// Phase 5: Observing -> SteadyStatePost
+	// Phase 5: Observing — fault reverted, recovery window now runs from the
+	// revert time; the phase stays Observing until the window elapses.
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+
+	// Advance clock past the full recovery window since the revert
+	clk.Advance(61 * time.Second)
+
+	// Phase 5b: Observing -> SteadyStatePost
 	result, err = r.Reconcile(ctx, reconcileRequest())
 	require.NoError(t, err)
 	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
@@ -1835,8 +2062,8 @@ func TestReconcileAbortedBackfillsEmptyMessageAndEndTime(t *testing.T) {
 	exp := newTestExperiment()
 	exp.Status.Phase = v1alpha1.PhaseAborted
 	exp.Status.ObservedGeneration = 1
-	exp.Status.Message = ""    // empty — should be backfilled
-	exp.Status.EndTime = nil   // nil — should be backfilled
+	exp.Status.Message = ""  // empty — should be backfilled
+	exp.Status.EndTime = nil // nil — should be backfilled
 	exp.Finalizers = []string{cleanupFinalizer}
 
 	orch := &mockOrchestrator{}

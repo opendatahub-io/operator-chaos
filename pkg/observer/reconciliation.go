@@ -75,9 +75,12 @@ func (r *ReconciliationChecker) CheckReconciliation(
 		result.Resources = nil
 
 		for _, mr := range component.ManagedResources {
-			ns := namespace
+			// Managed resources may live outside the injection namespace,
+			// so prefer the namespace declared in the knowledge model and
+			// fall back to the injection namespace when omitted.
+			ns := mr.Namespace
 			if ns == "" {
-				ns = mr.Namespace
+				ns = namespace
 			}
 
 			obj := &unstructured.Unstructured{}

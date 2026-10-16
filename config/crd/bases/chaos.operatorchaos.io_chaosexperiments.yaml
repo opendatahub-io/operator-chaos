@@ -116,6 +116,12 @@ spec:
                       type: string
                     type: object
                   ttl:
+                    description: |-
+                      TTL is how long the injected fault stays active. When set, the fault is
+                      reverted once the TTL elapses and the recovery window (recoveryTimeout)
+                      is measured from the fault removal, so the experiment observes a full
+                      recovery period with the fault gone. When unset, the fault is reverted
+                      at recoveryTimeout and the window is still measured from the revert.
                     type: string
                   type:
                     description: InjectionType represents the type of fault injection.
@@ -133,6 +139,13 @@ spec:
                     - WebhookLatency
                     - NamespaceDeletion
                     - LabelStomping
+                    - SecretDeletion
+                    - DeploymentScaleZero
+                    - LeaderElectionDisrupt
+                    - CrashLoopInject
+                    - ImageCorrupt
+                    - ResourceDeletion
+                    - PDBBlock
                     type: string
                 required:
                 - type
@@ -149,6 +162,10 @@ spec:
                         apiVersion:
                           type: string
                         conditionType:
+                          type: string
+                        expectedValue:
+                          type: string
+                        fieldPath:
                           type: string
                         kind:
                           type: string
@@ -297,6 +314,14 @@ spec:
                 required:
                 - verdict
                 type: object
+              faultRevertedAt:
+                description: |-
+                  FaultRevertedAt records when the injected fault was actually removed.
+                  The recovery window is measured from this time, not from
+                  InjectionStartedAt, so persistent faults (e.g. NetworkPartition) get a
+                  full recoveryTimeout of observation after the fault is gone.
+                format: date-time
+                type: string
               injectionLog:
                 items:
                   properties:
@@ -327,6 +352,13 @@ spec:
                       - WebhookLatency
                       - NamespaceDeletion
                       - LabelStomping
+                      - SecretDeletion
+                      - DeploymentScaleZero
+                      - LeaderElectionDisrupt
+                      - CrashLoopInject
+                      - ImageCorrupt
+                      - ResourceDeletion
+                      - PDBBlock
                       type: string
                   required:
                   - action
@@ -383,6 +415,10 @@ spec:
                             apiVersion:
                               type: string
                             conditionType:
+                              type: string
+                            expectedValue:
+                              type: string
+                            fieldPath:
                               type: string
                             kind:
                               type: string
@@ -443,6 +479,10 @@ spec:
                             apiVersion:
                               type: string
                             conditionType:
+                              type: string
+                            expectedValue:
+                              type: string
+                            fieldPath:
                               type: string
                             kind:
                               type: string

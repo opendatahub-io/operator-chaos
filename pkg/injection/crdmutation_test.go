@@ -2,6 +2,7 @@ package injection
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
@@ -13,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 func TestCRDMutationValidate(t *testing.T) {
@@ -1145,4 +1147,135 @@ func TestCRDMutationRouteValidation(t *testing.T) {
 // client_key is a helper to create a NamespacedName for client.Get.
 func client_key(name, namespace string) client.ObjectKey {
 	return client.ObjectKey{Name: name, Namespace: namespace}
+}
+
+// TestCRDMutationCleanupScalarPathDirectRestore verifies that cleanup of a
+// scalar-path mutation restores the original value in a single patch without
+// first nulling the path. The null-then-restore two-step is rejected by the
+// API server for required fields (e.g. Route spec.to.name: "Required value"),
+// which left TTL-bearing experiments retrying cleanup until timeout.
+func TestCRDMutationCleanupScalarPathDirectRestore(t *testing.T) {
+	scheme := runtime.NewScheme()
+	gvk := schema.GroupVersionKind{Group: "route.example.com", Version: "v1", Kind: "Route"}
+	scheme.AddKnownTypeWithName(gvk, &unstructured.Unstructured{})
+	scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "route.example.com", Version: "v1", Kind: "RouteList"}, &unstructured.UnstructuredList{})
+
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gvk)
+	obj.SetName("my-route")
+	obj.SetNamespace("test-ns")
+	require.NoError(t, unstructured.SetNestedField(obj.Object, "original-service", "spec", "to", "name"))
+
+	var recorded []string
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(obj).
+		WithInterceptorFuncs(interceptor.Funcs{
+			Patch: func(ctx context.Context, c client.WithWatch, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+				if data, err := patch.Data(obj); err == nil {
+					recorded = append(recorded, string(data))
+				}
+				return c.Patch(ctx, obj, patch, opts...)
+			},
+		}).
+		Build()
+
+	injector := NewCRDMutationInjector(fakeClient)
+	ctx := context.Background()
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.CRDMutation,
+		Parameters: map[string]string{
+			"apiVersion": "route.example.com/v1",
+			"kind":       "Route",
+			"name":       "my-route",
+			"path":       "spec.to.name",
+			"value":      "chaos-nonexistent-service",
+		},
+	}
+
+	cleanup, _, err := injector.Inject(ctx, spec, "test-ns")
+	require.NoError(t, err)
+	require.NoError(t, cleanup(ctx))
+
+	// The original value must be restored...
+	restored := &unstructured.Unstructured{}
+	restored.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("my-route", "test-ns"), restored))
+	name, _, err := unstructured.NestedString(restored.Object, "spec", "to", "name")
+	require.NoError(t, err)
+	assert.Equal(t, "original-service", name)
+	assert.NotContains(t, restored.GetAnnotations(), safety.RollbackAnnotationKey,
+		"cleanup must remove the rollback annotation")
+
+	// ...and no patch may null the mutated path: the API server rejects a
+	// null value for required fields like Route spec.to.name.
+	for _, p := range recorded {
+		assert.NotContains(t, p, "\"name\":null", "cleanup must not null a scalar path: %s", p)
+	}
+	require.NotEmpty(t, recorded)
+	assert.Contains(t, strings.Join(recorded, " "), "original-service",
+		"cleanup must restore the original value")
+}
+
+// TestCRDMutationRevertScalarPathDirectRestore verifies that Revert of a
+// scalar-path mutation restores the original value without first nulling the
+// path: the null step is rejected by the API server for required fields (e.g.
+// Route spec.to.name: "Required value"), which would leave the controller
+// retrying the revert forever.
+func TestCRDMutationRevertScalarPathDirectRestore(t *testing.T) {
+	scheme := runtime.NewScheme()
+	gvk := schema.GroupVersionKind{Group: "route.example.com", Version: "v1", Kind: "Route"}
+	scheme.AddKnownTypeWithName(gvk, &unstructured.Unstructured{})
+	scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "route.example.com", Version: "v1", Kind: "RouteList"}, &unstructured.UnstructuredList{})
+
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gvk)
+	obj.SetName("revert-route")
+	obj.SetNamespace("test-ns")
+	require.NoError(t, unstructured.SetNestedField(obj.Object, "original-service", "spec", "to", "name"))
+
+	var recorded []string
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(obj).
+		WithInterceptorFuncs(interceptor.Funcs{
+			Patch: func(ctx context.Context, c client.WithWatch, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+				if data, err := patch.Data(obj); err == nil {
+					recorded = append(recorded, string(data))
+				}
+				return c.Patch(ctx, obj, patch, opts...)
+			},
+		}).
+		Build()
+
+	injector := NewCRDMutationInjector(fakeClient)
+	ctx := context.Background()
+	spec := v1alpha1.InjectionSpec{
+		Type: v1alpha1.CRDMutation,
+		Parameters: map[string]string{
+			"apiVersion": "route.example.com/v1",
+			"kind":       "Route",
+			"name":       "revert-route",
+			"path":       "spec.to.name",
+			"value":      "chaos-nonexistent-service",
+		},
+	}
+
+	_, _, err := injector.Inject(ctx, spec, "test-ns")
+	require.NoError(t, err)
+
+	require.NoError(t, injector.Revert(ctx, spec, "test-ns"))
+
+	restored := &unstructured.Unstructured{}
+	restored.SetGroupVersionKind(gvk)
+	require.NoError(t, fakeClient.Get(ctx, client_key("revert-route", "test-ns"), restored))
+	name, _, err := unstructured.NestedString(restored.Object, "spec", "to", "name")
+	require.NoError(t, err)
+	assert.Equal(t, "original-service", name)
+	assert.NotContains(t, restored.GetAnnotations(), safety.RollbackAnnotationKey,
+		"revert must remove the rollback annotation")
+
+	for _, p := range recorded {
+		assert.NotContains(t, p, "\"name\":null", "revert must not null a scalar path: %s", p)
+	}
 }

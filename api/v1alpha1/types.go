@@ -116,6 +116,11 @@ type InjectionSpec struct {
 	// +kubebuilder:validation:Maximum=100
 	// +kubebuilder:default=1
 	Count       int32             `json:"count,omitempty"`
+	// TTL is how long the injected fault stays active. When set, the fault is
+	// reverted once the TTL elapses and the recovery window (recoveryTimeout)
+	// is measured from the fault removal, so the experiment observes a full
+	// recovery period with the fault gone. When unset, the fault is reverted
+	// at recoveryTimeout and the window is still measured from the revert.
 	TTL         metav1.Duration   `json:"ttl,omitempty"`
 	DangerLevel DangerLevel       `json:"dangerLevel,omitempty"`
 }
@@ -308,8 +313,14 @@ type ChaosExperimentStatus struct {
 	StartTime          *metav1.Time       `json:"startTime,omitempty"`
 	EndTime            *metav1.Time       `json:"endTime,omitempty"`
 	InjectionStartedAt *metav1.Time       `json:"injectionStartedAt,omitempty"`
-	SteadyStatePre     *CheckResult       `json:"steadyStatePre,omitempty"`
-	SteadyStatePost    *CheckResult       `json:"steadyStatePost,omitempty"`
+	// FaultRevertedAt records when the injected fault was actually removed.
+	// The recovery window is measured from this time, not from
+	// InjectionStartedAt, so persistent faults (e.g. NetworkPartition) get a
+	// full recoveryTimeout of observation after the fault is gone.
+	// +optional
+	FaultRevertedAt  *metav1.Time       `json:"faultRevertedAt,omitempty"`
+	SteadyStatePre   *CheckResult       `json:"steadyStatePre,omitempty"`
+	SteadyStatePost  *CheckResult       `json:"steadyStatePost,omitempty"`
 	// +listType=atomic
 	InjectionLog       []InjectionEvent   `json:"injectionLog,omitempty"`
 	EvaluationResult   *EvaluationSummary `json:"evaluationResult,omitempty"`
