@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../images/favicon-32.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -26,10 +26,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -7495,7 +7495,7 @@ not the CRD's own TypeMeta API version.</p>
 <td><code>TTL</code></td>
 <td><code>metav1.Duration</code></td>
 <td><code>ttl</code></td>
-<td></td>
+<td>TTL is how long the injected fault stays active. When set, the fault is reverted once the TTL elapses and the recovery window (recoveryTimeout) is measured from the fault removal, so the experiment observes a full recovery period with the fault gone. When unset, drivers differ: the CLI keeps the legacy timing (post-check after recoveryTimeout measured from injection, cleanup deferred to the end of the run), while the controller always reverts before the post-check.</td>
 </tr>
 <tr>
 <td><code>DangerLevel</code></td>
@@ -7625,6 +7625,24 @@ not the CRD's own TypeMeta API version.</p>
 <td><code>*metav1.Time</code></td>
 <td><code>injectionStartedAt</code></td>
 <td></td>
+</tr>
+<tr>
+<td><code>FaultRevertedAt</code></td>
+<td><code>*metav1.Time</code></td>
+<td><code>faultRevertedAt</code></td>
+<td>FaultRevertedAt records when the injected fault was actually removed. The recovery window is measured from this time, not from InjectionStartedAt, so persistent faults (e.g. NetworkPartition) get a full recoveryTimeout of observation after the fault is gone. +optional</td>
+</tr>
+<tr>
+<td><code>PostCheckStartedAt</code></td>
+<td><code>*metav1.Time</code></td>
+<td><code>postCheckStartedAt</code></td>
+<td>PostCheckStartedAt records when the post-check's reconciliation polling began. The controller polls one cycle per reconcile until all managed resources reconcile or PostCheckStartedAt + recoveryTimeout passes; re-entries resume from this time instead of restarting. +optional</td>
+</tr>
+<tr>
+<td><code>PostCheckCycles</code></td>
+<td><code>int</code></td>
+<td><code>postCheckCycles</code></td>
+<td>PostCheckCycles is the number of reconciliation poll cycles run so far in the post-check, accumulated across requeues. +optional</td>
 </tr>
 <tr>
 <td><code>SteadyStatePre</code></td>
@@ -7924,10 +7942,10 @@ not the CRD's own TypeMeta API version.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.indexes", "navigation.tabs.sticky", "navigation.path", "navigation.instant", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.indexes", "navigation.tabs.sticky", "navigation.path", "navigation.instant", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../javascripts/diagram-zoom.js"></script>
       
