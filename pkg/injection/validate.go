@@ -161,6 +161,19 @@ func validateNetworkPartitionParams(spec v1alpha1.InjectionSpec) error {
 	return validateLabelSelector(spec, "NetworkPartition")
 }
 
+// rejectChaosMetadataPath rejects mutation targets that would null the
+// rollback marker's own storage. The rollback annotation and chaos labels
+// under metadata are what make cleanup and revert retryable: nulling them
+// mid-restore turns a failed restore into a silent no-op on retry.
+func rejectChaosMetadataPath(path string) error {
+	if path == "metadata" || path == "metadata.annotations" ||
+		strings.HasPrefix(path, "metadata.annotations.chaos.operatorchaos.io/") ||
+		strings.HasPrefix(path, "metadata.labels.chaos.operatorchaos.io/") {
+		return fmt.Errorf("CRDMutation path %q targets chaos-managed metadata and cannot be mutated", path)
+	}
+	return nil
+}
+
 func validateCRDMutationParams(spec v1alpha1.InjectionSpec) error {
 	apiVersion, ok := spec.Parameters["apiVersion"]
 	if !ok || apiVersion == "" {
@@ -201,6 +214,9 @@ func validateCRDMutationParams(spec v1alpha1.InjectionSpec) error {
 	}
 	if hasPath {
 		if err := validateJSONPath("path", spec.Parameters["path"]); err != nil {
+			return err
+		}
+		if err := rejectChaosMetadataPath(spec.Parameters["path"]); err != nil {
 			return err
 		}
 	}

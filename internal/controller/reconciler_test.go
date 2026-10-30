@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -37,6 +38,11 @@ type mockOrchestrator struct {
 	postCheckResult *v1alpha1.CheckResult
 	postFindings    []observer.Finding
 	postCheckErr    error
+	pollResult      *observer.ReconciliationResult
+	pollErr         error
+	finalResult     *v1alpha1.CheckResult
+	finalFindings   []observer.Finding
+	finalErr        error
 	evalResult      *evaluator.EvaluationResult
 
 	// Call tracking
@@ -44,7 +50,10 @@ type mockOrchestrator struct {
 	preCheckCalled  bool
 	injectCalled    bool
 	revertCalled    bool
+	revertCallCount int
 	postCheckCalled bool
+	pollCalls       int
+	finalCalled     bool
 	evaluateCalled  bool
 }
 
@@ -65,12 +74,23 @@ func (m *mockOrchestrator) InjectFault(_ context.Context, _ *v1alpha1.ChaosExper
 
 func (m *mockOrchestrator) RevertFault(_ context.Context, _ *v1alpha1.ChaosExperiment) error {
 	m.revertCalled = true
+	m.revertCallCount++
 	return m.revertErr
 }
 
 func (m *mockOrchestrator) RunPostCheck(_ context.Context, _ *v1alpha1.ChaosExperiment) (*v1alpha1.CheckResult, []observer.Finding, error) {
 	m.postCheckCalled = true
 	return m.postCheckResult, m.postFindings, m.postCheckErr
+}
+
+func (m *mockOrchestrator) PollPostCheckOnce(_ context.Context, _ *v1alpha1.ChaosExperiment) (*observer.ReconciliationResult, error) {
+	m.pollCalls++
+	return m.pollResult, m.pollErr
+}
+
+func (m *mockOrchestrator) RunPostCheckFinal(_ context.Context, _ *v1alpha1.ChaosExperiment, _ *observer.ReconciliationResult) (*v1alpha1.CheckResult, []observer.Finding, error) {
+	m.finalCalled = true
+	return m.finalResult, m.finalFindings, m.finalErr
 }
 
 func (m *mockOrchestrator) EvaluateExperiment(_ []observer.Finding, _ v1alpha1.HypothesisSpec) *evaluator.EvaluationResult {
@@ -83,15 +103,17 @@ type mockLock struct {
 	renewErr   error
 	releaseErr error
 
-	acquireCalled bool
-	renewCalled   bool
-	releaseCalled bool
+	acquireCalled  bool
+	acquiredLease  time.Duration
+	renewCalled    bool
+	releaseCalled  bool
 
 	releaseFunc func() error
 }
 
-func (m *mockLock) Acquire(_ context.Context, _ string, _ string, _ time.Duration) error {
+func (m *mockLock) Acquire(_ context.Context, _ string, _ string, leaseDuration time.Duration) error {
 	m.acquireCalled = true
+	m.acquiredLease = leaseDuration
 	return m.acquireErr
 }
 
@@ -378,7 +400,11 @@ func TestReconcileObserveRequeuesWithRemainingWhenLessThanMax(t *testing.T) {
 	assert.Equal(t, 10*time.Second, result.RequeueAfter)
 }
 
-func TestReconcileObserveTransitionsWhenTimedOut(t *testing.T) {
+// TestReconcileObserveNoTTLRevertsAtRecoveryTimeoutAndWaitsWindow verifies that
+// with no TTL the fault is reverted once the recovery timeout elapses, but the
+// post-check transition only happens after a full recovery timeout measured
+// from the revert, not from injection.
+func TestReconcileObserveNoTTLRevertsAtRecoveryTimeoutAndWaitsWindow(t *testing.T) {
 	scheme := newTestScheme()
 	exp := newTestExperiment()
 	exp.Status.Phase = v1alpha1.PhaseObserving
@@ -397,34 +423,206 @@ func TestReconcileObserveTransitionsWhenTimedOut(t *testing.T) {
 
 	result, err := r.Reconcile(ctx, reconcileRequest())
 	require.NoError(t, err)
+
+	// Fault reverted, but the phase must stay Observing until a full
+	// recovery window has elapsed since the revert.
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(61*time.Second)), "revert time should be the reconcile time")
+	// Requeue waits out the remaining window (capped at maxObserveRequeue).
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake one second past the full window since the revert.
+	clk = clock.NewFakeClock(updated.Status.FaultRevertedAt.Add(61 * time.Second))
+	r.Clock = clk
+
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
 	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	// Revert must not run a second time.
+	assert.Equal(t, 1, orch.revertCallCount)
+}
+
+// TestReconcileObserveTTLRevertsAtTTLAndWaitsWindowFromRevert verifies that a
+// TTL-bearing fault is reverted at the first wake past the TTL and that the
+// recovery window runs from the revert time.
+func TestReconcileObserveTTLRevertsAtTTLAndWaitsWindowFromRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 35s elapsed, past the 30s TTL but before the 60s recovery timeout.
+	clk := clock.NewFakeClock(startTime.Add(35 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
 
 	updated, err := getExperiment(ctx, r)
 	require.NoError(t, err)
-	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
 	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(35*time.Second)), "revert time should be the reconcile time")
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake one second past revert+recoveryTimeout (35s + 61s = 96s).
+	clk = clock.NewFakeClock(startTime.Add(96 * time.Second))
+	r.Clock = clk
+
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 1, orch.revertCallCount)
 }
 
-func TestReconcilePostCheckEvaluatesInline(t *testing.T) {
+// TestReconcileObserveTTLExceedsRecoveryTimeout verifies that the TTL is
+// authoritative: when the TTL is later than the recovery timeout, the fault
+// stays active for the full TTL (matching the CLI orchestrator and the
+// InjectionSpec.TTL documentation) and the recovery window still runs from
+// the revert.
+func TestReconcileObserveTTLExceedsRecoveryTimeout(t *testing.T) {
 	scheme := newTestScheme()
 	exp := newTestExperiment()
-	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.Phase = v1alpha1.PhaseObserving
 	exp.Status.ObservedGeneration = 1
-	exp.Finalizers = []string{cleanupFinalizer}
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 120 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
 
-	findings := []observer.Finding{
-		{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
-	}
-	orch := &mockOrchestrator{
-		postCheckResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
-		postFindings:    findings,
-		evalResult: &evaluator.EvaluationResult{
-			Verdict:    v1alpha1.Resilient,
-			Confidence: "1/1 checks passed",
-		},
-	}
+	orch := &mockOrchestrator{}
 	lock := &mockLock{}
-	clk := clock.NewFakeClock(time.Now())
+	// 61s elapsed: past the 60s recovery timeout, before the 120s TTL.
+	// The fault must NOT be reverted yet — the TTL is authoritative.
+	clk := clock.NewFakeClock(startTime.Add(61 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.False(t, orch.revertCalled, "fault must stay active until the TTL elapses")
+	assert.Nil(t, updated.Status.FaultRevertedAt)
+	// Requeue aims at the TTL deadline: 59s remain, capped at maxObserveRequeue.
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+
+	// Wake past the TTL: revert, then wait out the window from the revert.
+	clk = clock.NewFakeClock(startTime.Add(121 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.True(t, orch.revertCalled)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+
+	// Wake past revert + recovery timeout.
+	clk = clock.NewFakeClock(updated.Status.FaultRevertedAt.Add(61 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 1, orch.revertCallCount)
+}
+
+// TestReconcileObserveRevertErrorRetried verifies that a failed revert is
+// retried on a later reconcile instead of aborting, and FaultRevertedAt is
+// only set once the revert succeeds.
+func TestReconcileObserveRevertErrorRetried(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+
+	orch := &mockOrchestrator{revertErr: errors.New("revert failed")}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(startTime.Add(35 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	// No abort, no FaultRevertedAt, and the retry is spaced out so a
+	// persistently failing revert does not hammer the API server.
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.Nil(t, updated.Status.FaultRevertedAt)
+	assert.Equal(t, revertRetryInterval, result.RequeueAfter)
+
+	// Next reconcile succeeds.
+	orch.revertErr = nil
+	clk = clock.NewFakeClock(startTime.Add(36 * time.Second))
+	r.Clock = clk
+
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+	assert.True(t, updated.Status.FaultRevertedAt.Time.Equal(startTime.Add(36*time.Second)), "revert time should be the reconcile time")
+	assert.Equal(t, 2, orch.revertCallCount)
+}
+
+// TestReconcileObserveReentryAfterRevertSkipsRevert verifies crash-recovery:
+// when FaultRevertedAt is already recorded, re-entry must not revert again and
+// the window is measured from the recorded time.
+func TestReconcileObserveReentryAfterRevertSkipsRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+	revertedAt := metav1.NewTime(startTime.Add(35 * time.Second))
+	exp.Status.FaultRevertedAt = &revertedAt
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 96s: 61s past the recorded revert time.
+	clk := clock.NewFakeClock(startTime.Add(96 * time.Second))
 
 	r := newReconciler(scheme, exp, orch, lock, clk)
 	ctx := context.Background()
@@ -435,10 +633,86 @@ func TestReconcilePostCheckEvaluatesInline(t *testing.T) {
 
 	updated, err := getExperiment(ctx, r)
 	require.NoError(t, err)
-	// PostCheck now evaluates inline — transitions directly to Complete.
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.False(t, orch.revertCalled, "re-entry after a recorded revert must not revert again")
+}
+
+// TestReconcileObserveReentryMidWindowRequeuesWithoutRevert verifies that a
+// re-entry while the recovery window is still running requeues based on the
+// remaining window since FaultRevertedAt and does not revert again.
+func TestReconcileObserveReentryMidWindowRequeuesWithoutRevert(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseObserving
+	exp.Status.ObservedGeneration = 1
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	injTime := metav1.NewTime(startTime)
+	exp.Status.InjectionStartedAt = &injTime
+	revertedAt := metav1.NewTime(startTime.Add(35 * time.Second))
+	exp.Status.FaultRevertedAt = &revertedAt
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	// 60s: 25s into the 60s recovery window since the revert.
+	clk := clock.NewFakeClock(startTime.Add(60 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	assert.False(t, orch.revertCalled)
+	// 35s of window remain, capped at maxObserveRequeue.
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+}
+
+func TestReconcilePostCheckEvaluatesInline(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+
+	orch := &mockOrchestrator{
+		pollResult:  &observer.ReconciliationResult{AllReconciled: true},
+		finalResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings: []observer.Finding{
+			{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
+			{Source: observer.SourceReconciliation, Passed: true},
+		},
+		evalResult: &evaluator.EvaluationResult{
+			Verdict:    v1alpha1.Resilient,
+			Confidence: "1/1 checks passed",
+		},
+	}
+	lock := &mockLock{}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	clk := clock.NewFakeClock(startTime)
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	// First reconcile records the post-check start and requeues.
+	result, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	// Second reconcile polls (all reconciled), runs the final checks, and
+	// evaluates inline — transitions directly to Complete.
+	clk.Advance(time.Second)
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
 	assert.Equal(t, v1alpha1.PhaseComplete, updated.Status.Phase)
 	assert.NotNil(t, updated.Status.SteadyStatePost)
-	assert.True(t, orch.postCheckCalled)
+	assert.True(t, orch.finalCalled)
 	// Evaluate IS called in the same reconcile for consistency.
 	assert.True(t, orch.evaluateCalled)
 	assert.Equal(t, v1alpha1.Resilient, updated.Status.Verdict)
@@ -781,38 +1055,6 @@ func TestReconcileLeaseRenewalHolderMismatchAborts(t *testing.T) {
 	assert.Equal(t, v1alpha1.PhaseAborted, updated.Status.Phase)
 }
 
-func TestReconcileObserveRevertFailureAborts(t *testing.T) {
-	scheme := newTestScheme()
-	exp := newTestExperiment()
-	exp.Status.Phase = v1alpha1.PhaseObserving
-	exp.Status.ObservedGeneration = 1
-	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	injTime := metav1.NewTime(startTime)
-	exp.Status.InjectionStartedAt = &injTime
-
-	orch := &mockOrchestrator{
-		revertErr: fmt.Errorf("revert network error"),
-	}
-	lock := &mockLock{}
-	clk := clock.NewFakeClock(startTime.Add(61 * time.Second))
-
-	r := newReconciler(scheme, exp, orch, lock, clk)
-	ctx := context.Background()
-
-	// RevertFault failure in reconcileObserve should abort (not retry indefinitely).
-	result, err := r.Reconcile(ctx, reconcileRequest())
-	require.NoError(t, err)
-	assert.Equal(t, ctrl.Result{RequeueAfter: 100 * time.Millisecond}, result)
-
-	updated, err := getExperiment(ctx, r)
-	require.NoError(t, err)
-	assert.Equal(t, v1alpha1.PhaseAborted, updated.Status.Phase)
-	assert.Contains(t, updated.Status.Message, "post-timeout revert failed")
-	// abort() from Observing calls RevertFault again, recording cleanup error.
-	assert.Contains(t, updated.Status.CleanupError, "abort revert failed")
-	assert.True(t, lock.releaseCalled)
-}
-
 func TestReconcileEvaluateWithDeviations(t *testing.T) {
 	scheme := newTestScheme()
 	exp := newTestExperiment()
@@ -855,11 +1097,15 @@ func TestReconcilePostCheckErrorAborts(t *testing.T) {
 	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
 	exp.Status.ObservedGeneration = 1
 
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+
 	orch := &mockOrchestrator{
-		postCheckErr: fmt.Errorf("observer timeout"),
+		pollErr: fmt.Errorf("observer timeout"),
 	}
 	lock := &mockLock{}
-	clk := clock.NewFakeClock(time.Now())
+	clk := clock.NewFakeClock(startTime)
 
 	r := newReconciler(scheme, exp, orch, lock, clk)
 	ctx := context.Background()
@@ -1039,7 +1285,7 @@ func TestReconcileEvaluatePostCheckErrorAborts(t *testing.T) {
 	exp.Status.ObservedGeneration = 1
 
 	orch := &mockOrchestrator{
-		postCheckErr: fmt.Errorf("evaluation observer timeout"),
+		pollErr: fmt.Errorf("evaluation observer timeout"),
 	}
 	lock := &mockLock{}
 	clk := clock.NewFakeClock(time.Now())
@@ -1178,11 +1424,12 @@ func TestReconcileFullLifecycle(t *testing.T) {
 		{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
 	}
 	orch := &mockOrchestrator{
-		preCheckResult:  &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
-		injectEvents:    []v1alpha1.InjectionEvent{{Type: v1alpha1.PodKill, Target: "pod/test", Action: "killed"}},
-		postCheckResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
-		postFindings:    findings,
-		evalResult:      &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "1/1"},
+		preCheckResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		injectEvents:   []v1alpha1.InjectionEvent{{Type: v1alpha1.PodKill, Target: "pod/test", Action: "killed"}},
+		pollResult:     &observer.ReconciliationResult{AllReconciled: true},
+		finalResult:    &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings:  findings,
+		evalResult:     &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "1/1"},
 	}
 	lock := &mockLock{}
 	clk := clock.NewFakeClock(startTime)
@@ -1225,7 +1472,20 @@ func TestReconcileFullLifecycle(t *testing.T) {
 	// Advance clock past recovery timeout
 	clk.Advance(61 * time.Second)
 
-	// Phase 5: Observing -> SteadyStatePost
+	// Phase 5: Observing — fault reverted, recovery window now runs from the
+	// revert time; the phase stays Observing until the window elapses.
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, maxObserveRequeue, result.RequeueAfter)
+	updated, err = getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseObserving, updated.Status.Phase)
+	require.NotNil(t, updated.Status.FaultRevertedAt)
+
+	// Advance clock past the full recovery window since the revert
+	clk.Advance(61 * time.Second)
+
+	// Phase 5b: Observing -> SteadyStatePost
 	result, err = r.Reconcile(ctx, reconcileRequest())
 	require.NoError(t, err)
 	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
@@ -1233,7 +1493,12 @@ func TestReconcileFullLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
 
-	// Phase 6: SteadyStatePost -> Complete (post-check + evaluate inline)
+	// Phase 6a: SteadyStatePost records the post-check start
+	result, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+
+	// Phase 6b: one poll cycle (all reconciled) -> final checks + evaluate inline
 	result, err = r.Reconcile(ctx, reconcileRequest())
 	require.NoError(t, err)
 	assert.Equal(t, ctrl.Result{RequeueAfter: 100 * time.Millisecond}, result)
@@ -1442,16 +1707,21 @@ func TestReconcilePostCheckFailedSetsRecoveryObservedFalse(t *testing.T) {
 	exp.Status.ObservedGeneration = 1
 	exp.Finalizers = []string{cleanupFinalizer}
 
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+
 	orch := &mockOrchestrator{
-		postCheckResult: &v1alpha1.CheckResult{Passed: false, ChecksRun: 1, ChecksPassed: 0},
-		postFindings:    []observer.Finding{},
+		pollResult:  &observer.ReconciliationResult{AllReconciled: true},
+		finalResult: &v1alpha1.CheckResult{Passed: false, ChecksRun: 1, ChecksPassed: 0},
+		finalFindings: []observer.Finding{},
 		evalResult: &evaluator.EvaluationResult{
 			Verdict:    v1alpha1.Failed,
 			Confidence: "0/1 checks passed",
 		},
 	}
 	lock := &mockLock{}
-	clk := clock.NewFakeClock(time.Now())
+	clk := clock.NewFakeClock(startTime)
 
 	r := newReconciler(scheme, exp, orch, lock, clk)
 	ctx := context.Background()
@@ -1835,8 +2105,8 @@ func TestReconcileAbortedBackfillsEmptyMessageAndEndTime(t *testing.T) {
 	exp := newTestExperiment()
 	exp.Status.Phase = v1alpha1.PhaseAborted
 	exp.Status.ObservedGeneration = 1
-	exp.Status.Message = ""    // empty — should be backfilled
-	exp.Status.EndTime = nil   // nil — should be backfilled
+	exp.Status.Message = ""  // empty — should be backfilled
+	exp.Status.EndTime = nil // nil — should be backfilled
 	exp.Finalizers = []string{cleanupFinalizer}
 
 	orch := &mockOrchestrator{}
@@ -1937,4 +2207,272 @@ func TestReconcileTerminalWithoutFinalizerSkipsLockRelease(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, ctrl.Result{}, result)
 	assert.Equal(t, 0, releaseCount, "Lock.Release should not be called when finalizer is absent")
+}
+
+// TestReconcilePendingLeaseIncludesTTL verifies the controller's experiment
+// lock lease covers the whole run for TTL-bearing experiments — TTL plus
+// twice the recovery timeout — matching the CLI orchestrator. Without the
+// TTL, a controller restart during a long TTL lets the lease expire while
+// the fault is still active.
+func TestReconcilePendingLeaseIncludesTTL(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Spec.Injection.TTL = metav1.Duration{Duration: 30 * time.Second}
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	_, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	assert.Equal(t, 30*time.Second+2*60*time.Second, lock.acquiredLease,
+		"lease must cover TTL plus twice the recovery timeout")
+
+	// Without a TTL the lease keeps the legacy duration.
+	exp2 := newTestExperiment()
+	lock2 := &mockLock{}
+	r2 := newReconciler(scheme, exp2, orch, lock2, clk)
+	_, err = r2.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+	assert.Equal(t, 2*60*time.Second, lock2.acquiredLease)
+}
+
+// TestReconcilePostCheckSetsStartAndRequeues verifies the post-check records
+// its start time and requeues before running any polling, so the worker is
+// never blocked by the reconciliation poll.
+func TestReconcilePostCheckSetsStartAndRequeues(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+
+	orch := &mockOrchestrator{}
+	lock := &mockLock{}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	clk := clock.NewFakeClock(startTime)
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	result, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	assert.Equal(t, 100*time.Millisecond, result.RequeueAfter)
+	updated, err := getExperiment(context.Background(), r)
+	require.NoError(t, err)
+	require.NotNil(t, updated.Status.PostCheckStartedAt)
+	assert.True(t, updated.Status.PostCheckStartedAt.Time.Equal(startTime))
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 0, orch.pollCalls, "no polling before the start time is persisted")
+}
+
+// TestReconcilePostCheckPartialResultRequeues verifies a partial
+// reconciliation result requeues at the poll interval and accumulates cycles,
+// keeping the phase in SteadyStatePost instead of blocking the worker.
+func TestReconcilePostCheckPartialResultRequeues(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+	exp.Status.PostCheckCycles = 1
+
+	orch := &mockOrchestrator{
+		pollResult: &observer.ReconciliationResult{AllReconciled: false},
+	}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(startTime.Add(5 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	result, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	assert.Equal(t, 2*time.Second, result.RequeueAfter, "requeue at the poll interval")
+	updated, err := getExperiment(context.Background(), r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+	assert.Equal(t, 2, updated.Status.PostCheckCycles, "cycles accumulate across requeues")
+	assert.Equal(t, 1, orch.pollCalls)
+	assert.False(t, orch.finalCalled, "final checks must not run on a partial result")
+}
+
+// TestReconcilePostCheckCompleteEvaluates verifies an all-reconciled poll
+// cycle runs the final checks and evaluates in the same reconcile.
+func TestReconcilePostCheckCompleteEvaluates(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+	exp.Status.PostCheckCycles = 2
+
+	orch := &mockOrchestrator{
+		pollResult:     &observer.ReconciliationResult{AllReconciled: true},
+		finalResult:    &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings: []observer.Finding{
+			{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
+			{Source: observer.SourceReconciliation, Passed: true},
+		},
+		evalResult: &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "1/1"},
+	}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(startTime.Add(3 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	_, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(context.Background(), r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, updated.Status.Phase)
+	assert.Equal(t, v1alpha1.Resilient, updated.Status.Verdict)
+	assert.Equal(t, 3, updated.Status.PostCheckCycles)
+	assert.True(t, orch.pollCalls >= 1)
+	assert.True(t, orch.finalCalled, "final checks must run once reconciliation completes")
+}
+
+// TestReconcilePostCheckDeadlineProceedsWithPartial verifies that once
+// PostCheckStartedAt + recoveryTimeout passes, the experiment proceeds to the
+// final checks with the partial result instead of requeueing forever.
+func TestReconcilePostCheckDeadlineProceedsWithPartial(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+	exp.Status.PostCheckCycles = 29
+
+	orch := &mockOrchestrator{
+		pollResult:     &observer.ReconciliationResult{AllReconciled: false},
+		finalResult:    &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings: []observer.Finding{
+			{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
+			{Source: observer.SourceReconciliation, Passed: false},
+		},
+		evalResult: &evaluator.EvaluationResult{Verdict: v1alpha1.Degraded, Confidence: "partial"},
+	}
+	lock := &mockLock{}
+	// 61s past start: past the 60s recovery timeout deadline.
+	clk := clock.NewFakeClock(startTime.Add(61 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	_, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(context.Background(), r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, updated.Status.Phase)
+	assert.Equal(t, v1alpha1.Degraded, updated.Status.Verdict)
+	assert.True(t, orch.finalCalled, "deadline must force the final checks with the partial result")
+}
+
+// TestReconcilePostCheckConvergesOverMultipleCycles verifies the requeue-based
+// post-check converges end to end: partial results requeue and accumulate
+// cycles, and a later all-reconciled cycle runs the final checks and
+// evaluates — across successive reconciles, not just single transitions.
+func TestReconcilePostCheckConvergesOverMultipleCycles(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseSteadyStatePost
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+
+	orch := &mockOrchestrator{
+		pollResult: &observer.ReconciliationResult{AllReconciled: false},
+		finalResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings: []observer.Finding{
+			{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
+			{Source: observer.SourceReconciliation, Passed: true},
+		},
+		evalResult: &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "1/1"},
+	}
+	lock := &mockLock{}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	clk := clock.NewFakeClock(startTime)
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	ctx := context.Background()
+
+	// Reconcile 1: record the post-check start.
+	_, err := r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	// Reconciles 2-3: partial results requeue at the poll interval.
+	for i := 0; i < 2; i++ {
+		clk.Advance(2 * time.Second)
+		result, err := r.Reconcile(ctx, reconcileRequest())
+		require.NoError(t, err)
+		assert.Equal(t, 2*time.Second, result.RequeueAfter, "partial cycle %d must requeue at the poll interval", i+1)
+
+		updated, err := getExperiment(ctx, r)
+		require.NoError(t, err)
+		assert.Equal(t, v1alpha1.PhaseSteadyStatePost, updated.Status.Phase)
+		assert.Equal(t, i+1, updated.Status.PostCheckCycles)
+		assert.False(t, orch.finalCalled)
+	}
+
+	// Reconcile 4: reconciliation converges — final checks + evaluate.
+	orch.pollResult = &observer.ReconciliationResult{AllReconciled: true}
+	clk.Advance(2 * time.Second)
+	_, err = r.Reconcile(ctx, reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(ctx, r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, updated.Status.Phase)
+	assert.Equal(t, v1alpha1.Resilient, updated.Status.Verdict)
+	assert.Equal(t, 3, updated.Status.PostCheckCycles, "cycles from partial results are preserved")
+	assert.True(t, orch.finalCalled)
+}
+
+// TestReconcileEvaluateStampsAccumulatedTiming verifies the Evaluating crash
+// recovery path stamps the reconciliation finding with the accumulated cycle
+// count and recovery time from the recorded post-check start.
+func TestReconcileEvaluateStampsAccumulatedTiming(t *testing.T) {
+	scheme := newTestScheme()
+	exp := newTestExperiment()
+	exp.Status.Phase = v1alpha1.PhaseEvaluating
+	exp.Status.ObservedGeneration = 1
+	exp.Finalizers = []string{cleanupFinalizer}
+	startTime := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	startedAt := metav1.NewTime(startTime)
+	exp.Status.PostCheckStartedAt = &startedAt
+	exp.Status.PostCheckCycles = 4
+
+	orch := &mockOrchestrator{
+		pollResult:  &observer.ReconciliationResult{AllReconciled: true},
+		finalResult: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1},
+		finalFindings: []observer.Finding{
+			{Source: observer.SourceSteadyState, Passed: true, Checks: &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1}},
+			{Source: observer.SourceReconciliation, Passed: true, ReconciliationResult: &observer.ReconciliationResult{AllReconciled: true}},
+		},
+		evalResult: &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "1/1"},
+	}
+	lock := &mockLock{}
+	clk := clock.NewFakeClock(startTime.Add(10 * time.Second))
+
+	r := newReconciler(scheme, exp, orch, lock, clk)
+	_, err := r.Reconcile(context.Background(), reconcileRequest())
+	require.NoError(t, err)
+
+	updated, err := getExperiment(context.Background(), r)
+	require.NoError(t, err)
+	assert.Equal(t, v1alpha1.PhaseComplete, updated.Status.Phase)
+
+	// The reconciliation result passed to the final checks must carry the
+	// accumulated cycles (4 prior + this poll) and the recovery time since
+	// the recorded post-check start. The controller stamps the poll result
+	// in place before handing it to RunPostCheckFinal.
+	assert.Equal(t, 5, orch.pollResult.ReconcileCycles)
+	assert.Equal(t, 10*time.Second, orch.pollResult.RecoveryTime)
 }

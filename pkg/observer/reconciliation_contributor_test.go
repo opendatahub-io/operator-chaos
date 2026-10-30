@@ -24,6 +24,14 @@ func (m *mockReconciliationChecker) CheckReconciliation(
 	return m.result, m.err
 }
 
+func (m *mockReconciliationChecker) CheckReconciliationOnce(
+	_ context.Context,
+	_ *model.ComponentModel,
+	_ string,
+) (*ReconciliationResult, error) {
+	return m.result, m.err
+}
+
 func TestReconciliationContributor_WritesFindings(t *testing.T) {
 	board := NewObservationBoard()
 	checker := &mockReconciliationChecker{

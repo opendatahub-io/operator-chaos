@@ -171,7 +171,7 @@ func newSuiteCommand() *cobra.Command {
 	cmd.Flags().StringVar(&knowledgeDir, "knowledge-dir", "", "directory of operator knowledge YAMLs")
 	cmd.Flags().StringVar(&reportDir, "report-dir", "", "directory for report output")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "validate without running")
-	cmd.Flags().DurationVar(&timeout, "timeout", 10*time.Minute, "timeout per experiment")
+	cmd.Flags().DurationVar(&timeout, "timeout", 21*time.Minute, "timeout per experiment; must exceed each experiment worst case of TTL plus 2x recoveryTimeout (recovery window and post-check), plus 45s transient-revert allowance when TTL is set")
 	cmd.Flags().IntVar(&parallel, "parallel", 1, "max concurrent experiments")
 	cmd.Flags().BoolVar(&distributedLock, "distributed-lock", false, "use Kubernetes Lease-based distributed locking")
 	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
@@ -273,11 +273,27 @@ func runSingleExperiment(parentCtx context.Context, file string, deps *orchestra
 		return r
 	}
 
-	// In dry-run mode, just validate
+	// In dry-run mode, just validate. Dry runs never inject a fault or
+	// wait through recovery, so the duration budget does not apply.
 	if dryRun {
 		r.verdict = fmt.Sprintf("VALID %s (%s)", exp.Name, exp.Spec.Injection.Type)
 		r.status = "pass"
 		return r
+	}
+
+	// Reject upfront when the experiment cannot finish inside the
+	// per-experiment timeout, instead of aborting mid-run. Recorded as a
+	// failure, not a skip: a suite that never ran an experiment because of
+	// a timeout misconfiguration must not exit green. A manifest-level
+	// blastRadius.dryRun never injects a fault or waits through recovery
+	// (CLI dry runs already returned above), so the budget does not apply.
+	if !exp.Spec.BlastRadius.DryRun {
+		if err := validateRunDuration(exp, timeout); err != nil {
+			r.verdict = fmt.Sprintf("FAIL  %s: %v", exp.Name, err)
+			r.status = "fail"
+			r.err = err
+			return r
+		}
 	}
 
 	// Execute experiment
@@ -485,4 +501,3 @@ func collectExperimentFiles(dir string, recursive bool) ([]string, error) {
 
 	return files, nil
 }
-

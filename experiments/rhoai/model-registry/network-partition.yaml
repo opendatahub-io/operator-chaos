@@ -21,7 +21,7 @@ spec:
     type: NetworkPartition
     parameters:
       labelSelector: control-plane=model-registry-operator
-    ttl: "300s"
+    ttl: "120s"
   hypothesis:
     description: >-
       When the model-registry-operator pod is network-partitioned from

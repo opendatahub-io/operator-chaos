@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/opendatahub-io/operator-chaos/pkg/clock"
 	"github.com/opendatahub-io/operator-chaos/pkg/model"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -69,82 +71,17 @@ func (r *ReconciliationChecker) CheckReconciliation(
 
 	for r.clock.Now().Before(deadline) {
 		cycles++
-		allGood := true
-		// Reset resources at start of each cycle so the last cycle's
-		// diagnostic data is preserved on timeout.
-		result.Resources = nil
-
-		for _, mr := range component.ManagedResources {
-			ns := namespace
-			if ns == "" {
-				ns = mr.Namespace
-			}
-
-			obj := &unstructured.Unstructured{}
-			obj.SetAPIVersion(mr.APIVersion)
-			obj.SetKind(mr.Kind)
-
-			err := r.client.Get(ctx, types.NamespacedName{Name: mr.Name, Namespace: ns}, obj)
-			if err != nil {
-				allGood = false
-				result.Resources = append(result.Resources, ResourceCheckResult{
-					Kind:       mr.Kind,
-					Name:       mr.Name,
-					Namespace:  ns,
-					Reconciled: false,
-					Details:    fmt.Sprintf("not found: %v", err),
-				})
-				continue
-			}
-
-			// Check owner reference if expected
-			reconciled := true
-			details := "exists"
-
-			if mr.OwnerRef != "" {
-				ownerRefs := obj.GetOwnerReferences()
-				hasOwner := false
-				for _, ref := range ownerRefs {
-					if ref.Kind == mr.OwnerRef {
-						hasOwner = true
-						break
-					}
-				}
-				if !hasOwner {
-					reconciled = false
-					details = fmt.Sprintf("missing owner reference %s", mr.OwnerRef)
-				}
-			}
-
-			// Check expected spec fields if defined
-			if mr.ExpectedSpec != nil {
-				for field, expected := range mr.ExpectedSpec {
-					actual, found, _ := unstructured.NestedFieldNoCopy(obj.Object, "spec", field)
-					if !found {
-						reconciled = false
-						details = fmt.Sprintf("spec.%s not found", field)
-					} else if fmt.Sprintf("%v", actual) != fmt.Sprintf("%v", expected) {
-						reconciled = false
-						details = fmt.Sprintf("spec.%s: expected %v, got %v", field, expected, actual)
-					}
-				}
-			}
-
-			if !reconciled {
-				allGood = false
-			}
-
-			result.Resources = append(result.Resources, ResourceCheckResult{
-				Kind:       mr.Kind,
-				Name:       mr.Name,
-				Namespace:  ns,
-				Reconciled: reconciled,
-				Details:    details,
-			})
+		cycle, err := r.CheckReconciliationOnce(ctx, component, namespace)
+		if err != nil {
+			result.AllReconciled = false
+			result.ReconcileCycles = cycles
+			result.RecoveryTime = r.clock.Now().Sub(startTime)
+			return result, err
 		}
+		result.Resources = cycle.Resources
+		result.AllReconciled = cycle.AllReconciled
 
-		if allGood {
-			result.AllReconciled = true
+		if cycle.AllReconciled {
 			result.ReconcileCycles = cycles
 			result.RecoveryTime = r.clock.Now().Sub(startTime)
 			return result, nil
@@ -166,4 +103,106 @@ func (r *ReconciliationChecker) CheckReconciliation(
 	result.ReconcileCycles = cycles
 	result.RecoveryTime = r.clock.Now().Sub(startTime)
 	return result, nil
+}
+
+// CheckReconciliationOnce runs a single pass over the component's managed
+// resources, with no polling loop or deadline: each resource is looked up in
+// its declared namespace (falling back to the injection namespace when
+// omitted) and checked for existence, owner references, and expected spec
+// fields. Callers that need polling drive this method on their own cadence —
+// the CLI loops inside RunPostCheck, the controller requeues per cycle.
+func (r *ReconciliationChecker) CheckReconciliationOnce(
+	ctx context.Context,
+	component *model.ComponentModel,
+	namespace string,
+) (*ReconciliationResult, error) {
+	result := &ReconciliationResult{
+		AllReconciled: true,
+	}
+
+	for _, mr := range component.ManagedResources {
+		check, err := r.checkManagedResource(ctx, mr, namespace)
+		if err != nil {
+			return nil, err
+		}
+		if !check.Reconciled {
+			result.AllReconciled = false
+		}
+		result.Resources = append(result.Resources, check)
+	}
+
+	return result, nil
+}
+
+// checkManagedResource looks up a single managed resource in its declared
+// namespace (falling back to the injection namespace when omitted) and
+// verifies existence, owner references, and expected spec fields.
+func (r *ReconciliationChecker) checkManagedResource(ctx context.Context, mr model.ManagedResource, namespace string) (ResourceCheckResult, error) {
+	ns := mr.Namespace
+	if ns == "" {
+		ns = namespace
+	}
+
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(mr.APIVersion)
+	obj.SetKind(mr.Kind)
+
+	err := r.client.Get(ctx, types.NamespacedName{Name: mr.Name, Namespace: ns}, obj)
+	if err != nil {
+		// Only NotFound is an expected lookup result for a resource the
+		// operator has not reconciled yet. Other errors (Forbidden from a
+		// missing RBAC rule, network failures) must propagate: recording
+		// them as unreconciled resources would mask an operational failure
+		// as a Degraded verdict.
+		if !apierrors.IsNotFound(err) {
+			return ResourceCheckResult{}, fmt.Errorf("looking up %s %s/%s: %w", mr.Kind, ns, mr.Name, err)
+		}
+		return ResourceCheckResult{
+			Kind:       mr.Kind,
+			Name:       mr.Name,
+			Namespace:  ns,
+			Reconciled: false,
+			Details:    fmt.Sprintf("not found: %v", err),
+		}, nil
+	}
+
+	// Check owner reference if expected
+	reconciled := true
+	details := "exists"
+
+	if mr.OwnerRef != "" {
+		hasOwner := false
+		for _, ref := range obj.GetOwnerReferences() {
+			if ref.Kind == mr.OwnerRef {
+				hasOwner = true
+				break
+			}
+		}
+		if !hasOwner {
+			reconciled = false
+			details = fmt.Sprintf("missing owner reference %s", mr.OwnerRef)
+		}
+	}
+
+	// Check expected spec fields if defined
+	if mr.ExpectedSpec != nil {
+		for field, expected := range mr.ExpectedSpec {
+			actual, found, _ := unstructured.NestedFieldNoCopy(obj.Object, "spec", field)
+			if !found {
+				reconciled = false
+				details = fmt.Sprintf("spec.%s not found", field)
+			} else if fmt.Sprintf("%v", actual) != fmt.Sprintf("%v", expected) {
+				reconciled = false
+				details = fmt.Sprintf("spec.%s: expected %v, got %v", field, expected, actual)
+			}
+		}
+	}
+
+	return ResourceCheckResult{
+		Kind:       mr.Kind,
+		Name:       mr.Name,
+		Namespace:  ns,
+		Reconciled: reconciled,
+		Details:    details,
+	}, nil
 }

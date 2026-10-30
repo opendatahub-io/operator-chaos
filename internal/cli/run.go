@@ -84,10 +84,22 @@ func newRunCommand() *cobra.Command {
 				fmt.Fprintf(os.Stderr, "Skipping experiment %q: tier %d > max-tier %d (not executed)\n", exp.Name, exp.Spec.Tier, maxTier)
 				return nil
 			}
-
 			// Override dry-run from CLI flag
 			if dryRun {
 				exp.Spec.BlastRadius.DryRun = true
+			}
+
+			// A TTL-bearing experiment runs for TTL (fault active) plus
+			// recoveryTimeout (recovery window measured from the revert).
+			// Reject upfront when that cannot fit in the run timeout, instead
+			// of aborting mid-window and losing the verdict. This runs after
+			// the tier filter so filtered-out experiments are skipped, not
+			// failed, and is skipped entirely for dry runs, which never
+			// inject a fault or wait through recovery.
+			if !exp.Spec.BlastRadius.DryRun {
+				if err := validateRunDuration(exp, timeout); err != nil {
+					return err
+				}
 			}
 
 			// Read verbose from persistent flags
@@ -127,7 +139,7 @@ func newRunCommand() *cobra.Command {
 	cmd.Flags().StringVar(&knowledgeDir, "knowledge-dir", "", "directory of operator knowledge YAMLs")
 	cmd.Flags().StringVar(&reportDir, "report-dir", "", "directory for report output")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "validate without injecting")
-	cmd.Flags().DurationVar(&timeout, "timeout", 10*time.Minute, "total experiment timeout")
+	cmd.Flags().DurationVar(&timeout, "timeout", 21*time.Minute, "total experiment timeout; must exceed the experiment worst case of TTL plus 2x recoveryTimeout (recovery window and post-check), plus 45s transient-revert allowance when TTL is set")
 	cmd.Flags().BoolVar(&distributedLock, "distributed-lock", false, "use Kubernetes Lease-based distributed locking")
 	cmd.Flags().StringVar(&lockNamespace, "lock-namespace", v1alpha1.DefaultNamespace, "namespace for distributed lock leases")
 	cmd.Flags().Int32Var(&maxTier, "max-tier", 0, "skip experiments above this tier (0 = no filter)")
@@ -154,11 +166,8 @@ func overrideExperimentNamespace(exp *v1alpha1.ChaosExperiment, namespace string
 	if len(exp.Spec.BlastRadius.AllowedNamespaces) > 0 {
 		seen := make(map[string]bool)
 		updated := make([]string, 0, len(exp.Spec.BlastRadius.AllowedNamespaces))
-		for _, ns := range exp.Spec.BlastRadius.AllowedNamespaces {
+		for range exp.Spec.BlastRadius.AllowedNamespaces {
 			replacement := namespace
-			if ns == "" {
-				replacement = ns
-			}
 			if !seen[replacement] {
 				seen[replacement] = true
 				updated = append(updated, replacement)
@@ -166,4 +175,42 @@ func overrideExperimentNamespace(exp *v1alpha1.ChaosExperiment, namespace string
 		}
 		exp.Spec.BlastRadius.AllowedNamespaces = updated
 	}
+}
+
+// revertRetryAllowance reserves budget for transient TTL-revert retries:
+// one failed cleanup attempt costs up to the cleanup timeout (30s) plus
+// the retry interval (5s), with a small margin. Persistent revert failures
+// remain bounded only by --timeout — the retry loop is deliberately
+// unbounded so the fault stays owned (see RHOAIENG-100810 for the
+// abort-path redesign).
+const revertRetryAllowance = 45 * time.Second
+
+// validateRunDuration rejects experiments that cannot finish inside the run
+// timeout. The worst case is TTL (fault active) + 2x recoveryTimeout
+// (recovery window + post-check polling) + a transient-revert allowance —
+// the allowance applies only to TTL-bearing faults, which are the only ones
+// reverted (and retried) mid-run. An exact fit also fails since setup runs
+// on the same timeout. Failing upfront beats losing the verdict to a
+// mid-run timeout.
+func validateRunDuration(exp *v1alpha1.ChaosExperiment, timeout time.Duration) error {
+	ttl := exp.Spec.Injection.TTL.Duration
+	recoveryTimeout := exp.ResolvedRecoveryTimeout()
+	runDuration := ttl + recoveryTimeout*2
+	if ttl > 0 {
+		runDuration += revertRetryAllowance
+	}
+	if runDuration >= timeout {
+		return fmt.Errorf("experiment duration %s (TTL %s + 2x recoveryTimeout %s for the recovery window and post-check%s) exceeds --timeout %s; raise --timeout or shorten the experiment",
+			runDuration, ttl, recoveryTimeout, retryAllowancePhrase(ttl), timeout)
+	}
+	return nil
+}
+
+// retryAllowancePhrase describes the transient-revert part of the budget
+// for the rejection message; empty when no TTL means no mid-run revert.
+func retryAllowancePhrase(ttl time.Duration) string {
+	if ttl > 0 {
+		return fmt.Sprintf(", plus %s for transient revert retries", revertRetryAllowance)
+	}
+	return ""
 }

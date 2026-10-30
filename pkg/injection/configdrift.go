@@ -256,8 +256,10 @@ func (d *ConfigDriftInjector) revertSecret(ctx context.Context, spec v1alpha1.In
 		secret.Data[dataKey] = restoredValue
 	}
 
-	safety.RemoveChaosMetadata(secret, string(v1alpha1.ConfigDrift))
-
+	// Restore the data with the rollback annotation still in place: the
+	// annotation is the completion marker, so a failure below stays an error
+	// and the retry re-enters here instead of falsely reporting success
+	// while the rollback Secret still holds the original value.
 	if err := d.client.Update(ctx, secret); err != nil {
 		return fmt.Errorf("restoring Secret %s: %w", key, err)
 	}
@@ -266,7 +268,11 @@ func (d *ConfigDriftInjector) revertSecret(ctx context.Context, spec v1alpha1.In
 	if err := d.client.Delete(ctx, rbSecret); err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("deleting rollback Secret %s: %w", rollbackSecretName, err)
 	}
-	return nil
+
+	// Rollback Secret is gone: remove the rollback annotation to mark the
+	// revert complete.
+	safety.RemoveChaosMetadata(secret, string(v1alpha1.ConfigDrift))
+	return d.client.Update(ctx, secret)
 }
 
 func (d *ConfigDriftInjector) revertConfigMap(ctx context.Context, spec v1alpha1.InjectionSpec, namespace string) error {

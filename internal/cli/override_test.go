@@ -36,6 +36,19 @@ func newTestExperiment() *v1alpha1.ChaosExperiment {
 	}
 }
 
+// TestOverrideExperimentNamespace_EmptyAllowedNamespace verifies --namespace
+// replaces even empty allowedNamespaces entries: an empty entry means unset
+// in the YAML, and leaving it empty would fail blast-radius containment
+// (the target namespace never matches ""), silently breaking the run.
+func TestOverrideExperimentNamespace_EmptyAllowedNamespace(t *testing.T) {
+	exp := newTestExperiment()
+	exp.Spec.BlastRadius.AllowedNamespaces = []string{"ns-a", ""}
+
+	overrideExperimentNamespace(exp, "my-ns")
+
+	assert.Equal(t, []string{"my-ns"}, exp.Spec.BlastRadius.AllowedNamespaces)
+}
+
 func TestApplyOverrides_ParameterName(t *testing.T) {
 	exp := newTestExperiment()
 	err := applyOverrides(exp, []string{"injection.parameters.name=new-webhook"})

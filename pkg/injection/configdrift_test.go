@@ -2,6 +2,7 @@ package injection
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	v1alpha1 "github.com/opendatahub-io/operator-chaos/api/v1alpha1"
@@ -13,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 func TestConfigDriftValidate(t *testing.T) {
@@ -451,4 +453,84 @@ func TestConfigDriftInjectSecretAndCleanup(t *testing.T) {
 	// Verify rollback Secret was deleted
 	err = fakeClient.Get(ctx, client.ObjectKey{Name: "chaos-rollback-my-secret-password", Namespace: "test-ns"}, rbSecret)
 	assert.Error(t, err, "rollback Secret should be deleted after cleanup")
+}
+
+// TestConfigDriftRevertSecretFailedRollbackDeleteRetried verifies the revert
+// keeps the rollback annotation until the rollback Secret is deleted: a
+// failed delete must return an error (so cleanup retries) instead of the
+// retry seeing no annotation and falsely reporting success while the
+// rollback Secret, which holds the original Secret value, is left behind.
+func TestConfigDriftRevertSecretFailedRollbackDeleteRetried(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "revert-secret",
+			Namespace: "test-ns",
+		},
+		Data: map[string][]byte{
+			"password": []byte("original-password"),
+		},
+	}
+
+	deleteFails := true
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(secret).
+		WithInterceptorFuncs(interceptor.Funcs{
+			Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
+				if deleteFails && obj.GetName() != "revert-secret" {
+					return fmt.Errorf("simulated delete failure")
+				}
+				return c.Delete(ctx, obj, opts...)
+			},
+		}).
+		Build()
+	injector := NewConfigDriftInjector(fakeClient)
+	ctx := context.Background()
+
+	spec := v1alpha1.InjectionSpec{
+		Type:        v1alpha1.ConfigDrift,
+		DangerLevel: v1alpha1.DangerLevelHigh,
+		Parameters: map[string]string{
+			"name":         "revert-secret",
+			"key":          "password",
+			"value":        "corrupted-pw",
+			"resourceType": "Secret",
+		},
+	}
+
+	_, _, err := injector.Inject(ctx, spec, "test-ns")
+	require.NoError(t, err)
+
+	// First revert: rollback Secret delete fails — must be an error, not success.
+	err = injector.Revert(ctx, spec, "test-ns")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "deleting rollback Secret")
+
+	// The rollback Secret still exists and still holds the original value.
+	rbList := &corev1.SecretList{}
+	require.NoError(t, fakeClient.List(ctx, rbList, client.InNamespace("test-ns")))
+	var rbLeft bool
+	for _, s := range rbList.Items {
+		if s.Name != "revert-secret" {
+			rbLeft = true
+		}
+	}
+	assert.True(t, rbLeft, "rollback Secret must survive a failed delete")
+
+	// Retry succeeds: rollback Secret deleted, data restored, annotation gone.
+	deleteFails = false
+	require.NoError(t, injector.Revert(ctx, spec, "test-ns"))
+
+	restored := &corev1.Secret{}
+	require.NoError(t, fakeClient.Get(ctx, client.ObjectKey{Name: "revert-secret", Namespace: "test-ns"}, restored))
+	assert.Equal(t, "original-password", string(restored.Data["password"]))
+	assert.NotContains(t, restored.GetAnnotations(), "chaos.operatorchaos.io/rollback-data")
+
+	require.NoError(t, fakeClient.List(ctx, rbList, client.InNamespace("test-ns")))
+	for _, s := range rbList.Items {
+		assert.NotContains(t, s.Name, "chaos-rollback-", "rollback Secret must be deleted after successful revert")
+	}
 }

@@ -9,6 +9,7 @@ import (
 
 type ReconciliationCheckerInterface interface {
 	CheckReconciliation(ctx context.Context, component *model.ComponentModel, namespace string, timeout time.Duration) (*ReconciliationResult, error)
+	CheckReconciliationOnce(ctx context.Context, component *model.ComponentModel, namespace string) (*ReconciliationResult, error)
 }
 
 type ReconciliationContributor struct {

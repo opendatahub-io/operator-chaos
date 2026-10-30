@@ -44,6 +44,14 @@ func (o *passthroughOrchestrator) RunPostCheck(_ context.Context, _ *v1alpha1.Ch
 	return &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}, nil, nil
 }
 
+func (o *passthroughOrchestrator) PollPostCheckOnce(_ context.Context, _ *v1alpha1.ChaosExperiment) (*observer.ReconciliationResult, error) {
+	return nil, nil
+}
+
+func (o *passthroughOrchestrator) RunPostCheckFinal(_ context.Context, _ *v1alpha1.ChaosExperiment, _ *observer.ReconciliationResult) (*v1alpha1.CheckResult, []observer.Finding, error) {
+	return &v1alpha1.CheckResult{Passed: true, ChecksRun: 1, ChecksPassed: 1, Timestamp: metav1.Now()}, nil, nil
+}
+
 func (o *passthroughOrchestrator) EvaluateExperiment(_ []observer.Finding, _ v1alpha1.HypothesisSpec) *evaluator.EvaluationResult {
 	return &evaluator.EvaluationResult{Verdict: v1alpha1.Resilient, Confidence: "high"}
 }
